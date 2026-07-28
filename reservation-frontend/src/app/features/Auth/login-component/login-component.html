@@ -1,0 +1,125 @@
+<div class="login-page">
+  <div class="login-container">
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+      </div>
+      <span class="logo-text">Salle du Soleil</span>
+    </div>
+
+    <!-- Titre -->
+    <h1 class="title">Connectez-vous à votre compte</h1>
+    <p class="subtitle">Plateforme de gestion des réservations</p>
+
+    <!-- Card -->
+    <div class="login-card">
+      <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" novalidate>
+        
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Adresse email</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            #emailControl="ngModel"
+            placeholder="votre@email.tn"
+            required
+            email
+            autocomplete="email"
+            [class.invalid-input]="emailControl.invalid && (emailControl.touched || loginForm.submitted)"
+          />
+
+          <!-- Erreurs Email -->
+          <div class="field-error" *ngIf="emailControl.invalid && (emailControl.touched || loginForm.submitted)">
+            <span *ngIf="emailControl.errors?.['required']">
+              L'email est obligatoire.
+            </span>
+            <span *ngIf="emailControl.errors?.['email']">
+              L'email doit être valide.
+            </span>
+          </div>
+        </div>
+
+     <!-- Mot de passe -->
+<div class="form-group">
+  <label for="password">Mot de passe</label>
+  <div class="password-wrapper">
+    <input
+      id="password"
+      [type]="showPassword ? 'text' : 'password'"
+      name="password"
+      [(ngModel)]="password"
+      #passwordControl="ngModel"
+      placeholder="••••••••"
+      required
+    
+      autocomplete="current-password"
+      [class.invalid-input]="passwordControl.invalid && (passwordControl.touched || loginForm.submitted)"
+    />
+    <button 
+      type="button" 
+      class="toggle-password" 
+      (click)="togglePassword()" 
+      [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+    >
+      <svg *ngIf="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      <svg *ngIf="showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-3.72 1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Erreurs Mot de passe -->
+  <div class="field-error" *ngIf="passwordControl.invalid && (passwordControl.touched || loginForm.submitted)">
+    <span *ngIf="passwordControl.errors?.['required']">
+      Le mot de passe est obligatoire.
+    </span>
+
+  </div>
+</div>
+
+        <!-- Options -->
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" name="rememberMe" [(ngModel)]="rememberMe" />
+            <span class="checkmark"></span>
+            Se souvenir de moi
+          </label>
+          <a href="#" class="forgot-link" (click)="onForgotPassword(); $event.preventDefault()">Mot de passe oublié?</a>
+        </div>
+
+        <!-- Erreur globale API -->
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Bouton -->
+        <button type="submit" class="btn-login">
+          <span>Connexion</span>
+          <span ></span>
+        </button>
+      </form>
+
+      <!-- Créer compte -->
+      <p class="create-account">
+        Pas encore de compte?
+        <a href="#" (click)="onCreateAccount(); $event.preventDefault()">Créer un compte</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer">© 2024 Salle du Soleil. Tous droits réservés</p>
+  </div>
+</div>

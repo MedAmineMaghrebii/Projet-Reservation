@@ -1,0 +1,241 @@
+<div class="modal-container">
+  <div class="card-wizard">
+    <!-- Header -->
+    <div class="wizard-header">
+      <h2>Nouvelle réservation</h2>
+      <p class="subtitle">Étape {{ etapeCourante }} / 4</p>
+    </div>
+
+    <!-- Stepper Navigation -->
+    <div class="stepper">
+      <div class="step-item" [class.active]="etapeCourante === 1" [class.completed]="etapeCourante > 1">
+        <span class="step-badge">1</span>
+        <span class="step-label">Client</span>
+      </div>
+      <div class="line" [class.active]="etapeCourante > 1"></div>
+
+      <div class="step-item" [class.active]="etapeCourante === 2" [class.completed]="etapeCourante > 2">
+        <span class="step-badge">2</span>
+        <span class="step-label">Réservation & Services</span>
+      </div>
+      <div class="line" [class.active]="etapeCourante > 2"></div>
+
+      <div class="step-item" [class.active]="etapeCourante === 3" [class.completed]="etapeCourante > 3">
+        <span class="step-badge">3</span>
+        <span class="step-label">Tarification</span>
+      </div>
+      <div class="line" [class.active]="etapeCourante > 3"></div>
+
+      <div class="step-item" [class.active]="etapeCourante === 4">
+        <span class="step-badge">4</span>
+        <span class="step-label">Confirmation</span>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 1 : CLIENT -->
+    <div class="step-content" *ngIf="etapeCourante === 1">
+      <h3>Sélectionnez ou créez un client</h3>
+
+      <div class="segmented-control">
+        <button [class.active]="modeClient === 'existant'" (click)="modeClient = 'existant'">Client existant</button>
+        <button [class.active]="modeClient === 'nouveau'" (click)="modeClient = 'nouveau'">Nouveau client</button>
+      </div>
+
+      <!-- Mode Client Existant -->
+      <div *ngIf="modeClient === 'existant'" class="search-section">
+        <div class="input-icon">
+          <input type="text" [(ngModel)]="rechercheClientTerme" placeholder="Rechercher par nom, CIN, téléphone..." />
+        </div>
+
+        <div class="client-list">
+          <div 
+            class="client-card" 
+            *ngFor="let c of clientsFiltres" 
+            [class.selected]="clientSelectionne?.clientId === c.clientId"
+            (click)="clientSelectionne = c">
+            <div class="client-info">
+              <strong>{{ c.nom }} {{ c.prenom }}</strong>
+              <small>CIN: {{ c.cin }} • Tel: {{ c.telephone || 'N/A' }}</small>
+            </div>
+            <span class="badge badge-success">Confirmé ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Nouveau Client -->
+      <div *ngIf="modeClient === 'nouveau'" class="form-grid">
+        <div class="form-group">
+          <label>CIN *</label>
+          <input type="text" [(ngModel)]="nouveauClient.cin" placeholder="12345678" />
+        </div>
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" [(ngModel)]="nouveauClient.nom" placeholder="Dupont" />
+        </div>
+        <div class="form-group">
+          <label>Prénom *</label>
+          <input type="text" [(ngModel)]="nouveauClient.prenom" placeholder="Jean" />
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="text" [(ngModel)]="nouveauClient.telephone" placeholder="98 123 456" />
+        </div>
+        <div class="form-group full-width">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="nouveauClient.email" placeholder="email@exemple.com" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 2 : DÉTAILS DE LA RÉSERVATION ET SERVICES -->
+    <div class="step-content" *ngIf="etapeCourante === 2">
+      <h3>Détails de la réservation</h3>
+
+      <div class="form-group">
+        <label>Sélectionner la Salle *</label>
+    <select 
+  [(ngModel)]="salleSelectionnee" 
+  [compareWith]="compareSalles" 
+  (ngModelChange)="onSalleChange($event)">
+  <option [ngValue]="undefined" disabled>-- Choisir une salle --</option>
+  <option *ngFor="let s of sallesDisponibles" [ngValue]="s">
+    {{ s.nom }} (Capacité max : {{ s.capaciteMax }} pers.)
+  </option>
+</select>
+      </div>
+
+      <div class="form-grid" style="margin-top: 1rem;">
+        <div class="form-group full-width">
+          <label>Date de la réservation *</label>
+          <input type="date" [(ngModel)]="nouvelleReservation.date" />
+        </div>
+
+        <div class="form-group">
+          <label>Heure début *</label>
+          <input type="time" [(ngModel)]="nouvelleReservation.heureDebut" />
+        </div>
+
+        <div class="form-group">
+          <label>Heure fin *</label>
+          <input type="time" [(ngModel)]="nouvelleReservation.heureFin" />
+        </div>
+      </div>
+<!-- Section Services Optionnels -->
+<div class="services-header-info" style="margin-top: 1.5rem;" *ngIf="salleSelectionnee">
+  <label>Services optionnels disponibles :</label>
+  <span class="text-muted">Cliquez sur un ou plusieurs services pour les inclure</span>
+</div>
+
+<!-- Message si aucun service n'est disponible -->
+<div *ngIf="salleSelectionnee && servicesDisponibles.length === 0" class="text-muted" style="margin-top: 0.5rem; ">
+  Aucun service optionnel associé à cette salle.
+</div>
+
+<!-- Grille des services -->
+<div class="services-grid" *ngIf="servicesDisponibles.length > 0">
+  <div 
+    class="service-card-modern" 
+    *ngFor="let service of servicesDisponibles; trackBy: trackByService"
+    [class.selected]="isServiceSelected(service)"
+    (click)="toggleService(service)">
+    
+    <div class="card-top">
+      <div class="icon-wrapper">📦</div>
+      <div class="selection-check">
+        <span *ngIf="isServiceSelected(service)">✓</span>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h4 class="service-title">{{ service.nom }}</h4>
+    </div>
+
+    <div class="card-footer">
+      <div class="price-tag">
+        <span class="price-value">{{ service.prix }}</span>
+        <span class="price-unit">DT / unité</span>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <!-- ÉTAPE 3 : TARIFICATION -->
+    <div class="step-content" *ngIf="etapeCourante === 3">
+      <h3>Tarification</h3>
+
+      <div class="price-box">
+        <div class="form-group">
+          <label>Montant Total (TND) *</label>
+          <input type="number" [(ngModel)]="nouvelleReservation.montantTotal" placeholder="0" />
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+          <label>Acompte requis (%)</label>
+          <div class="acompte-row">
+            <select [(ngModel)]="tauxAcompte">
+              <option [value]="10">10%</option>
+              <option [value]="20">20%</option>
+              <option [value]="30">30%</option>
+              <option [value]="50">50%</option>
+            </select>
+            <span class="acompte-valeur">= {{ montantAcompte }} TND</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 4 : CONFIRMATION -->
+    <div class="step-content" *ngIf="etapeCourante === 4">
+      <h3>Récapitulatif de la réservation</h3>
+
+      <div class="summary-card">
+        <div class="summary-item">
+          <span>Client :</span>
+          <strong>{{ modeClient === 'existant' ? (clientSelectionne?.nom + ' ' + clientSelectionne?.prenom) : (nouveauClient.nom + ' ' + nouveauClient.prenom) }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>Salle :</span>
+          <strong>{{ salleSelectionnee?.nom }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>Date :</span>
+          <strong>{{ nouvelleReservation.date }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>Horaire :</span>
+          <strong>De {{ nouvelleReservation.heureDebut }} à {{ nouvelleReservation.heureFin }}</strong>
+        </div>
+        <div class="summary-item" *ngIf="servicesSelectionnes.length > 0">
+          <span>Services inclus :</span>
+          <div>
+            <span *ngFor="let s of servicesSelectionnes" class="badge-service">
+              {{ s.nom }} ({{ s.prix }} TND)
+            </span>
+          </div>
+        </div>
+        <div class="summary-item highlight">
+          <span>Montant Total :</span>
+          <strong>{{ nouvelleReservation.montantTotal }} TND</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="wizard-footer">
+      <button class="btn btn-secondary" (click)="changerEtape(etapeCourante - 1)" [disabled]="etapeCourante === 1">
+        ← Retour
+      </button>
+
+      <button *ngIf="etapeCourante < 4" class="btn btn-primary" (click)="changerEtape(etapeCourante + 1)">
+        Suivant →
+      </button>
+
+      <button *ngIf="etapeCourante === 4" class="btn btn-success" (click)="soumettreReservation()">
+        Confirmer & Enregistrer
+      </button>
+    </div>
+  </div>
+</div>

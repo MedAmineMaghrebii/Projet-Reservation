@@ -1,0 +1,41 @@
+<header class="topbar">
+  <!-- Fil d'Ariane (Breadcrumbs) -->
+  <div class="breadcrumb-container">
+    <span class="root-title">Espace</span>
+    <svg class="separator-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+    <span class="active-title">{{ currentPageTitle }}</span>
+  </div>
+
+  <!-- Actions à droite (Recherche, Notifications, Profil) -->
+  <div class="topbar-actions">
+    <!-- Recherche -->
+    <button class="action-btn" title="Rechercher">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+
+    <!-- Notification avec point violet -->
+    <button class="action-btn notif-btn" title="Notifications">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+      </svg>
+      <span class="notif-badge"></span>
+    </button>
+
+    <div class="divider"></div>
+
+    <!-- Avatar + Nom utilisateur -->
+    <div class="user-profile">
+      <div class="avatar">AM</div>
+      <span class="user-name">Amine</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </div>
+</header>

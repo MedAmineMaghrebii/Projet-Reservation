@@ -1,0 +1,6 @@
+export enum MethodePaiement {
+  ESPECES = 'ESPECES',
+  CHEQUE = 'CHEQUE',
+  VIREMENT_BANCAIRE = 'VIREMENT_BANCAIRE',
+  CARTE = 'CARTE'
+}

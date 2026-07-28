@@ -1,0 +1,109 @@
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  padding: 0 2rem;
+  background-color: #f8f9fe;
+  border-bottom: 1px solid #eef0f6;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Breadcrumb */
+  .breadcrumb-container {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-left: 0.8rem;
+    border-left: 2px solid #dcdfe8; /* La petite ligne verticale à gauche */
+
+    .root-title {
+      font-size: 0.95rem;
+      color: #807e9a;
+      font-weight: 500;
+    }
+
+    .separator-icon {
+      color: #a0a5ba;
+    }
+
+    .active-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #161528;
+    }
+  }
+
+  /* Actions Droite */
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .action-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #161528;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #f1f5f9;
+      }
+
+      &.notif-btn {
+        background: transparent;
+        border: none;
+
+        .notif-badge {
+          position: absolute;
+          top: 6px;
+          right: 6px;
+          width: 8px;
+          height: 8px;
+          background-color: #8b5cf6; /* Violet */
+          border-radius: 50%;
+        }
+      }
+    }
+
+    .divider {
+      width: 1px;
+      height: 24px;
+      background-color: #e2e8f0;
+      margin: 0 0.5rem;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #e9d5ff; /* Violet clair */
+        color: #7e22ce;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #161528;
+      }
+    }
+  }
+}

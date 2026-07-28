@@ -1,0 +1,50 @@
+/* 1. Réinitialisation globale pour coller au bord de l'écran */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* 2. Conteneur principal */
+.app-container {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fe;
+  align-items: stretch; /* Force les enfants à prendre toute la hauteur */
+}
+
+/* 3. Ajustement de la Sidebar */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;         /* Coller parfaitement en haut */
+  left: 0;        /* Coller parfaitement à gauche */
+  margin: 0;      /* Assurer aucune marge externe */
+  background-color: #161528;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+/* 4. Zone principale de contenu */
+.main-content {
+  flex: 1;
+  background-color: #f8f9fe;
+  min-height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box; 
+}
