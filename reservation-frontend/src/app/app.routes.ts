@@ -3,6 +3,7 @@ import { LoginComponent } from './features/Auth/login-component/login-component'
 import { ListeReservationComponent } from './features/Reservation/liste-reservation-component/liste-reservation-component';
 import { AjouterReservationComponent } from './features/Reservation/ajoute-reservation-component/ajoute-reservation-component';
 import { SidebarComponent } from './shared/main-layout-component/main-layout-component';
+import { FinalisationComponent } from './features/finalisation-component/finalisation-component';
 
 export const routes: Routes = [
   // Page de connexion (hors layout, sans la sidebar)
@@ -23,6 +24,10 @@ export const routes: Routes = [
       {
         path: 'ajouter-reservation',
         component: AjouterReservationComponent
+      },
+       {
+        path: 'finalisation',
+        component: FinalisationComponent
       },
       {
         path: '',

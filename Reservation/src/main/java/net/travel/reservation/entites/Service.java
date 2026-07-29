@@ -1,7 +1,11 @@
 package net.travel.reservation.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "services")
@@ -24,4 +28,8 @@ public class Service {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salle_id", nullable = false)
     private Salle salle;
+    @ManyToMany(mappedBy = "services")
+    @JsonIgnore // Eviter la boucle de référence JSON
+    @Builder.Default
+    private List<Reservation> reservations = new ArrayList<>();
 }

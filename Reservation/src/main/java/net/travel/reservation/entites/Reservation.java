@@ -86,7 +86,14 @@ public class Reservation {
             orphanRemoval = false,
             fetch = FetchType.LAZY)
     private Contrat contrat;
-
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "reservation_services",
+            joinColumns = @JoinColumn(name = "reservation_id"),
+            inverseJoinColumns = @JoinColumn(name = "service_id")
+    )
+    @Builder.Default
+    private List<Service> services = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cree_par", nullable = false)
     private User creePar;

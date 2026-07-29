@@ -2,9 +2,12 @@ package net.travel.reservation.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Reservation;
+import net.travel.reservation.entites.User;
+import net.travel.reservation.repositories.UserRepository;
 import net.travel.reservation.services.ReservationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -13,10 +16,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final UserRepository userRepository;
 
 
     // Récupérer toutes les réservations
@@ -45,13 +48,21 @@ public class ReservationController {
     public ResponseEntity<Reservation> createReservation(
             @RequestBody Reservation reservation) {
 
-        Reservation nouvelleReservation =
-                reservationService.createReservation(reservation);
 
-        return new ResponseEntity<>(
-                nouvelleReservation,
-                HttpStatus.CREATED
-        );
+            // 2. Récupérer l'email (username) du JWT / SecurityContext
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            // 3. Charger l'objet User complet depuis la BDD
+            User currentUser = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'email : " + email));
+
+            // 4. Assigner l'objet User AVANT la sauvegarde
+            reservation.setCreePar(currentUser);
+
+            // 5. Enregistrer en base
+            Reservation nouvelleReservation = reservationService.createReservation(reservation);
+
+            return new ResponseEntity<>(nouvelleReservation, HttpStatus.CREATED);
     }
 
 
