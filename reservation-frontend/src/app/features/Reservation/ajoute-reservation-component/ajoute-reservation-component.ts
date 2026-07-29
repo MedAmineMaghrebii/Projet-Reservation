@@ -35,7 +35,7 @@ export class AjouterReservationComponent implements OnInit {
 
   // Formulaires
   clientSelectionne?: Client;
-  salleSelectionnee?: Salle;
+  salleSelectionnee: Salle | undefined = undefined;
 
   nouveauClient: Partial<Client> = {
     nom: '',
@@ -85,9 +85,9 @@ loadSalles(): void {
       // Si au moins une salle existe et aucune n'est sélectionnée
       if (this.sallesDisponibles.length > 0 && !this.salleSelectionnee) {
         // Pré-sélectionner la première salle
-        this.salleSelectionnee = this.sallesDisponibles[0];
+        //this.salleSelectionnee = this.sallesDisponibles[0];
         // Charger ses services immédiatement !
-        this.onSalleChange(this.salleSelectionnee);
+        //this.onSalleChange(this.salleSelectionnee);
       }
     },
     error: (err) => console.error('Erreur lors du chargement des salles :', err)
@@ -102,13 +102,13 @@ compareSalles(s1: Salle, s2: Salle): boolean {
 
   // Déclenché à la sélection d'une salle
   // Remplacez votre méthode onSalleChange par celle-ci :
-onSalleChange(salle?: Salle): void {
+onSalleChange(): void {
   // Réinitialise la sélection actuelle
   this.servicesSelectionnes = [];
   this.servicesDisponibles = [];
 
   // Utilise la salle passée en paramètre ou salleSelectionnee
-  const targetSalle = salle || this.salleSelectionnee;
+  /*const targetSalle = salle || this.salleSelectionnee;
 
   if (!targetSalle) {
     return;
@@ -116,9 +116,10 @@ onSalleChange(salle?: Salle): void {
 
   // Extrait l'ID quelle que soit sa structure (salleId ou id)
   const salleId = targetSalle.salleId ?? (targetSalle as any).id;
-
+*/
+const salleId = this.salleSelectionnee?.salleId;
   if (!salleId) {
-    console.warn('Aucun ID trouvé pour la salle sélectionnée :', targetSalle);
+    //console.warn('Aucun ID trouvé pour la salle sélectionnée :', targetSalle);
     return;
   }
 
@@ -145,7 +146,9 @@ onSalleChange(salle?: Salle): void {
 
   // Basculer la sélection (permet de sélectionner / désélectionner plusieurs services)
   toggleService(service: Service): void {
+     
     const id = this.getServiceId(service);
+    
     if (id === null || id === undefined) return;
 
     const index = this.servicesSelectionnes.findIndex(
@@ -159,6 +162,7 @@ onSalleChange(salle?: Salle): void {
       // Sinon, on l'ajoute à la liste des services sélectionnés
       this.servicesSelectionnes.push(service);
     }
+    console.log("selected",this.servicesSelectionnes)
     this.calculerMontantTotal();
   }
 

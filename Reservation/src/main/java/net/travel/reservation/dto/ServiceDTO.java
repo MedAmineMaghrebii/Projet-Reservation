@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ServiceDTO {
+    private Long serviceId;
     private String nom;
     private String description;
     private Double prix;

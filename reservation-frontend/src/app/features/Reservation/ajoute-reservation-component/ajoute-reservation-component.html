@@ -96,8 +96,8 @@
     <select 
   [(ngModel)]="salleSelectionnee" 
   [compareWith]="compareSalles" 
-  (ngModelChange)="onSalleChange($event)">
-  <option [ngValue]="undefined" disabled>-- Choisir une salle --</option>
+  (ngModelChange)="onSalleChange()">
+  <option value="undefined" disabled hidden>-- Choisir une salle --</option>
   <option *ngFor="let s of sallesDisponibles" [ngValue]="s">
     {{ s.nom }} (Capacité max : {{ s.capaciteMax }} pers.)
   </option>

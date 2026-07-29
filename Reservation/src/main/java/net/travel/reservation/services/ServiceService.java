@@ -89,6 +89,7 @@ public class ServiceService {
     // --- Mapping Helpers ---
     private ServiceDTO mapToDTO(Service entity) {
         return ServiceDTO.builder()
+                .serviceId(entity.getServiceId())
                 .nom(entity.getNom())
                 .description(entity.getDescription())
                 .prix(entity.getPrix())
@@ -98,6 +99,7 @@ public class ServiceService {
 
     private Service mapToEntity(ServiceDTO dto, Salle salle) {
         return Service.builder()
+                .serviceId(dto.getServiceId())
                 .nom(dto.getNom())
                 .description(dto.getDescription())
                 .prix(dto.getPrix())
