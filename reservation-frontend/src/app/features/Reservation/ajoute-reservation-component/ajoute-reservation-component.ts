@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Client } from '../../../core/models/clients/client';
@@ -9,195 +9,201 @@ import { Reservation } from '../../../core/models/reservations/reservation';
 import { StatutReservation } from '../../../core/models/reservations/statut-reservation.enum';
 import { Service } from '../../../core/models/service/service';
 
-import { ReservationService } from '../../../core/services/reservation.service';
 import { ClientService } from '../../../core/services/client';
-import { ServiceService } from '../../../core/services/service.service';
 import { SalleService } from '../../../core/services/salle.service';
+import { ReservationService } from '../../../core/services/reservation.service';
+import { ServiceService } from '../../../core/services/service.service';
 
 @Component({
   selector: 'app-ajouter-reservation',
   standalone: true,
   templateUrl: './ajoute-reservation-component.html',
   styleUrl: './ajoute-reservation-component.scss',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AjouterReservationComponent implements OnInit {
 
   etapeCourante: number = 1;
   modeClient: 'existant' | 'nouveau' = 'existant';
 
-  // Données
   clientsExistants: Client[] = [];
   sallesDisponibles: Salle[] = [];
   servicesDisponibles: Service[] = [];
   servicesSelectionnes: Service[] = [];
+
   rechercheClientTerme: string = '';
-
-  // Formulaires
   clientSelectionne?: Client;
-  salleSelectionnee: Salle | undefined = undefined;
 
-  nouveauClient: Partial<Client> = {
-    nom: '',
-    prenom: '',
-    cin: '',
-    telephone: '',
-    email: '',
-    adresse: ''
-  };
+  // Formulaire Réactif pour Nouveau Client
+  clientForm!: FormGroup;
 
-  nouvelleReservation: Partial<Reservation> = {
-    date: '',
-    heureDebut: '',
-    heureFin: '',
-    montantTotal: 0,
-    notes: '',
-    statut: StatutReservation.EN_ATTENTE
-  };
+  // Formulaire Réactif pour la Réservation & Tarification
+  reservationForm!: FormGroup;
 
   tauxAcompte: number = 30;
 
   constructor(
+    private fb: FormBuilder,
     private reservationService: ReservationService,
     private clientService: ClientService,
     private salleService: SalleService,
     private serviceService: ServiceService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.initForms();
     this.loadClients();
     this.loadSalles();
   }
 
+  private initForms(): void {
+    // Initialisation du formulaire Nouveau Client avec Validators
+    this.clientForm = this.fb.group({
+      cin: ['', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]],
+      nom: ['', [Validators.required, Validators.minLength(3)]],
+      prenom: ['', [Validators.required, Validators.minLength(3)]],
+      telephone: ['', [Validators.pattern(/^[0-9]{8}$/)]],
+      email: ['', [Validators.required, Validators.email]],
+      adresse: ['']
+    });
+
+    // Initialisation du formulaire Réservation
+    this.reservationForm = this.fb.group({
+      salleSelectionnee: [null, Validators.required],
+      date: ['', Validators.required],
+      heureDebut: ['', Validators.required],
+      heureFin: ['', Validators.required],
+      montantTotal: [0, [Validators.required, Validators.min(0)]],
+      tauxAcompte: [30],
+      notes: ['']
+    });
+
+    // Mise à jour automatique du recalcul de l'acompte lorsque le taux change
+    this.reservationForm.get('tauxAcompte')?.valueChanges.subscribe(val => {
+      this.tauxAcompte = val;
+      this.cdr.markForCheck();
+    });
+  }
+
   loadClients(): void {
     this.clientService.getAllClients().subscribe({
-      next: (data) => this.clientsExistants = data,
+      next: (data) => {
+        this.clientsExistants = data || [];
+        this.cdr.markForCheck();
+      },
       error: (err) => console.error('Erreur lors du chargement des clients :', err)
     });
   }
 
-loadSalles(): void {
-  this.salleService.getAllSalles().subscribe({
-    next: (data) => {
-      this.sallesDisponibles = data;
-      
-      // Si au moins une salle existe et aucune n'est sélectionnée
-      if (this.sallesDisponibles.length > 0 && !this.salleSelectionnee) {
-        // Pré-sélectionner la première salle
-        //this.salleSelectionnee = this.sallesDisponibles[0];
-        // Charger ses services immédiatement !
-        //this.onSalleChange(this.salleSelectionnee);
-      }
-    },
-    error: (err) => console.error('Erreur lors du chargement des salles :', err)
-  });
-}// Dans le fichier .ts
-compareSalles(s1: Salle, s2: Salle): boolean {
-  if (!s1 || !s2) return false;
-  const id1 = s1.salleId ?? (s1 as any).id;
-  const id2 = s2.salleId ?? (s2 as any).id;
-  return id1 === id2;
-}
-
-  // Déclenché à la sélection d'une salle
-  // Remplacez votre méthode onSalleChange par celle-ci :
-onSalleChange(): void {
-  // Réinitialise la sélection actuelle
-  this.servicesSelectionnes = [];
-  this.servicesDisponibles = [];
-
-  // Utilise la salle passée en paramètre ou salleSelectionnee
-  /*const targetSalle = salle || this.salleSelectionnee;
-
-  if (!targetSalle) {
-    return;
+  loadSalles(): void {
+    this.salleService.getAllSalles().subscribe({
+      next: (data) => {
+        this.sallesDisponibles = data || [];
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Erreur lors du chargement des salles :', err)
+    });
   }
 
-  // Extrait l'ID quelle que soit sa structure (salleId ou id)
-  const salleId = targetSalle.salleId ?? (targetSalle as any).id;
-*/
-const salleId = this.salleSelectionnee?.salleId;
-  if (!salleId) {
-    //console.warn('Aucun ID trouvé pour la salle sélectionnée :', targetSalle);
-    return;
+  compareSalles(s1: Salle, s2: Salle): boolean {
+    if (!s1 || !s2) return false;
+    const id1 = s1.salleId ?? (s1 as any).id;
+    const id2 = s2.salleId ?? (s2 as any).id;
+    return id1 === id2;
   }
 
-  console.log('Chargement des services pour la salle ID :', salleId);
+  onSalleChange(): void {
+    this.servicesSelectionnes = [];
+    this.servicesDisponibles = [];
+    const salle: Salle = this.reservationForm.get('salleSelectionnee')?.value;
+    const salleId = salle?.salleId;
 
-  this.serviceService.getServicesBySalleId(salleId).subscribe({
-    next: (data) => {
-      console.log('Services reçus :', data);
-      // Assure que data est bien un tableau
-      this.servicesDisponibles = Array.isArray(data) ? data : [];
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des services :', err);
-      this.servicesDisponibles = [];
+    if (!salleId) {
+      this.calculerMontantTotal();
+      this.cdr.markForCheck();
+      return;
     }
-  });
-}
 
-  // Récupère l'ID unique du service (gère 'serviceId' ou 'id')
+    this.serviceService.getServicesBySalleId(salleId).subscribe({
+      next: (data) => {
+        this.servicesDisponibles = Array.isArray(data) ? data : [];
+        this.calculerMontantTotal();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des services :', err);
+        this.servicesDisponibles = [];
+        this.calculerMontantTotal();
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   private getServiceId(service: Service): number | string | null {
     if (!service) return null;
     return service.serviceId ?? (service as any).id ?? null;
   }
 
-  // Basculer la sélection (permet de sélectionner / désélectionner plusieurs services)
   toggleService(service: Service): void {
-     
     const id = this.getServiceId(service);
-    
     if (id === null || id === undefined) return;
 
-    const index = this.servicesSelectionnes.findIndex(
-      s => this.getServiceId(s) === id
-    );
+    const index = this.servicesSelectionnes.findIndex(s => this.getServiceId(s) === id);
 
     if (index > -1) {
-      // Si déjà sélectionné, on le retire
       this.servicesSelectionnes.splice(index, 1);
     } else {
-      // Sinon, on l'ajoute à la liste des services sélectionnés
       this.servicesSelectionnes.push(service);
     }
-    console.log("selected",this.servicesSelectionnes)
+
     this.calculerMontantTotal();
+    this.cdr.markForCheck();
   }
 
-  // Vérifie si un service donné est sélectionné
   isServiceSelected(service: Service): boolean {
     const id = this.getServiceId(service);
     if (id === null || id === undefined) return false;
-
-    return this.servicesSelectionnes.some(
-      s => this.getServiceId(s) === id
-    );
+    return this.servicesSelectionnes.some(s => this.getServiceId(s) === id);
   }
 
-  // Permet à Angular d'identifier chaque carte de manière unique
- trackByService = (index: number, service: Service): any => {
-  return this.getServiceId(service) ?? index;
-};
+  trackByService = (index: number, service: Service): any => {
+    return this.getServiceId(service) ?? index;
+  };
 
   calculerMontantTotal(): void {
+    const salle: Salle = this.reservationForm.get('salleSelectionnee')?.value;
+    const prixSalle = (salle as any)?.prix || 0;
     const totalServices = this.servicesSelectionnes.reduce((sum, s) => sum + (s.prix || 0), 0);
-    this.nouvelleReservation.montantTotal = totalServices;
+    this.reservationForm.patchValue({ montantTotal: prixSalle + totalServices }, { emitEvent: false });
   }
 
   get clientsFiltres(): Client[] {
-    if (!this.rechercheClientTerme) return this.clientsExistants;
-    const term = this.rechercheClientTerme.toLowerCase();
-    return this.clientsExistants.filter(c => 
-      c.nom.toLowerCase().includes(term) || 
-      c.prenom.toLowerCase().includes(term) || 
-      c.cin.includes(term)
-    );
+    if (!this.rechercheClientTerme || !this.rechercheClientTerme.trim()) {
+      return this.clientsExistants;
+    }
+
+    const term = this.rechercheClientTerme.toLowerCase().trim();
+    return this.clientsExistants.filter(c => {
+      const nom = c.nom ? c.nom.toLowerCase() : '';
+      const prenom = c.prenom ? c.prenom.toLowerCase() : '';
+      const cin = c.cin ? c.cin.toLowerCase() : '';
+      const email = c.email ? c.email.toLowerCase() : '';
+      const telephone = c.telephone ? c.telephone.toLowerCase() : '';
+
+      return nom.includes(term) ||
+             prenom.includes(term) ||
+             cin.includes(term) ||
+             email.includes(term) ||
+             telephone.includes(term);
+    });
   }
 
   get montantAcompte(): number {
-    return ((this.nouvelleReservation.montantTotal || 0) * this.tauxAcompte) / 100;
+    const total = this.reservationForm.get('montantTotal')?.value || 0;
+    return (total * this.tauxAcompte) / 100;
   }
 
   changerEtape(etape: number): void {
@@ -207,30 +213,48 @@ const salleId = this.salleSelectionnee?.salleId;
         return;
       }
       if (this.modeClient === 'nouveau') {
-        if (!this.nouveauClient.nom || !this.nouveauClient.prenom || !this.nouveauClient.cin) {
-          alert('Veuillez remplir au moins le NOM, PRÉNOM et CIN du nouveau client.');
+        if (this.clientForm.invalid) {
+          this.clientForm.markAllAsTouched();
+          alert('Veuillez corriger les erreurs du formulaire client avant de continuer.');
           return;
         }
       }
     }
 
     if (this.etapeCourante === 2 && etape === 3) {
-      if (!this.salleSelectionnee) {
+      const salle = this.reservationForm.get('salleSelectionnee')?.value;
+      const date = this.reservationForm.get('date')?.value;
+      const heureDebut = this.reservationForm.get('heureDebut')?.value;
+      const heureFin = this.reservationForm.get('heureFin')?.value;
+
+      if (!salle) {
         alert('Veuillez sélectionner une salle.');
+        return;
+      }
+      if (!date || !heureDebut || !heureFin) {
+        alert('Veuillez renseigner la date et les horaires.');
         return;
       }
     }
 
     if (etape >= 1 && etape <= 4) {
       this.etapeCourante = etape;
+      this.cdr.markForCheck();
     }
   }
 
   soumettreReservation(): void {
     if (this.modeClient === 'nouveau') {
-      this.clientService.createClient(this.nouveauClient as Client).subscribe({
+      if (this.clientForm.invalid) {
+        this.clientForm.markAllAsTouched();
+        return;
+      }
+      this.clientService.createClient(this.clientForm.value as Client).subscribe({
         next: (createdClient) => this.enregistrerReservation(createdClient),
-        error: (err) => console.error('Erreur création client :', err)
+        error: (err) => {
+          console.error('Erreur création client :', err);
+          alert('Erreur lors de la création du client. Vérifiez les données saisies.');
+        }
       });
     } else {
       if (!this.clientSelectionne) return;
@@ -239,26 +263,37 @@ const salleId = this.salleSelectionnee?.salleId;
   }
 
   private enregistrerReservation(client: Client): void {
-    if (!this.salleSelectionnee) return;
+    const resValue = this.reservationForm.value;
+
+    if (!resValue.salleSelectionnee) {
+      alert('Veuillez sélectionner une salle.');
+      return;
+    }
+
+    if (!resValue.date || !resValue.heureDebut || !resValue.heureFin) {
+      alert('Veuillez remplir la date ainsi que les heures de début et de fin.');
+      return;
+    }
 
     const reservationToSave = new Reservation(
       0,
       `RES-${Date.now().toString().slice(-5)}`,
-      this.nouvelleReservation.date!,
-      this.nouvelleReservation.heureDebut!,
-      this.nouvelleReservation.heureFin!,
+      resValue.date,
+      resValue.heureDebut,
+      resValue.heureFin,
       StatutReservation.EN_ATTENTE,
-      this.nouvelleReservation.montantTotal || 0,
+      resValue.montantTotal || 0,
       client,
-      this.salleSelectionnee
+      resValue.salleSelectionnee,
+      this.servicesSelectionnes
     );
 
-    reservationToSave.notes = this.nouvelleReservation.notes;
+    reservationToSave.notes = resValue.notes;
 
     this.reservationService.createReservation(reservationToSave).subscribe({
       next: () => {
         alert('Réservation enregistrée avec succès !');
-        this.router.navigate(['/reservations']);
+        this.router.navigate(['/finalisation']);
       },
       error: (err) => console.error('Erreur lors de la réservation :', err)
     });

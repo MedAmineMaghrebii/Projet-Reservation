@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../core/models/reservations/reservation';
 import { Router } from '@angular/router'; 
 import { ReservationService } from '../../../core/services/reservation.service';
+import { ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+
 
 
 @Component({
@@ -12,6 +14,7 @@ import { ReservationService } from '../../../core/services/reservation.service';
   imports: [CommonModule, FormsModule],
    templateUrl: './liste-reservation-component.html',
   styleUrl: './liste-reservation-component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class ListeReservationComponent implements OnInit {
 
@@ -23,7 +26,8 @@ export class ListeReservationComponent implements OnInit {
   activeView: 'list' | 'calendar' = 'list';
 
   constructor(private reservationService: ReservationService,
-    private router: Router
+    private router: Router ,
+      private cdr: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {

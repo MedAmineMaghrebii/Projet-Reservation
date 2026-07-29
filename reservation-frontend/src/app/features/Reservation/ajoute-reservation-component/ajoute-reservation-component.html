@@ -43,8 +43,20 @@
 
       <!-- Mode Client Existant -->
       <div *ngIf="modeClient === 'existant'" class="search-section">
-        <div class="input-icon">
-          <input type="text" [(ngModel)]="rechercheClientTerme" placeholder="Rechercher par nom, CIN, téléphone..." />
+        <div class="search-box-modern">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input"
+            [value]="rechercheClientTerme"
+            (input)="rechercheClientTerme = $any($event.target).value"
+            placeholder="Rechercher un client (Nom, CIN, Email, Tel)..." 
+          />
+        </div>
+
+        <div class="list-header">
+          <label class="text-muted">Sélectionnez un client :</label>
+          <span class="count-badge">{{ clientsFiltres.length }} client(s)</span>
         </div>
 
         <div class="client-list">
@@ -55,119 +67,152 @@
             (click)="clientSelectionne = c">
             <div class="client-info">
               <strong>{{ c.nom }} {{ c.prenom }}</strong>
-              <small>CIN: {{ c.cin }} • Tel: {{ c.telephone || 'N/A' }}</small>
+              <small>CIN: {{ c.cin }} • Tel: {{ c.telephone || 'N/A' }} • Email: {{ c.email || 'N/A' }}</small>
             </div>
-            <span class="badge badge-success">Confirmé ✓</span>
+            <span class="badge badge-success" *ngIf="clientSelectionne?.clientId === c.clientId">Sélectionné ✓</span>
+          </div>
+
+          <div *ngIf="clientsFiltres.length === 0" class="empty-state">
+            <span>🚫 Aucun client ne correspond à votre recherche.</span>
           </div>
         </div>
       </div>
 
-      <!-- Mode Nouveau Client -->
-      <div *ngIf="modeClient === 'nouveau'" class="form-grid">
-        <div class="form-group">
+      <!-- Mode Nouveau Client avec Reactive Forms -->
+      <form [formGroup]="clientForm" *ngIf="modeClient === 'nouveau'" class="form-grid">
+        
+        <!-- CIN -->
+        <div class="form-group"> 
           <label>CIN *</label>
-          <input type="text" [(ngModel)]="nouveauClient.cin" placeholder="12345678" />
+          <input type="text" formControlName="cin" placeholder="12345678" />
+          <small class="text-danger" *ngIf="clientForm.get('cin')?.invalid && (clientForm.get('cin')?.dirty || clientForm.get('cin')?.touched)">
+            <span *ngIf="clientForm.get('cin')?.errors?.['required']">Le CIN est obligatoire.</span>
+            <span *ngIf="clientForm.get('cin')?.errors?.['pattern']">Le CIN doit comporter exactement 8 chiffres.</span>
+          </small>
         </div>
+
+        <!-- NOM -->
         <div class="form-group">
           <label>Nom *</label>
-          <input type="text" [(ngModel)]="nouveauClient.nom" placeholder="Dupont" />
+          <input type="text" formControlName="nom" placeholder="Dupont" />
+          <small class="text-danger" *ngIf="clientForm.get('nom')?.invalid && (clientForm.get('nom')?.dirty || clientForm.get('nom')?.touched)">
+            <span *ngIf="clientForm.get('nom')?.errors?.['required']">Le nom est obligatoire.</span>
+            <span *ngIf="clientForm.get('nom')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
         </div>
+
+        <!-- PRÉNOM -->
         <div class="form-group">
           <label>Prénom *</label>
-          <input type="text" [(ngModel)]="nouveauClient.prenom" placeholder="Jean" />
+          <input type="text" formControlName="prenom" placeholder="Jean" />
+          <small class="text-danger" *ngIf="clientForm.get('prenom')?.invalid && (clientForm.get('prenom')?.dirty || clientForm.get('prenom')?.touched)">
+            <span *ngIf="clientForm.get('prenom')?.errors?.['required']">Le prénom est obligatoire.</span>
+            <span *ngIf="clientForm.get('prenom')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
         </div>
+
+        <!-- TÉLÉPHONE -->
         <div class="form-group">
           <label>Téléphone</label>
-          <input type="text" [(ngModel)]="nouveauClient.telephone" placeholder="98 123 456" />
+          <input type="text" formControlName="telephone" placeholder="98123456" />
+          <small class="text-danger" *ngIf="clientForm.get('telephone')?.invalid && (clientForm.get('telephone')?.dirty || clientForm.get('telephone')?.touched)">
+            <span *ngIf="clientForm.get('telephone')?.errors?.['pattern']">Doit contenir exactement 8 chiffres.</span>
+          </small>
         </div>
+
+        <!-- EMAIL -->
         <div class="form-group full-width">
-          <label>Email</label>
-          <input type="email" [(ngModel)]="nouveauClient.email" placeholder="email@exemple.com" />
+          <label>Email *</label>
+          <input type="email" formControlName="email" placeholder="email@exemple.com" />
+          <small class="text-danger" *ngIf="clientForm.get('email')?.invalid && (clientForm.get('email')?.dirty || clientForm.get('email')?.touched)">
+            <span *ngIf="clientForm.get('email')?.errors?.['required']">L'email est obligatoire.</span>
+            <span *ngIf="clientForm.get('email')?.errors?.['email']">Format d'email invalide.</span>
+          </small>
         </div>
-      </div>
+
+      </form>
     </div>
 
     <!-- ÉTAPE 2 : DÉTAILS DE LA RÉSERVATION ET SERVICES -->
-    <div class="step-content" *ngIf="etapeCourante === 2">
+    <div class="step-content" *ngIf="etapeCourante === 2" [formGroup]="reservationForm">
       <h3>Détails de la réservation</h3>
 
       <div class="form-group">
         <label>Sélectionner la Salle *</label>
-    <select 
-  [(ngModel)]="salleSelectionnee" 
-  [compareWith]="compareSalles" 
-  (ngModelChange)="onSalleChange()">
-  <option value="undefined" disabled hidden>-- Choisir une salle --</option>
-  <option *ngFor="let s of sallesDisponibles" [ngValue]="s">
-    {{ s.nom }} (Capacité max : {{ s.capaciteMax }} pers.)
-  </option>
-</select>
+        <select 
+          formControlName="salleSelectionnee" 
+          [compareWith]="compareSalles" 
+          (change)="onSalleChange()">
+          <option [ngValue]="null" disabled hidden>-- Choisir une salle --</option>
+          <option *ngFor="let s of sallesDisponibles" [ngValue]="s">
+            {{ s.nom }} (Capacité max : {{ s.capaciteMax }} pers.)
+          </option>
+        </select>
       </div>
 
       <div class="form-grid" style="margin-top: 1rem;">
         <div class="form-group full-width">
           <label>Date de la réservation *</label>
-          <input type="date" [(ngModel)]="nouvelleReservation.date" />
+          <input type="date" formControlName="date" />
         </div>
 
         <div class="form-group">
           <label>Heure début *</label>
-          <input type="time" [(ngModel)]="nouvelleReservation.heureDebut" />
+          <input type="time" formControlName="heureDebut" />
         </div>
 
         <div class="form-group">
           <label>Heure fin *</label>
-          <input type="time" [(ngModel)]="nouvelleReservation.heureFin" />
+          <input type="time" formControlName="heureFin" />
         </div>
       </div>
-<!-- Section Services Optionnels -->
-<div class="services-header-info" style="margin-top: 1.5rem;" *ngIf="salleSelectionnee">
-  <label>Services optionnels disponibles :</label>
-  <span class="text-muted">Cliquez sur un ou plusieurs services pour les inclure</span>
-</div>
 
-<!-- Message si aucun service n'est disponible -->
-<div *ngIf="salleSelectionnee && servicesDisponibles.length === 0" class="text-muted" style="margin-top: 0.5rem; ">
-  Aucun service optionnel associé à cette salle.
-</div>
-
-<!-- Grille des services -->
-<div class="services-grid" *ngIf="servicesDisponibles.length > 0">
-  <div 
-    class="service-card-modern" 
-    *ngFor="let service of servicesDisponibles; trackBy: trackByService"
-    [class.selected]="isServiceSelected(service)"
-    (click)="toggleService(service)">
-    
-    <div class="card-top">
-      <div class="icon-wrapper">📦</div>
-      <div class="selection-check">
-        <span *ngIf="isServiceSelected(service)">✓</span>
+      <!-- Section Services Optionnels -->
+      <div class="services-header-info" style="margin-top: 1.5rem;" *ngIf="reservationForm.get('salleSelectionnee')?.value">
+        <label>Services optionnels disponibles :</label>
+        <span class="text-muted">Cliquez sur un ou plusieurs services pour les inclure</span>
       </div>
-    </div>
 
-    <div class="card-body">
-      <h4 class="service-title">{{ service.nom }}</h4>
-    </div>
-
-    <div class="card-footer">
-      <div class="price-tag">
-        <span class="price-value">{{ service.prix }}</span>
-        <span class="price-unit">DT / unité</span>
+      <div *ngIf="reservationForm.get('salleSelectionnee')?.value && servicesDisponibles.length === 0" class="text-muted" style="margin-top: 0.5rem;">
+        Aucun service optionnel associé à cette salle.
       </div>
-    </div>
-  </div>
-</div>
+
+      <div class="services-grid" *ngIf="servicesDisponibles.length > 0">
+        <div 
+          class="service-card-modern" 
+          *ngFor="let service of servicesDisponibles; trackBy: trackByService"
+          [class.selected]="isServiceSelected(service)"
+          (click)="toggleService(service)">
+          
+          <div class="card-top">
+            <div class="icon-wrapper">📦</div>
+            <div class="selection-check">
+              <span *ngIf="isServiceSelected(service)">✓</span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <h4 class="service-title">{{ service.nom }}</h4>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-tag">
+              <span class="price-value">{{ service.prix }}</span>
+              <span class="price-unit">DT / unité</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ÉTAPE 3 : TARIFICATION -->
-    <div class="step-content" *ngIf="etapeCourante === 3">
+    <div class="step-content" *ngIf="etapeCourante === 3" [formGroup]="reservationForm">
       <h3>Tarification</h3>
 
       <div class="price-box">
         <div class="form-group">
           <label>Montant Total (TND) *</label>
-          <input type="number" [(ngModel)]="nouvelleReservation.montantTotal" placeholder="0" />
+          <input type="number" formControlName="montantTotal" placeholder="0" />
         </div>
 
         <hr />
@@ -175,11 +220,11 @@
         <div class="form-group">
           <label>Acompte requis (%)</label>
           <div class="acompte-row">
-            <select [(ngModel)]="tauxAcompte">
-              <option [value]="10">10%</option>
-              <option [value]="20">20%</option>
-              <option [value]="30">30%</option>
-              <option [value]="50">50%</option>
+            <select formControlName="tauxAcompte">
+              <option [ngValue]="10">10%</option>
+              <option [ngValue]="20">20%</option>
+              <option [ngValue]="30">30%</option>
+              <option [ngValue]="50">50%</option>
             </select>
             <span class="acompte-valeur">= {{ montantAcompte }} TND</span>
           </div>
@@ -194,19 +239,23 @@
       <div class="summary-card">
         <div class="summary-item">
           <span>Client :</span>
-          <strong>{{ modeClient === 'existant' ? (clientSelectionne?.nom + ' ' + clientSelectionne?.prenom) : (nouveauClient.nom + ' ' + nouveauClient.prenom) }}</strong>
+          <strong>
+            {{ modeClient === 'existant' 
+                ? (clientSelectionne?.nom + ' ' + clientSelectionne?.prenom) 
+                : (clientForm.get('nom')?.value + ' ' + clientForm.get('prenom')?.value) }}
+          </strong>
         </div>
         <div class="summary-item">
           <span>Salle :</span>
-          <strong>{{ salleSelectionnee?.nom }}</strong>
+          <strong>{{ reservationForm.get('salleSelectionnee')?.value?.nom }}</strong>
         </div>
         <div class="summary-item">
           <span>Date :</span>
-          <strong>{{ nouvelleReservation.date }}</strong>
+          <strong>{{ reservationForm.get('date')?.value }}</strong>
         </div>
         <div class="summary-item">
           <span>Horaire :</span>
-          <strong>De {{ nouvelleReservation.heureDebut }} à {{ nouvelleReservation.heureFin }}</strong>
+          <strong>De {{ reservationForm.get('heureDebut')?.value }} à {{ reservationForm.get('heureFin')?.value }}</strong>
         </div>
         <div class="summary-item" *ngIf="servicesSelectionnes.length > 0">
           <span>Services inclus :</span>
@@ -218,7 +267,7 @@
         </div>
         <div class="summary-item highlight">
           <span>Montant Total :</span>
-          <strong>{{ nouvelleReservation.montantTotal }} TND</strong>
+          <strong>{{ reservationForm.get('montantTotal')?.value }} TND</strong>
         </div>
       </div>
     </div>
