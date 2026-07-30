@@ -14,6 +14,11 @@ export class ClientService {
 
   constructor(private http: HttpClient) {}
 
+  //Clients summary
+  getAllClientsSummary(): Observable<Client[]> {
+    return this.http.get<Client[]>(`${this.apiUrl}/summary`);
+  }
+
   /**
    * Récupère la liste de tous les clients
    */

@@ -1,0 +1,332 @@
+$primary-color: #7c4dff;
+$bg-color: #f8f9fe;
+$card-bg: #ffffff;
+$text-dark: #1e1b4b;
+$text-muted: #8e95a5;
+$border-color: #f1f3f9;
+
+.reservations-container {
+  padding: 2rem 3rem;
+  background-color: $bg-color;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: $text-dark;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+
+  .header-title {
+    .subtitle {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: $primary-color;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin: 0.25rem 0;
+      color: $text-dark;
+    }
+
+    .count-label {
+      font-size: 0.9rem;
+      color: $text-muted;
+      margin: 0;
+    }
+  }
+
+  .btn-primary {
+    background-color: $primary-color;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(124, 77, 255, 0.25);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: darken($primary-color, 5%);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+/* Controls (Search & Filters) */
+.controls-card {
+  background: $card-bg;
+  border-radius: 16px;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+  .search-and-filter {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .search-input {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        width: 16px;
+        height: 16px;
+        color: $text-muted;
+      }
+
+      input {
+        background-color: #f3f4f8;
+        border: none;
+        border-radius: 20px;
+        padding: 0.6rem 1rem 0.6rem 2.2rem;
+        font-size: 0.875rem;
+        width: 220px;
+        outline: none;
+        color: $text-dark;
+
+        &::placeholder {
+          color: $text-muted;
+        }
+      }
+    }
+
+    .filter-dropdown {
+      display: flex;
+      align-items: center;
+      position: relative;
+
+      .filter-icon {
+        position: absolute;
+        left: 12px;
+        width: 16px;
+        height: 16px;
+        color: $text-muted;
+        pointer-events: none;
+      }
+
+      
+      select {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 0.5rem 2rem 0.5rem 2.2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $text-dark;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+      }
+    }
+  }
+
+  .view-toggle {
+    display: flex;
+    background-color: #f1f3f9;
+    border-radius: 20px;
+    padding: 3px;
+
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 1rem;
+      border-radius: 17px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $text-muted;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+
+      .btn-icon {
+        width: 15px;
+        height: 15px;
+      }
+
+      &.active {
+        background-color: #fff;
+        color: $primary-color;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+/* Table Card */
+.table-card {
+  background: $card-bg;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+
+  .reservations-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+
+    th {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: $text-muted;
+      letter-spacing: 0.05em;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid $border-color;
+    }
+
+    td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid $border-color;
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Client Cell */
+    .client-cell {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+
+      .bg-purple { background-color: #f3e8ff; color: #7e22ce; }
+      .bg-green  { background-color: #dcfce7; color: #15803d; }
+      .bg-blue   { background-color: #e0f2fe; color: #0369a1; }
+      .bg-pink   { background-color: #fce7f3; color: #be185d; }
+
+      .client-info {
+        display: flex;
+        flex-direction: column;
+
+        .client-name {
+          font-weight: 700;
+          color: $text-dark;
+        }
+
+        .event-type {
+          font-size: 0.8rem;
+          color: $text-muted;
+          margin-top: 2px;
+        }
+      }
+    }
+
+    /* Date Cell */
+    .date-cell {
+      .date-main {
+        display: block;
+        font-weight: 600;
+        color: $text-dark;
+      }
+
+      .date-sub {
+        display: block;
+        font-size: 0.8rem;
+        color: $text-muted;
+        margin-top: 2px;
+      }
+    }
+
+    /* Location & Guests */
+    .location-cell {
+      color: #525866;
+      font-weight: 500;
+    }
+
+    .guests-cell {
+      font-weight: 700;
+      color: $text-dark;
+    }
+
+    /* Status Badges */
+    .status-cell {
+      .badge {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+
+        &.badge-confirmed {
+          background-color: #e6f7edd2;
+          color: #0d8a4f;
+        }
+
+        &.badge-pending {
+          background-color: #fef3c7;
+          color: #d97706;
+        }
+
+        &.badge-cancelled {
+          background-color: #fee2e2;
+          color: #dc2626;
+        }
+
+        &.badge-default {
+          background-color: #f1f5f9;
+          color: #64748b;
+        }
+      }
+    }
+
+    /* Actions */
+    .actions-cell {
+      text-align: right;
+
+      .btn-more {
+        background: none;
+        border: none;
+        color: $text-muted;
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+
+        &:hover {
+          background-color: #f1f3f9;
+          color: $text-dark;
+        }
+      }
+    }
+
+    .empty-message {
+      text-align: center;
+      color: $text-muted;
+      padding: 3rem;
+    }
+  }
+}

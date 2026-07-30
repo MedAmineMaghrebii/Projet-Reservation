@@ -4,6 +4,7 @@ import { ListeReservationComponent } from './features/Reservation/liste-reservat
 import { AjouterReservationComponent } from './features/Reservation/ajoute-reservation-component/ajoute-reservation-component';
 import { SidebarComponent } from './shared/main-layout-component/main-layout-component';
 import { FinalisationComponent } from './features/finalisation-component/finalisation-component';
+import { ListeClientsComponent } from './features/clients/liste-clients-component/liste-clients-component';
 
 export const routes: Routes = [
   // Page de connexion (hors layout, sans la sidebar)
@@ -30,6 +31,10 @@ export const routes: Routes = [
         component: FinalisationComponent
       },
       {
+        path: 'clients',
+        component: ListeClientsComponent
+      },
+      {
         path: '',
         redirectTo: 'Allreservations',
         pathMatch: 'full'
@@ -38,8 +43,8 @@ export const routes: Routes = [
   },
 
   // Catch-all : Redirection si la route n'existe pas (toujours en DERNIER)
-  {
+  /*{
     path: '**',
     redirectTo: 'login'
-  }
+  }*/
 ];

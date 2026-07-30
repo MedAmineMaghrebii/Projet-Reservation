@@ -1,0 +1,131 @@
+<div class="reservations-container">
+  
+  <!-- Header -->
+<!-- Header -->
+<header class="header">
+  <div class="header-title">
+    <span class="subtitle">RELATION CLIENT</span>
+    <h1>Clients</h1>
+    <p class="count-label"> Une vue claire sur les relations qui font votre activité.</p>
+  </div>
+  
+  <!-- Ajout de l'événement (click) ici -->
+  <button class="btn-primary" (click)="goToAddClient()">
+    <i class="icon-plus">+</i>
+    Nouveau Client
+  </button>
+</header>
+
+  <!-- Control Bar -->
+  <div class="controls-card">
+    <div class="search-and-filter">
+      <!-- Barre de recherche -->
+      <div class="search-input">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Rechercher..." 
+          [(ngModel)]="searchTerm" 
+          (input)="filterClients()" 
+        />
+      </div>
+</div>
+</div>
+
+  
+      
+
+    
+
+  <!-- Tableau des réservations -->
+  <div class="table-card">
+  <table class="reservations-table">
+    <thead>
+      <tr>
+        <th>CLIENT</th>
+        <th>CONTACT</th>
+        <th>DERNIÈRE RÉSERVATION</th>
+        <th>ÉVÉNEMENTS</th>
+        <th>TOTAL PAYÉ</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let res of filteredClients">
+
+        <!-- Client -->
+        <td>
+          <div class="client-cell">
+            <div class="avatar" [ngClass]="getAvatarClass(res.clientId)">
+              {{ getInitials(res.prenom || '', res.nom || '') }}
+            </div>
+
+            <div class="client-info">
+              <span class="client-name">
+                {{ res.prenom }} {{ res.nom }}
+              </span>
+              <span class="client-cin">
+                CIN : {{ res.cin }}
+              </span>
+            </div>
+          </div>
+        </td>
+
+
+        <!-- Contact -->
+        <td>
+          <div class="contact-cell">
+            <span>{{ res.telephone }}</span>
+            <small>{{ res.email }}</small>
+          </div>
+        </td>
+
+
+        <!-- Date -->
+        <td>
+          <span class="date-main">
+            {{ res.derniereReservation | date:'dd/MM/yyyy' }}
+          </span>
+        </td>
+
+
+        <!-- Events -->
+        <td>
+          <span class="guests-cell">
+            {{ res.nombreEvenements }}
+          </span>
+        </td>
+
+
+        <!-- Amount -->
+        <td>
+          <span class="amount-badge">
+            {{ res.totalPaye | number:'1.2-2' }} DT
+          </span>
+        </td>
+
+
+        <!-- Actions -->
+        <td class="actions-cell">
+          <button class="btn-more">•••</button>
+        </td>
+
+      </tr>
+
+
+      <tr *ngIf="filteredClients.length === 0">
+        <td colspan="6" class="empty-message">
+          Aucun client trouvé.
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+</div>

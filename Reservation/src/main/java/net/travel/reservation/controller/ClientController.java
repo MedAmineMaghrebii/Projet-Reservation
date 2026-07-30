@@ -2,6 +2,7 @@ package net.travel.reservation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.ClientSummary;
 import net.travel.reservation.entites.Client;
 import net.travel.reservation.services.ClientService;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,12 @@ import java.util.List;
 public class ClientController {
 
     private final ClientService clientService;
+
+    //Recuperer les clients stats
+    @GetMapping("/summary")
+    public ResponseEntity<List<ClientSummary>> getClientsSummary() {
+        return ResponseEntity.ok(clientService.getClientsSummary());
+    }
 
     // Récupérer tous les clients
     @GetMapping

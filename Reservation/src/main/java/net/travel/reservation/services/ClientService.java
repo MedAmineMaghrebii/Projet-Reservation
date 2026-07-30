@@ -3,10 +3,12 @@ package net.travel.reservation.services;
 
 
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.ClientSummary;
 import net.travel.reservation.entites.Client;
 import net.travel.reservation.repositories.ClientRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -18,6 +20,20 @@ public class ClientService {
     private final ClientRepository clientRepository;
 
 
+//clients summary
+public List<ClientSummary> getClientsSummary(){
+
+    List<ClientSummary> clients = clientRepository.getClientsSummary();
+
+    clients.forEach(client -> {
+        if (client.getTotalPaye() == null) {
+            client.setTotalPaye(BigDecimal.ZERO);
+        }
+    });
+
+    return clients;
+
+};
 
     // Récupérer tous les clients
     public List<Client> getAllClients() {
