@@ -1,4 +1,4 @@
-<div class="reservations-container">
+<div class="table-wrapper">
   
   <!-- Header -->
 <!-- Header -->
@@ -56,6 +56,7 @@
 
     <tbody>
       <tr *ngFor="let res of filteredClients">
+  
 
         <!-- Client -->
         <td>
@@ -68,8 +69,8 @@
               <span class="client-name">
                 {{ res.prenom }} {{ res.nom }}
               </span>
-              <span class="client-cin">
-                CIN : {{ res.cin }}
+              <span class="client-id">
+                CIN: {{ res.cin }}
               </span>
             </div>
           </div>
@@ -79,8 +80,8 @@
         <!-- Contact -->
         <td>
           <div class="contact-cell">
-            <span>{{ res.telephone }}</span>
-            <small>{{ res.email }}</small>
+            <span class="contact-phone">+216 {{ res.telephone }}</span>
+            <span class="contact-email">{{ res.email }}</span>
           </div>
         </td>
 
@@ -94,8 +95,8 @@
 
 
         <!-- Events -->
-        <td>
-          <span class="guests-cell">
+        <td class="text-center">
+          <span class="events-counts">
             {{ res.nombreEvenements }}
           </span>
         </td>
@@ -103,7 +104,7 @@
 
         <!-- Amount -->
         <td>
-          <span class="amount-badge">
+          <span class="total-paid">
             {{ res.totalPaye | number:'1.2-2' }} DT
           </span>
         </td>
@@ -111,8 +112,30 @@
 
         <!-- Actions -->
         <td class="actions-cell">
-          <button class="btn-more">•••</button>
-        </td>
+    <div class="action-menu-container">
+      <button 
+        type="button" 
+        class="btn-more" 
+        (click)="toggleMenu(res.clientId, $event)">
+        •••
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (activeMenuId() === res.clientId) {
+        <div class="action-dropdown">
+          <button type="button" (click)="openViewModal(res)">
+            👁️ Voir
+          </button>
+          <button type="button" (click)="openEditModal(res)">
+            ✏️ Modifier
+          </button>
+          <button type="button" class="delete-action" (click)="openDeleteModal(res)">
+            🗑️ Supprimer
+          </button>
+        </div>
+      }
+    </div>
+  </td>
 
       </tr>
 
@@ -129,3 +152,186 @@
 
 
 </div>
+
+
+
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. VIEW MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'view'"
+  [showFooter]="false"
+  (closed)="closeModal()">
+  
+  <!-- Centered Header Section -->
+  <div class="client-header">
+    <div class="avatar">
+      {{ selectedClient()?.prenom?.[0] }}{{ selectedClient()?.nom?.[0] }}
+    </div>
+    
+    <h2 class="client-name">
+      {{ selectedClient()?.prenom }} {{ selectedClient()?.nom }}
+    </h2>
+    
+    <span class="client-type">Client particulier</span>
+    
+    <div class="status-badge active">
+      Client actif
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedClient()?.nombreEvenements ?? 0 }}</span>
+      <span class="stat-label">Événements</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-value">{{ (selectedClient()?.totalPaye ?? 0) | number:'1.0-0' }} DT</span>
+      <span class="stat-label">Total payé</span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedClient()?.derniereReservation | date:'MMM yy' }}</span>
+      <span class="stat-label">Dernière visite</span>
+    </div>
+  </div>
+
+  <!-- Detailed Contact Information -->
+  <div class="info-list">
+    <div class="info-item">
+      <span class="icon">📞</span>
+      <div class="info-content">
+        <label>Téléphone</label>
+        <p>{{ selectedClient()?.telephone }}</p>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon">✉️</span>
+      <div class="info-content">
+        <label>Email</label>
+        <p>{{ selectedClient()?.email }}</p>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon">📅</span>
+      <div class="info-content">
+        <label>Dernière réservation</label>
+        <p>{{ selectedClient()?.derniereReservation | date:'dd MMMM yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reservation History -->
+  <div class="history-section">
+    <h3>Historique des réservations</h3>
+    
+    <div class="history-list">
+      @for (item of selectedClient()?.historique; track item.id) {
+        <div class="history-card">
+          <div class="history-icon">📅</div>
+          <div class="history-details">
+            <span class="title">{{ item.titre }}</span>
+            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.lieu }}</span>
+          </div>
+          <span class="history-price">{{ item.montant | number:'1.0-0' }} DT</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Full Width Action Button -->
+  <button type="button" class="action-btn">
+    ✉️ Contacter le client
+  </button>
+</app-modal>
+
+<!-- 2. UPDATE / EDIT MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'edit'"
+  [title]="'Modifier le client'"
+  [subtitle]="'Mettre à jour les informations'"
+  [mode]="'edit'"
+  (closed)="closeModal()"
+  (saved)="saveClientChanges()">
+
+  <!-- Mode Nouveau Client avec Reactive Forms -->
+      <form [formGroup]="myForm" class="edit-form" >
+
+        <div class="form-group" hidden> 
+          
+          <input type="text" formControlName="id" placeholder="id..."  hidden/>
+          
+        </div>
+        
+        <!-- CIN -->
+        <div class="form-group"> 
+          <label>CIN *</label>
+          <input type="text" formControlName="cin" placeholder="CIN..." />
+          <small class="text-danger" *ngIf="myForm.get('cin')?.invalid && (myForm.get('cin')?.dirty || myForm.get('cin')?.touched)">
+            <span *ngIf="myForm.get('cin')?.errors?.['required']">Le CIN est obligatoire.</span>
+            <span *ngIf="myForm.get('cin')?.errors?.['pattern']">Le CIN doit comporter exactement 8 chiffres.</span>
+          </small>
+        </div>
+
+        <!-- NOM -->
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" formControlName="nom" placeholder="Nom..." />
+          <small class="text-danger" *ngIf="myForm.get('nom')?.invalid && (myForm.get('nom')?.dirty || myForm.get('nom')?.touched)">
+            <span *ngIf="myForm.get('nom')?.errors?.['required']">Le nom est obligatoire.</span>
+            <span *ngIf="myForm.get('nom')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- PRÉNOM -->
+        <div class="form-group">
+          <label>Prénom *</label>
+          <input type="text" formControlName="prenom" placeholder="Prenom..." />
+          <small class="text-danger" *ngIf="myForm.get('prenom')?.invalid && (myForm.get('prenom')?.dirty || myForm.get('prenom')?.touched)">
+            <span *ngIf="myForm.get('prenom')?.errors?.['required']">Le prénom est obligatoire.</span>
+            <span *ngIf="myForm.get('prenom')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- TÉLÉPHONE -->
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="text" formControlName="telephone" placeholder="Telephone..." />
+          <small class="text-danger" *ngIf="myForm.get('telephone')?.invalid && (myForm.get('telephone')?.dirty || myForm.get('telephone')?.touched)">
+            <span *ngIf="myForm.get('telephone')?.errors?.['pattern']">Doit contenir exactement 8 chiffres.</span>
+          </small>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="form-group full-width">
+          <label>Email *</label>
+          <input type="email" formControlName="email" placeholder="email@exemple.com" />
+          <small class="text-danger" *ngIf="myForm.get('email')?.invalid && (myForm.get('email')?.dirty || myForm.get('email')?.touched)">
+            <span *ngIf="myForm.get('email')?.errors?.['required']">L'email est obligatoire.</span>
+            <span *ngIf="myForm.get('email')?.errors?.['email']">Format d'email invalide.</span>
+          </small>
+        </div>
+
+      </form>
+  
+</app-modal>
+
+<!-- 3. DELETE CONFIRMATION MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'delete'"
+  [title]="'Confirmer la suppression'"
+  [saveText]="'Supprimer'"
+  [cancelText]="'Annuler'"
+  (closed)="closeModal()"
+  (saved)="confirmDelete()">
+
+  <div class="delete-confirmation">
+    <p>Êtes-vous sûr de vouloir supprimer <strong>{{ selectedClient()?.prenom }} {{ selectedClient()?.nom }}</strong> ?</p>
+    <p class="warning-text">Cette action est irréversible.</p>
+  </div>
+</app-modal>

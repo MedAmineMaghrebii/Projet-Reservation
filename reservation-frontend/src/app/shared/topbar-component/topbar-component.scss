@@ -1,9 +1,17 @@
 .topbar {
+   position: fixed;
+  top: 0;
+  left: 260px; // your sidebar width
+  right: 0;
+  z-index: 1000;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   height: 64px;
   padding: 0 2rem;
+
   background-color: #f8f9fe;
   border-bottom: 1px solid #eef0f6;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;

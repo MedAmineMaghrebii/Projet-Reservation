@@ -1,45 +1,204 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Client } from '../../../core/models/clients/client';
 import { Router } from '@angular/router'; 
 import { ClientService } from '../../../core/services/client';
 import { ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { ModalComponent, ModalMode } from '../../../shared/modal/modal-component/modal-component';
 
 
 
 @Component({
   selector: 'app-clients', 
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ModalComponent,ReactiveFormsModule],
    templateUrl: './liste-clients-component.html',
   styleUrl: './liste-clients-component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class ListeClientsComponent implements OnInit {
 
-  clients: Client[] = [];
+  clients: any[] = [];
   filteredClients: any[] = [];
   
   searchTerm: string = '';
   selectedFilter: string = 'Tous';
   activeView: 'list' | 'calendar' = 'list';
+  
+  // modal properties
+  isDialogOpen = false;
 
-  constructor(private clientService: ClientService,
+dialogMode: ModalMode = 'view';
+activeMenuId = signal<number | string | null>(null);
+  activeModal = signal<ModalMode>(null);
+  selectedClient = signal<any>(null);
+  myForm: FormGroup
+  // Editable form state
+  editForm = {
+    prenom: '',
+    nom: '',
+    cin: '',
+    email: '',
+    telephone: ''
+  };
+
+
+
+  constructor(private fb : FormBuilder,private clientService: ClientService,
     private router: Router ,
       private cdr: ChangeDetectorRef 
-  ) {}
+  ) {
+    
+
+  // Initialize your Reactive Form with Validators
+  this.myForm = this.fb.group({
+    id : [],
+    nom: ['', [Validators.required, Validators.minLength(3)]],
+    prenom: ['', [Validators.required, Validators.minLength(3)]],
+    cin: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
+    email: ['', [Validators.required, Validators.email]],
+    telephone: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]]
+  });
+
+  }
+
 
   ngOnInit(): void {
     this.loadClients();
   }
+
+
+
+  // Toggle dropdown menu
+  toggleMenu(id: number | string, event: MouseEvent) {
+    event.stopPropagation();
+    this.activeMenuId.set(this.activeMenuId() === id ? null : id);
+  }
+
+  // Close dropdown menu when clicking anywhere outside
+  @HostListener('document:click')
+  closeMenus() {
+    this.activeMenuId.set(null);
+  }
+
+  // --- Modal Open Actions ---
+  openViewModal(client: any) {
+    this.selectedClient.set(client);
+    this.activeModal.set('view');
+    this.activeMenuId.set(null);
+  }
+
+  openEditModal(client: any) {
+    this.selectedClient.set(client);
+
+    this.myForm.patchValue({
+      id : client.clientId ?? '',
+      nom: client.nom ?? '',
+      prenom: client.prenom ?? '',
+      cin: client.cin ?? '',
+      email: client.email ?? '',
+      telephone: client.telephone ?? ''
+    });
+
+    this.activeModal.set('edit');
+    this.activeMenuId.set(null);
+  }
+
+  openDeleteModal(client: any) {
+    this.selectedClient.set(client);
+    this.activeModal.set('delete');
+    this.activeMenuId.set(null);
+  }
+
+  closeModal() {
+    this.activeModal.set(null);
+    this.selectedClient.set(null);
+    this.myForm.reset();
+  }
+
+  // --- Modal Submit Handlers ---
+  saveClientChanges() {
+    if (this.myForm.invalid) {
+      this.myForm.markAllAsTouched(); // Trigger error visual cues for invalid fields
+      return;
+    }
+
+    const updatedData = {
+      
+      ...this.myForm.value
+    };
+    console.log(updatedData)
+
+    this.clientService.updateClient(updatedData.id,updatedData).subscribe({
+      next: (data) => {
+        console.log(data)
+        this.filterClients();
+         this.cdr.detectChanges();
+         this.closeModal();
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des réservations', err);
+      }
+    });
+   
+    
+    // Call service to save changes here...
+    
+    this.closeModal();
+  }
+
+ confirmDelete() {
+  const currentClient = this.selectedClient();
+  const clientId = currentClient?.id || currentClient?.clientId;
+
+  if (!clientId) {
+    console.error('No client selected for deletion');
+    return;
+  }
+
+  this.clientService.deleteClient(clientId).subscribe({
+    next: () => {
+      console.log('Client deleted successfully');
+
+      // 1. Remove the client from the main data array
+      this.filteredClients = this.filteredClients.filter(
+        c => (c.id || c.clientId) !== clientId
+      );
+
+      // 2. Refresh local filter or trigger change detection if needed
+      if (typeof this.filterClients === 'function') {
+        this.filterClients();
+      }
+      this.cdr.detectChanges();
+
+      // 3. Close modal
+      this.closeModal();
+    },
+    error: (err) => {
+      console.error('Error deleting client:', err);
+    }
+  });
+}
+
+//modal functions
+ /* openModal(client: any): void {
+    
+  this.selectedClient = client;
+  this.dialogMode = 'view';
+  this.isDialogOpen = true;
+  console.log(client, this.isDialogOpen)
+}*/
+
+
+
 
   loadClients(): void {
     this.clientService.getAllClientsSummary().subscribe({
       next: (data) => {
         this.clients = data;
         this.filterClients();
-        console.log(data)
+         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur lors du chargement des réservations', err);
