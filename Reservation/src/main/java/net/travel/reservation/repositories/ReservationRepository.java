@@ -1,6 +1,8 @@
 package net.travel.reservation.repositories;
 
 import net.travel.reservation.entites.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
@@ -16,4 +18,10 @@ public interface ReservationRepository
 
 
     boolean existsByDate(LocalDate date);
+
+    Page<Reservation> findByClientClientId(
+            Long clientId,
+            Pageable pageable
+    );
+
 }

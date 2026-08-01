@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { ClientService } from '../../../core/services/client';
 import { ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ModalComponent, ModalMode } from '../../../shared/modal/modal-component/modal-component';
+import { ReservationService } from '../../../core/services/reservation.service';
+import { Reservation } from '../../../core/models/reservations/reservation';
 
 
 
@@ -18,7 +20,7 @@ import { ModalComponent, ModalMode } from '../../../shared/modal/modal-component
   changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class ListeClientsComponent implements OnInit {
-
+  reservations = signal<Reservation[]>([]);
   clients: any[] = [];
   filteredClients: any[] = [];
   
@@ -45,7 +47,8 @@ activeMenuId = signal<number | string | null>(null);
 
 
 
-  constructor(private fb : FormBuilder,private clientService: ClientService,
+  constructor(private fb : FormBuilder,private clientService: ClientService, 
+    private reservationService : ReservationService,
     private router: Router ,
       private cdr: ChangeDetectorRef 
   ) {
@@ -85,9 +88,13 @@ activeMenuId = signal<number | string | null>(null);
   // --- Modal Open Actions ---
   openViewModal(client: any) {
     this.selectedClient.set(client);
+    console.log(this.selectedClient())
+     this.reservations.set([]);
+    this.loadHistory(this.selectedClient().clientId)
     this.activeModal.set('view');
     this.activeMenuId.set(null);
   }
+  
 
   openEditModal(client: any) {
     this.selectedClient.set(client);
@@ -133,8 +140,8 @@ activeMenuId = signal<number | string | null>(null);
     this.clientService.updateClient(updatedData.id,updatedData).subscribe({
       next: (data) => {
         console.log(data)
-        this.filterClients();
-         this.cdr.detectChanges();
+        this.loadClients();
+         
          this.closeModal();
       },
       error: (err) => {
@@ -191,7 +198,18 @@ activeMenuId = signal<number | string | null>(null);
 }*/
 
 
+loadHistory(id: number) {
+  this.reservationService
+    .getReservationsByClient(id, 0, 5)
+    .subscribe({
+      next: (response) => {
+        console.log(response);
 
+        this.reservations.set(response.content);
+      },
+      error: (err) => console.error(err)
+    });
+}
 
   loadClients(): void {
     this.clientService.getAllClientsSummary().subscribe({

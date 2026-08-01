@@ -231,14 +231,14 @@
     <h3>Historique des réservations</h3>
     
     <div class="history-list">
-      @for (item of selectedClient()?.historique; track item.id) {
+      @for (item of reservations(); track item.reservationId) {
         <div class="history-card">
           <div class="history-icon">📅</div>
           <div class="history-details">
-            <span class="title">{{ item.titre }}</span>
-            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.lieu }}</span>
+            <span class="title">{{ item.numeroReservation }}</span>
+            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.salle.nom }}</span>
           </div>
-          <span class="history-price">{{ item.montant | number:'1.0-0' }} DT</span>
+          <span class="history-price">{{ item.montantTotal | number:'1.0-0' }} DT</span>
         </div>
       }
     </div>
