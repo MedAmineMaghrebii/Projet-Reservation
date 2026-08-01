@@ -11,7 +11,7 @@ import java.util.UUID;
 
 
 public interface RefreshTokenRepository
-        extends JpaRepository<RefreshToken, UUID> {
+        extends JpaRepository<RefreshToken, Long> {
 
 
     // Chercher un refresh token par sa valeur

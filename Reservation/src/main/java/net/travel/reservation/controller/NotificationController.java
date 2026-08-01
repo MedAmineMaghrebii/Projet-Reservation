@@ -1,7 +1,8 @@
 package net.travel.reservation.controller;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Notification;
-import net.travel.reservation.entites.User;
 import net.travel.reservation.services.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,106 +19,55 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-
-    // Récupérer toutes les notifications
+    // --- Récupérer toutes les notifications ---
     @GetMapping
     public ResponseEntity<List<Notification>> getAllNotifications() {
-
-        return ResponseEntity.ok(
-                notificationService.getAllNotifications()
-        );
+        return ResponseEntity.ok(notificationService.getAllNotifications());
     }
 
-
-    // Récupérer une notification par ID
+    // --- Récupérer une notification par ID ---
     @GetMapping("/{id}")
-    public ResponseEntity<Notification> getNotificationById(
-            @PathVariable UUID id) {
-
-        return ResponseEntity.ok(
-                notificationService.getNotificationById(id)
-        );
+    public ResponseEntity<Notification> getNotificationById(@PathVariable UUID id) {
+        return ResponseEntity.ok(notificationService.getNotificationById(id));
     }
 
-
-    // Créer une notification
+    // --- Créer une notification ---
     @PostMapping
-    public ResponseEntity<Notification> createNotification(
-            @RequestBody Notification notification) {
-
-        Notification nouvelleNotification =
-                notificationService.createNotification(notification);
-
-        return new ResponseEntity<>(
-                nouvelleNotification,
-                HttpStatus.CREATED
-        );
+    public ResponseEntity<Notification> createNotification(@Valid @RequestBody Notification notification) {
+        Notification nouvelleNotification = notificationService.createNotification(notification);
+        return new ResponseEntity<>(nouvelleNotification, HttpStatus.CREATED);
     }
 
-
-    // Récupérer les notifications d'un utilisateur
+    // --- Récupérer les notifications d'un utilisateur ---
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getUserNotifications(
-            @PathVariable Long userId) {
-
-        return ResponseEntity.ok(
-                notificationService.getUserNotifications(userId)
-        );
+    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable Long userId) {
+        return ResponseEntity.ok(notificationService.getUserNotifications(userId));
     }
 
-
-    // Notifications non lues
+    // --- Récupérer les notifications non lues ---
     @GetMapping("/user/{userId}/unread")
-    public ResponseEntity<List<Notification>> getUnreadNotifications(
-            @PathVariable Long userId) {
-
-        return ResponseEntity.ok(
-                notificationService.getUnreadNotifications(userId)
-        );
+    public ResponseEntity<List<Notification>> getUnreadNotifications(@PathVariable Long userId) {
+        return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
     }
 
-
-    // Nombre de notifications non lues
+    // --- Nombre de notifications non lues ---
     @GetMapping("/user/{userId}/count")
-    public ResponseEntity<Long> countUnread(
-            @PathVariable Long userId) {
-
-        return ResponseEntity.ok(
-                notificationService.countUnread(userId)
-        );
+    public ResponseEntity<Long> countUnread(@PathVariable Long userId) {
+        return ResponseEntity.ok(notificationService.countUnread(userId));
     }
 
-
-    // Marquer une notification comme lue
+    // --- Marquer une notification comme lue ---
     @PutMapping("/{id}/read")
-    public ResponseEntity<Notification> markAsRead(
-            @PathVariable UUID id) {
-
-        return ResponseEntity.ok(
-                notificationService.markAsRead(id)
-        );
+    public ResponseEntity<Notification> markAsRead(@PathVariable UUID id) {
+        return ResponseEntity.ok(notificationService.markAsRead(id));
     }
 
-
-    // Supprimer une notification
+    // --- Supprimer une notification ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotification(
-            @PathVariable UUID id) {
-
+    public ResponseEntity<Void> deleteNotification(@PathVariable UUID id) {
         notificationService.deleteNotification(id);
-
         return ResponseEntity.noContent().build();
     }
 
-
-    // Supprimer toutes les notifications d'un utilisateur
-    @DeleteMapping("/user")
-    public ResponseEntity<Void> deleteAllUserNotifications(
-            @RequestBody User user) {
-
-        notificationService.deleteAllUserNotifications(user);
-
-        return ResponseEntity.noContent().build();
-    }
 
 }

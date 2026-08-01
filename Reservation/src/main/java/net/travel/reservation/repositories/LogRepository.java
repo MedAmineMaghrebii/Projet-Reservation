@@ -4,7 +4,10 @@ package net.travel.reservation.repositories;
 
 import net.travel.reservation.entites.Log;
 import net.travel.reservation.entites.User;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -12,20 +15,12 @@ import java.util.List;
 public interface LogRepository extends JpaRepository<Log, Long> {
 
 
-    // Trouver les logs par utilisateur
-    List<Log> findByUser(User user);
+    @Query("SELECT l FROM Log l WHERE l.user.userId = :userId")
+    List<Log> findByUserId(@Param("userId") Long userId);
 
-
-    // Trouver les logs par type d'action
     List<Log> findByAction(String action);
 
-
-    // Trouver les logs d'une entité précise
     List<Log> findByEntite(String entite);
 
-
-    // Trouver les logs d'un objet précis
     List<Log> findByEntiteAndEntiteId(String entite, Long entiteId);
-
-
 }

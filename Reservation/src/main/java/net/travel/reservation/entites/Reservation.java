@@ -1,5 +1,6 @@
 package net.travel.reservation.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import net.travel.reservation.entites.User;
@@ -29,12 +30,7 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
-    // ✅ Heures (début/fin)
-    @Column(nullable = false)
-    private LocalTime heureDebut;
 
-    @Column(nullable = false)
-    private LocalTime heureFin;
 
 
 
@@ -59,28 +55,30 @@ public class Reservation {
             this.tokenReservation = UUID.randomUUID().toString();
         }
     }
-
+    // ✅ TARIFICATION APPLIQUÉE (Option 2)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tarification_id")
+    private TarificationSalle tarificationAppliquee;
     @PreUpdate
     public void preUpdate() {
         this.dateModification = LocalDateTime.now();
     }
     //RELATION--------------------------------------------
     // ✅ CLIENT (1-à-n)
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
     // ✅ SALLE (1-à-n) ← AJOUT IMPORTANT
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salle_id", nullable = false)
     private Salle salle;
 
     // ✅ PAIEMENTS (1-à-n) ← AJOUT IMPORTANT
-    @OneToOne(mappedBy = "reservation",
-            cascade = CascadeType.PERSIST,
-            orphanRemoval = false,
-            fetch = FetchType.LAZY)
-    private Paiement paiement;
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    @JsonIgnore
+    private List<Paiement> paiements = new ArrayList<>();
     @OneToOne(mappedBy = "reservation",
             cascade = CascadeType.ALL,
             orphanRemoval = false,

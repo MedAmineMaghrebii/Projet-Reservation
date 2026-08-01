@@ -38,14 +38,11 @@ public class AuthService {
             throw new RuntimeException("Email already exists");
         }
 
-
         User user = User.builder()
                 .email(request.getEmail())
-                .hashPassword(
-                        passwordEncoder.encode(
-                                request.getPassword()
-                        )
-                )
+                .firstname(request.getFirstName()) // <-- AJOUTÉ
+                .lastname(request.getLastName())   // <-- AJOUTÉ
+                .hashPassword(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .build();
 
@@ -65,12 +62,12 @@ public class AuthService {
                 refreshTokenService.createRefreshToken(user);
 
 
-
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .userId(user.getUserId())
                 .email(user.getEmail())
+                .role(user.getRole()) // <-- AJOUTER ICI
                 .build();
 
     }

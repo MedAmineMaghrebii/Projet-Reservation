@@ -1,207 +1,91 @@
 package net.travel.reservation.services;
 
-
-
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Contrat;
 import net.travel.reservation.entites.StatutContrat;
 import net.travel.reservation.repositories.ContratRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ContratService {
-
 
     private final ContratRepository contratRepository;
 
-
-
-    // Récupérer tous les contrats
     public List<Contrat> getAllContrats() {
-
         return contratRepository.findAll();
     }
 
-
-
-
-
-    // Récupérer un contrat par ID
     public Contrat getContratById(UUID id) {
-
-
         return contratRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Contrat introuvable"
-                        ));
+                .orElseThrow(() -> new RuntimeException("Contrat introuvable avec l'ID : " + id));
     }
 
-
-
-
-
-    // Créer un contrat
-    public Contrat createContrat(
-            Contrat contrat
-    ) {
-
-
-        if(contratRepository
-                .existsByNumeroContrat(
-                        contrat.getNumeroContrat()
-                )) {
-
-
-            throw new RuntimeException(
-                    "Numéro de contrat déjà utilisé"
-            );
+    @Transactional
+    public Contrat createContrat(Contrat contrat) {
+        if (contratRepository.existsByNumeroContrat(contrat.getNumeroContrat())) {
+            throw new RuntimeException("Numéro de contrat déjà utilisé : " + contrat.getNumeroContrat());
         }
 
-
-
-        if(contrat.getStatut() == null){
-
-            contrat.setStatut(
-                    StatutContrat.NON_SIGNE
-            );
+        // Validation métier des dates
+        if (contrat.getDateDebut() != null && contrat.getDateFin() != null
+                && contrat.getDateFin().isBefore(contrat.getDateDebut())) {
+            throw new RuntimeException("La date de fin ne peut pas être antérieure à la date de début");
         }
 
-
+        if (contrat.getStatut() == null) {
+            contrat.setStatut(StatutContrat.NON_SIGNE);
+        }
 
         return contratRepository.save(contrat);
     }
 
+    @Transactional
+    public Contrat updateContrat(UUID id, Contrat contratRequest) {
+        Contrat contrat = getContratById(id);
 
+        // Validation des dates
+        if (contratRequest.getDateDebut() != null && contratRequest.getDateFin() != null
+                && contratRequest.getDateFin().isBefore(contratRequest.getDateDebut())) {
+            throw new RuntimeException("La date de fin ne peut pas être antérieure à la date de début");
+        }
 
-
-
-    // Modifier un contrat
-    public Contrat updateContrat(
-            UUID id,
-            Contrat contratRequest
-    ) {
-
-
-        Contrat contrat =
-                getContratById(id);
-
-
-
-        contrat.setTitre(
-                contratRequest.getTitre()
-        );
-
-
-        contrat.setDescription(
-                contratRequest.getDescription()
-        );
-
-
-        contrat.setConditions(
-                contratRequest.getConditions()
-        );
-
-
-        contrat.setEngagements(
-                contratRequest.getEngagements()
-        );
-
-
-        contrat.setDateDebut(
-                contratRequest.getDateDebut()
-        );
-
-
-        contrat.setDateFin(
-                contratRequest.getDateFin()
-        );
-
-
-        contrat.setMontant(
-                contratRequest.getMontant()
-        );
-
-
-        contrat.setUrlDocument(
-                contratRequest.getUrlDocument()
-        );
-
-
+        contrat.setTitre(contratRequest.getTitre());
+        contrat.setDescription(contratRequest.getDescription());
+        contrat.setConditions(contratRequest.getConditions());
+        contrat.setEngagements(contratRequest.getEngagements());
+        contrat.setDateDebut(contratRequest.getDateDebut());
+        contrat.setDateFin(contratRequest.getDateFin());
+        contrat.setMontant(contratRequest.getMontant());
+        contrat.setUrlDocument(contratRequest.getUrlDocument());
 
         return contratRepository.save(contrat);
     }
 
-
-
-
-
-    // Modifier le statut du contrat
-    public Contrat updateStatut(
-            UUID id,
-            StatutContrat statut
-    ) {
-
-
-        Contrat contrat =
-                getContratById(id);
-
-
+    @Transactional
+    public Contrat updateStatut(UUID id, StatutContrat statut) {
+        Contrat contrat = getContratById(id);
         contrat.setStatut(statut);
-
-
         return contratRepository.save(contrat);
     }
 
-
-
-
-
-    // Chercher par numéro contrat
-    public Contrat getByNumeroContrat(
-            String numero
-    ) {
-
-
-        return (Contrat) contratRepository
-                .findByNumeroContrat(numero)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Contrat introuvable"
-                        ));
+    public Contrat getByNumeroContrat(String numero) {
+        return contratRepository.findByNumeroContrat(numero)
+                .orElseThrow(() -> new RuntimeException("Contrat introuvable avec le numéro : " + numero));
     }
 
-
-
-
-
-    // Supprimer un contrat
-    public void deleteContrat(
-            UUID id
-    ) {
-
-
-        Contrat contrat =
-                getContratById(id);
-
-
+    @Transactional
+    public void deleteContrat(UUID id) {
+        Contrat contrat = getContratById(id);
         contratRepository.delete(contrat);
     }
 
-
-
-
-
-    // Contrats actifs
     public List<Contrat> getContratsSignes() {
-
-
-        return contratRepository.findByStatut(StatutContrat.SIGNE) ;
+        return contratRepository.findByStatut(StatutContrat.SIGNE);
     }
-
 }

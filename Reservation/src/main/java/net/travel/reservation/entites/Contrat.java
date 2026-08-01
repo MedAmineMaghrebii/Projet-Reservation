@@ -1,5 +1,6 @@
 package net.travel.reservation.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -69,7 +70,8 @@ public class Contrat {
     // Statut du contrat
     @Enumerated(EnumType.STRING)
     private StatutContrat statut;
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private Reservation reservation;
 

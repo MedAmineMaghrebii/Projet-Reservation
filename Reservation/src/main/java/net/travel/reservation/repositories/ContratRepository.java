@@ -16,7 +16,7 @@ public interface ContratRepository
 
     boolean existsByNumeroContrat(String numeroContrat);
 
-    Optional<Object> findByNumeroContrat(String numero);
+    Optional<Contrat> findByNumeroContrat(String numero);
 
     List<Contrat> findByStatut(StatutContrat statut);
 }

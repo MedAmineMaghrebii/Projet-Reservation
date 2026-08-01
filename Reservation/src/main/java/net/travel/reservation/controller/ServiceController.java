@@ -1,5 +1,8 @@
 package net.travel.reservation.controller;
-import net.travel.reservation.dto.ServiceDTO;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import net.travel.reservation.entites.Service;
 import net.travel.reservation.services.ServiceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,53 +12,46 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/services")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ServiceController {
 
     private final ServiceService serviceService;
 
-    public ServiceController(ServiceService serviceService) {
-        this.serviceService = serviceService;
-    }
+    // --- CREATE ---
     @PostMapping
-    public ResponseEntity<ServiceDTO> createService(@RequestBody ServiceDTO serviceDTO) {
-        ServiceDTO createdService = serviceService.createService(serviceDTO);
+    public ResponseEntity<Service> createService(@Valid @RequestBody Service service) {
+        Service createdService = serviceService.createService(service);
         return new ResponseEntity<>(createdService, HttpStatus.CREATED);
     }
 
     // --- READ ALL ---
-    // GET /api/services
     @GetMapping
-    public ResponseEntity<List<ServiceDTO>> getAllServices() {
-        List<ServiceDTO> services = serviceService.getAllServices();
-        return ResponseEntity.ok(services);
+    public ResponseEntity<List<Service>> getAllServices() {
+        return ResponseEntity.ok(serviceService.getAllServices());
     }
 
     // --- READ BY ID ---
-    // GET /api/services/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceDTO> getServiceById(@PathVariable Long id) {
-        ServiceDTO service = serviceService.getServiceById(id);
-        return ResponseEntity.ok(service);
+    public ResponseEntity<Service> getServiceById(@PathVariable Long id) {
+        return ResponseEntity.ok(serviceService.getServiceById(id));
     }
 
     // --- READ BY SALLE ID ---
-    // GET /api/services/salle/{salleId}
     @GetMapping("/salle/{salleId}")
-    public ResponseEntity<List<ServiceDTO>> getServicesBySalleId(@PathVariable Long salleId) {
-        List<ServiceDTO> services = serviceService.getServicesBySalleId(salleId);
-        return ResponseEntity.ok(services);
+    public ResponseEntity<List<Service>> getServicesBySalleId(@PathVariable Long salleId) {
+        return ResponseEntity.ok(serviceService.getServicesBySalleId(salleId));
     }
 
     // --- UPDATE ---
-
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceDTO> updateService(@PathVariable Long id, @RequestBody ServiceDTO serviceDTO) {
-        ServiceDTO updatedService = serviceService.updateService(id, serviceDTO);
-        return ResponseEntity.ok(updatedService);
+    public ResponseEntity<Service> updateService(
+            @PathVariable Long id,
+            @Valid @RequestBody Service service) {
+        return ResponseEntity.ok(serviceService.updateService(id, service));
     }
 
     // --- DELETE ---
-    // DELETE /api/services/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteService(@PathVariable Long id) {
         serviceService.deleteService(id);

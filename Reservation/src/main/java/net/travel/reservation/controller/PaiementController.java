@@ -1,5 +1,6 @@
 package net.travel.reservation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Paiement;
 import net.travel.reservation.services.PaiementService;
@@ -19,85 +20,49 @@ public class PaiementController {
 
     private final PaiementService paiementService;
 
-
-    // Récupérer tous les paiements
+    // --- Récupérer tous les paiements ---
     @GetMapping
     public ResponseEntity<List<Paiement>> getAllPaiements() {
-
-        return ResponseEntity.ok(
-                paiementService.getAllPaiements()
-        );
+        return ResponseEntity.ok(paiementService.getAllPaiements());
     }
 
-
-    // Récupérer un paiement par ID
+    // --- Récupérer un paiement par ID ---
     @GetMapping("/{id}")
-    public ResponseEntity<Paiement> getPaiementById(
-            @PathVariable UUID id) {
-
-        return ResponseEntity.ok(
-                paiementService.getPaiementById(id)
-        );
+    public ResponseEntity<Paiement> getPaiementById(@PathVariable UUID id) {
+        return ResponseEntity.ok(paiementService.getPaiementById(id));
     }
 
-
-    // Ajouter un paiement
+    // --- Ajouter un paiement ---
     @PostMapping
-    public ResponseEntity<Paiement> createPaiement(
-            @RequestBody Paiement paiement) {
-
-        Paiement nouveauPaiement =
-                paiementService.createPaiement(paiement);
-
-        return new ResponseEntity<>(
-                nouveauPaiement,
-                HttpStatus.CREATED
-        );
+    public ResponseEntity<Paiement> createPaiement(@Valid @RequestBody Paiement paiement) {
+        Paiement nouveauPaiement = paiementService.createPaiement(paiement);
+        return new ResponseEntity<>(nouveauPaiement, HttpStatus.CREATED);
     }
 
-
-    // Modifier un paiement
+    // --- Modifier un paiement ---
     @PutMapping("/{id}")
     public ResponseEntity<Paiement> updatePaiement(
             @PathVariable UUID id,
-            @RequestBody Paiement paiement) {
-
-        return ResponseEntity.ok(
-                paiementService.updatePaiement(id, paiement)
-        );
+            @Valid @RequestBody Paiement paiement) {
+        return ResponseEntity.ok(paiementService.updatePaiement(id, paiement));
     }
 
-
-    // Supprimer un paiement
+    // --- Supprimer un paiement ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePaiement(
-            @PathVariable UUID id) {
-
+    public ResponseEntity<Void> deletePaiement(@PathVariable UUID id) {
         paiementService.deletePaiement(id);
-
         return ResponseEntity.noContent().build();
     }
 
-
-    // Paiements d'une réservation
+    // --- Paiements d'une réservation ---
     @GetMapping("/reservation/{reservationId}")
-    public ResponseEntity<List<Paiement>> getPaiementsByReservation(
-            @PathVariable Long reservationId) {
-
-        return ResponseEntity.ok(
-                paiementService.getPaiementsByReservation(reservationId)
-        );
+    public ResponseEntity<List<Paiement>> getPaiementsByReservation(@PathVariable Long reservationId) {
+        return ResponseEntity.ok(paiementService.getPaiementsByReservation(reservationId));
     }
 
-
-    // Total payé pour une réservation
+    // --- Total payé pour une réservation ---
     @GetMapping("/reservation/{reservationId}/total")
-    public ResponseEntity<BigDecimal> calculerTotalPaye(
-            @PathVariable Long reservationId) {
-
-        return ResponseEntity.ok(
-                paiementService.calculerTotalPaye(reservationId)
-        );
+    public ResponseEntity<BigDecimal> calculerTotalPaye(@PathVariable Long reservationId) {
+        return ResponseEntity.ok(paiementService.calculerTotalPaye(reservationId));
     }
-
 }
