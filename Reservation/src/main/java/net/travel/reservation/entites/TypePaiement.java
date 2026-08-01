@@ -6,6 +6,6 @@ public enum TypePaiement {
     VERSEMENT_ECHELONNE,
 
 
-    
+
     SOLDE_FINAL
 }

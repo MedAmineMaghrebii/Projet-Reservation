@@ -6,6 +6,7 @@ import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.User;
 import net.travel.reservation.repositories.UserRepository;
 import net.travel.reservation.services.ReservationService;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,18 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
 
+
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<Page<Reservation>> getReservationsByClient(
+            @PathVariable Long clientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+
+        return ResponseEntity.ok(
+                reservationService.getReservationHistory(clientId, page, size)
+        );
+    }
     // --- Récupérer une réservation par ID ---
     @GetMapping("/{id}")
     public ResponseEntity<Reservation> getReservationById(@PathVariable Long id) {

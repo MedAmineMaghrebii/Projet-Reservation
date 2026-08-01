@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Reservation } from '../models/reservations/reservation';
 import { environment } from '../../../environments/environment.development';
@@ -13,12 +13,41 @@ export class ReservationService {
 
   constructor(private http: HttpClient) { }
 
+
+
+
+
   /**
    * Récupérer toutes les réservations
    */
   getAllReservations(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(this.API_URL);
   }
+
+
+// list reservation par clientId
+getReservationsByClient( 
+    clientId: number,
+    page: number,
+    size: number) {
+
+      const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    return this.http.get<{
+    content: Reservation[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+    size: number;
+  }>(
+      `${this.API_URL}/client/${clientId}`,
+      { params }
+    );
+  }
+
+
 
   /**
    * Récupérer une réservation par son ID

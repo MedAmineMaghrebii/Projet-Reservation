@@ -2,6 +2,8 @@ package net.travel.reservation.repositories;
 
 import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.StatutReservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
@@ -31,6 +33,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDate(LocalDate date);
 
     boolean existsByDate(LocalDate date);
+
     // 🔍 Récupère les réservations actives pour une salle à une date donnée
     List<Reservation> findBySalleSalleIdAndDateAndStatutNot(Long salleId, LocalDate date, StatutReservation statut);
+
+
+    Page<Reservation> findByClientClientId(
+            Long clientId,
+            Pageable pageable
+    );
 }

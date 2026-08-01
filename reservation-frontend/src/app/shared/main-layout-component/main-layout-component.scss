@@ -30,7 +30,10 @@ html, body {
 .main-content {
   flex: 1;
   background-color: #f8f9fe;
+
   padding: 2rem;
+  padding-top: calc(64px + 2rem);
+
   overflow-y: auto;
   height: 100vh;
   box-sizing: border-box;

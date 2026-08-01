@@ -5,6 +5,10 @@ import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.StatutReservation;
 import net.travel.reservation.entites.TypePeriode;
 import net.travel.reservation.repositories.ReservationRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,24 @@ public class ReservationService {
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
+
+
+    //list of reservation by clientId
+    public Page<Reservation> getReservationHistory(
+            Long clientId,
+            int page,
+            int size
+    ) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "dateCreation")
+        );
+
+        return reservationRepository.findByClientClientId(clientId, pageable);
+    }
+
 
     /**
      * Récupérer une réservation par ID

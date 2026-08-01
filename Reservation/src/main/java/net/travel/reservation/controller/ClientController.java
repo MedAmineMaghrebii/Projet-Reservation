@@ -21,8 +21,8 @@ public class ClientController {
 
     //Recuperer les clients stats
     @GetMapping("/summary")
-    public ResponseEntity<List<Client>> getClientsSummary() {
-        return ResponseEntity.ok(clientService.getAllClients());
+    public ResponseEntity<List<ClientSummary>> getClientsSummary() {
+        return ResponseEntity.ok(clientService.getClientsSummary());
     }
 
     // Récupérer tous les clients

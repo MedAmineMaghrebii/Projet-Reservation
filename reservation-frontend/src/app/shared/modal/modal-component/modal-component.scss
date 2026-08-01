@@ -1,0 +1,105 @@
+
+
+
+// Modal overlay
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.modal {
+  background: white;
+  width: 100%;
+  max-width: 440px;
+  height: 100vh; // full screen height
+  border-radius: 0;
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.close-btn {
+    position: absolute;
+    top: 50%;
+    right: 1.25rem;
+    transform: translateY(-50%); /* Centers X button vertically */
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: #64748b;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+  }
+
+
+
+
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eef0f6;
+  
+  /* Use Flexbox with space-between */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  /* Give enough right padding so text doesn't hit the 'X' button */
+  padding: 1.25rem 3rem 1.25rem 1.5rem; 
+  box-sizing: border-box;
+
+  /* Force header title text to align left cleanly */
+  text-align: left;
+
+}
+
+.modal-body {
+  
+  padding: 1.75rem 1.5rem 1.5rem 1.5rem;
+  overflow-y: auto;
+  
+  /* Smooth custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
