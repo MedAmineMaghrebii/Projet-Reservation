@@ -1,7 +1,7 @@
 import { Reservation } from "../reservations/reservation";
 export class Client {
 
-  clientId!: number;
+clientId?: number;
   cin!: string;
   imageCin?: string;
   nom!: string;

@@ -1,23 +1,27 @@
 import { Salle } from '../salle/salle';
+import { Reservation } from '../reservations/reservation';
 
 export class Service {
   serviceId?: number;
-  nom: string;
+  nom!: string;
   description?: string;
-  prix: number;
+  prix!: number;
   salle?: Salle;
+  reservations?: Reservation[] = [];
 
   constructor(
-    nom: string = '',
-    prix: number = 0,
-    salle?: Salle,
+    serviceId?: number,
+    nom?: string,
+    prix?: number,
     description?: string,
-    serviceId?: number
+    salle?: Salle,
+    reservations: Reservation[] = []
   ) {
-    this.serviceId = serviceId;
-    this.nom = nom;
-    this.prix = prix;
-    this.salle = salle;
-    this.description = description;
+    if (serviceId !== undefined) this.serviceId = serviceId;
+    if (nom) this.nom = nom;
+    if (prix !== undefined) this.prix = prix;
+    if (description) this.description = description;
+    if (salle) this.salle = salle;
+    this.reservations = reservations;
   }
 }

@@ -9,14 +9,12 @@ import { environment } from '../../../environments/environment.development';
 })
 export class ReservationService {
 
-  // URL de ton API Spring Boot
   private readonly API_URL = `${environment.apiUrl}/api/reservations`;
 
   constructor(private http: HttpClient) { }
 
   /**
    * Récupérer toutes les réservations
-   * @GetMapping
    */
   getAllReservations(): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(this.API_URL);
@@ -24,7 +22,6 @@ export class ReservationService {
 
   /**
    * Récupérer une réservation par son ID
-   * @GetMapping("/{id}")
    */
   getReservationById(id: number): Observable<Reservation> {
     return this.http.get<Reservation>(`${this.API_URL}/${id}`);
@@ -32,15 +29,14 @@ export class ReservationService {
 
   /**
    * Ajouter une nouvelle réservation
-   * @PostMapping("/add")
+   * Mappé sur POST /api/reservations
    */
   createReservation(reservation: Reservation): Observable<Reservation> {
-    return this.http.post<Reservation>(`${this.API_URL}/add`, reservation);
+    return this.http.post<Reservation>(this.API_URL, reservation);
   }
 
   /**
    * Modifier une réservation existante
-   * @PutMapping("/{id}")
    */
   updateReservation(id: number, reservation: Reservation): Observable<Reservation> {
     return this.http.put<Reservation>(`${this.API_URL}/${id}`, reservation);
@@ -48,7 +44,6 @@ export class ReservationService {
 
   /**
    * Supprimer une réservation par son ID
-   * @DeleteMapping("/{id}")
    */
   deleteReservation(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`);
@@ -56,7 +51,6 @@ export class ReservationService {
 
   /**
    * Rechercher les réservations par date (Format YYYY-MM-DD)
-   * @GetMapping("/date/{date}")
    */
   findByDate(date: string): Observable<Reservation[]> {
     return this.http.get<Reservation[]>(`${this.API_URL}/date/${date}`);
@@ -64,7 +58,6 @@ export class ReservationService {
 
   /**
    * Vérifier si une réservation existe à une date donnée
-   * @GetMapping("/exists/{date}")
    */
   existsReservationByDate(date: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.API_URL}/exists/${date}`);

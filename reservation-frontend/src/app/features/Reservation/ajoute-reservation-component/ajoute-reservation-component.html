@@ -1,4 +1,4 @@
-<div class="modal-container">
+﻿<div class="modal-container">
   <div class="card-wizard">
     <!-- Header -->
     <div class="wizard-header">
@@ -156,15 +156,21 @@
           <input type="date" formControlName="date" />
         </div>
 
-        <div class="form-group">
-          <label>Heure début *</label>
-          <input type="time" formControlName="heureDebut" />
+        <div class="form-group full-width">
+          <label>Type de période *</label>
+          <select formControlName="typePeriode">
+            <option [ngValue]="null" disabled hidden>-- Choisir une période --</option>
+            <option [ngValue]="'MATIN'">Matin</option>
+            <option [ngValue]="'APRES_MIDI'">Après-midi</option>
+            <option [ngValue]="'JOURNEE'">Journée</option>
+            <option [ngValue]="'NUIT'">Nuit</option>
+          </select>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label>Heure fin *</label>
-          <input type="time" formControlName="heureFin" />
-        </div>
+      <div class="price-box" *ngIf="reservationForm.get('salleSelectionnee')?.value && reservationForm.get('typePeriode')?.value" style="margin-top: 1rem;">
+        <strong>Tarification de la salle :</strong>
+        <div>{{ tarificationSelectionnee?.typePeriode || reservationForm.get('typePeriode')?.value }} — {{ tarificationSelectionnee?.prix || 0 }} TND</div>
       </div>
 
       <!-- Section Services Optionnels -->
@@ -212,7 +218,16 @@
       <div class="price-box">
         <div class="form-group">
           <label>Montant Total (TND) *</label>
-          <input type="number" formControlName="montantTotal" placeholder="0" />
+          <input type="number" formControlName="montantTotal" placeholder="0" readonly />
+        </div>
+
+        <div class="summary-item" style="margin-top: 0.75rem;">
+          <span>Tarification salle :</span>
+          <strong>{{ tarificationSelectionnee?.prix || 0 }} TND</strong>
+        </div>
+        <div class="summary-item">
+          <span>Services :</span>
+          <strong>{{ servicesSelectionnes.reduce((sum, s) => sum + (s.prix || 0), 0) }} TND</strong>
         </div>
 
         <hr />
@@ -254,8 +269,8 @@
           <strong>{{ reservationForm.get('date')?.value }}</strong>
         </div>
         <div class="summary-item">
-          <span>Horaire :</span>
-          <strong>De {{ reservationForm.get('heureDebut')?.value }} à {{ reservationForm.get('heureFin')?.value }}</strong>
+          <span>Type de période :</span>
+          <strong>{{ reservationForm.get('typePeriode')?.value }}</strong>
         </div>
         <div class="summary-item" *ngIf="servicesSelectionnes.length > 0">
           <span>Services inclus :</span>

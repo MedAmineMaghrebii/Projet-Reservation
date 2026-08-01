@@ -104,10 +104,10 @@
             </div>
           </td>
 
-          <!-- Date & Créneau -->
+          <!-- Date -->
           <td class="date-cell">
             <span class="date-main">{{ res.date }}</span>
-            <span class="date-sub">{{ res.heureDebut }} - {{ res.heureFin }}</span>
+            <span class="date-sub">Horaire non disponible</span>
           </td>
 
           <!-- Lieu (Salle) -->
@@ -115,8 +115,8 @@
             {{ res.salle?.nom || 'Non attribué' }}
           </td>
 
-          <!-- Invités -->
-          <td class="guests-cell">
+          <!-- Invités --> 
+          <td class="guests-cell"> 
             {{ res.salle?.capaciteMax || '-' }}
           </td>
 
