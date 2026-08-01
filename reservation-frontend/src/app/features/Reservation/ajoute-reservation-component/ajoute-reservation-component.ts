@@ -16,13 +16,15 @@ import { SalleService } from '../../../core/services/salle.service';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { ServiceService } from '../../../core/services/service.service';
 import { TarificationSalleService } from '../../../core/services/tarification-salle.service';
+import { Toast } from '../../../shared/toast/toast';
+import { AlertComponent } from '../../../shared/alert/alert';
 
 @Component({
   selector: 'app-ajouter-reservation',
   standalone: true,
   templateUrl: './ajoute-reservation-component.html',
   styleUrl: './ajoute-reservation-component.scss',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Toast, AlertComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AjouterReservationComponent implements OnInit {
@@ -46,6 +48,16 @@ export class AjouterReservationComponent implements OnInit {
 
   tauxAcompte: number = 30;
   tarificationSelectionnee?: TarificationSalle;
+
+  toastVisible = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
+  alertVisible = false;
+  alertTitle = '';
+  alertMessage = '';
+  alertType: 'danger' | 'warning' | 'info' = 'warning';
+  private toastTimer?: ReturnType<typeof setTimeout>;
+  private alertAction?: () => void;
 
   constructor(
     private fb: FormBuilder,
@@ -123,11 +135,16 @@ export class AjouterReservationComponent implements OnInit {
     return id1 === id2;
   }
 
+  selectionnerClient(client: Client): void {
+    this.clientSelectionne = client;
+    this.showToast(`Client sélectionné : ${client.nom} ${client.prenom}`, 'success');
+  }
+
   onSalleChange(): void {
     this.servicesSelectionnes = [];
     this.servicesDisponibles = [];
     const salle: Salle = this.reservationForm.get('salleSelectionnee')?.value;
-    const salleId = salle?.salleId;
+    const salleId = salle?.salleId ?? (salle as any)?.id;
 
     if (!salleId) {
       this.tarificationSelectionnee = undefined;
@@ -161,7 +178,7 @@ export class AjouterReservationComponent implements OnInit {
       return;
     }
 
-    const salleId = salle.salleId;
+    const salleId = salle.salleId ?? (salle as any)?.id;
     if (!salleId) {
       this.tarificationSelectionnee = undefined;
       this.calculerMontantTotal();
@@ -246,16 +263,104 @@ export class AjouterReservationComponent implements OnInit {
     return (total * this.tauxAcompte) / 100;
   }
 
+  private showToast(message: string, type: 'success' | 'error' = 'success'): void {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.toastVisible = true;
+    this.cdr.markForCheck();
+
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+
+    this.toastTimer = setTimeout(() => {
+      this.toastVisible = false;
+      this.cdr.markForCheck();
+    }, 2500);
+  }
+
+  private showAlert(title: string, message: string, type: 'danger' | 'warning' | 'info' = 'warning', action?: () => void): void {
+    this.alertTitle = title;
+    this.alertMessage = message;
+    this.alertType = type;
+    this.alertVisible = true;
+    this.alertAction = action;
+    this.cdr.markForCheck();
+  }
+
+  onAlertConfirm(): void {
+    const action = this.alertAction;
+    this.alertVisible = false;
+    this.alertAction = undefined;
+    this.cdr.markForCheck();
+    action?.();
+  }
+
+  onAlertCancel(): void {
+    this.alertVisible = false;
+    this.alertAction = undefined;
+    this.cdr.markForCheck();
+  }
+
+  // 🛡️ Vérification des conflits de créneaux avant de passer à l'étape suivante
+  private verifierDisponibiliteAvantValidation(callback: () => void): void {
+    const salle = this.reservationForm.get('salleSelectionnee')?.value;
+    const date = this.reservationForm.get('date')?.value;
+    const typePeriode = this.reservationForm.get('typePeriode')?.value;
+
+    const salleId = salle?.salleId ?? salle?.id;
+
+    if (!salleId || !date || !typePeriode) {
+      callback();
+      return;
+    }
+
+    this.reservationService.findByDate(date).subscribe({
+      next: (reservations) => {
+        const conflit = reservations.find(r => {
+          const rSalleId = r.salle?.salleId ?? (r.salle as any)?.id;
+          const rPeriode = r.typePeriode || r.tarificationAppliquee?.typePeriode;
+          const rStatut = r.statut;
+
+          if (rStatut === StatutReservation.ANNULEE) return false;
+          if (rSalleId !== salleId) return false;
+
+          // Règle de chevauchement
+          if (rPeriode === typePeriode) return true;
+          if (rPeriode === 'JOURNEE') return true;
+          if (typePeriode === 'JOURNEE') return true;
+
+          return false;
+        });
+
+        if (conflit) {
+          this.showAlert(
+            'Conflit de réservation',
+            `La salle est déjà réservée pour cette date et cette période. Veuillez choisir une autre date ou une autre salle.`,
+            'warning'
+          );
+        } else {
+          this.showToast('Étape 2 validée. Vous pouvez poursuivre vers la tarification.', 'success');
+          callback(); // Pas de conflit, on avance
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors de la vérification de disponibilité :', err);
+        callback(); // En cas de problème réseau, le backend bloquera de toute façon
+      }
+    });
+  }
+
   changerEtape(etape: number): void {
     if (this.etapeCourante === 1 && etape === 2) {
       if (this.modeClient === 'existant' && !this.clientSelectionne) {
-        alert('Veuillez sélectionner un client dans la liste.');
+        this.showAlert('Client requis', 'Veuillez sélectionner un client dans la liste avant de continuer.', 'warning');
         return;
       }
       if (this.modeClient === 'nouveau') {
         if (this.clientForm.invalid) {
           this.clientForm.markAllAsTouched();
-          alert('Veuillez corriger les erreurs du formulaire client avant de continuer.');
+          this.showAlert('Informations client incomplètes', 'Veuillez corriger les erreurs du formulaire client avant de continuer.', 'warning');
           return;
         }
       }
@@ -264,21 +369,27 @@ export class AjouterReservationComponent implements OnInit {
     if (this.etapeCourante === 2 && etape === 3) {
       const salle = this.reservationForm.get('salleSelectionnee')?.value;
       const date = this.reservationForm.get('date')?.value;
-      const heureDebut = this.reservationForm.get('heureDebut')?.value;
-      const heureFin = this.reservationForm.get('heureFin')?.value;
+      const typePeriode = this.reservationForm.get('typePeriode')?.value;
 
       if (!salle) {
-        alert('Veuillez sélectionner une salle.');
+        this.showAlert('Salle requise', 'Veuillez sélectionner une salle avant de continuer.', 'warning');
         return;
       }
       if (!date) {
-        alert('Veuillez renseigner la date de réservation.');
+        this.showAlert('Date requise', 'Veuillez renseigner la date de réservation.', 'warning');
         return;
       }
-      if (!this.reservationForm.get('typePeriode')?.value) {
-        alert('Veuillez sélectionner un type de période.');
+      if (!typePeriode) {
+        this.showAlert('Période requise', 'Veuillez sélectionner un type de période.', 'warning');
         return;
       }
+
+      // Vérification avant de passer à l'étape 3
+      this.verifierDisponibiliteAvantValidation(() => {
+        this.etapeCourante = etape;
+        this.cdr.markForCheck();
+      });
+      return;
     }
 
     if (etape >= 1 && etape <= 4) {
@@ -297,7 +408,7 @@ export class AjouterReservationComponent implements OnInit {
         next: (createdClient) => this.enregistrerReservation(createdClient),
         error: (err) => {
           console.error('Erreur création client :', err);
-          alert('Erreur lors de la création du client. Vérifiez les données saisies.');
+          this.showToast('Erreur lors de la création du client. Vérifiez les données saisies.', 'error');
         }
       });
     } else {
@@ -310,17 +421,17 @@ export class AjouterReservationComponent implements OnInit {
     const resValue = this.reservationForm.value;
 
     if (!resValue.salleSelectionnee) {
-      alert('Veuillez sélectionner une salle.');
+      this.showAlert('Salle requise', 'Veuillez sélectionner une salle avant d’enregistrer.', 'warning');
       return;
     }
 
     if (!resValue.date) {
-      alert('Veuillez remplir la date de réservation.');
+      this.showAlert('Date requise', 'Veuillez remplir la date de réservation.', 'warning');
       return;
     }
 
     if (!resValue.typePeriode) {
-      alert('Veuillez sélectionner un type de période avant d’enregistrer.');
+      this.showAlert('Période requise', 'Veuillez sélectionner un type de période avant d’enregistrer.', 'warning');
       return;
     }
 
@@ -347,11 +458,14 @@ export class AjouterReservationComponent implements OnInit {
     reservationToSave.typePeriode = resValue.typePeriode;
 
     this.reservationService.createReservation(reservationToSave).subscribe({
-      next: () => {
-        alert('Réservation enregistrée avec succès !');
-        this.router.navigate(['/finalisation']);
+      next: (createdReservation) => {
+        this.showToast('Réservation enregistrée avec succès !', 'success');
+        setTimeout(() => this.router.navigate(['/finalisation'], { state: { reservation: createdReservation } }), 800);
       },
-      error: (err) => console.error('Erreur lors de la réservation :', err)
+      error: (err) => {
+        console.error('Erreur lors de la réservation :', err);
+        this.showToast(err.error?.message || 'Erreur lors de la création de la réservation.', 'error');
+      }
     });
   }
 }

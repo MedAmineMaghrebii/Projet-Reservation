@@ -1,1 +1,34 @@
-<p>calendrier-component works!</p>
+<section class="calendar-page">
+  <div class="calendar-header">
+    <div>
+      <p class="calendar-label">Planning de réservations</p>
+      <h1>{{ formatMonth() }}</h1>
+    </div>
+    <div class="calendar-actions">
+      <button class="nav-btn" (click)="previousMonth()">Précédent</button>
+      <button class="nav-btn nav-btn-primary" (click)="nextMonth()">Suivant</button>
+    </div>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="calendar-row calendar-weekdays">
+      <div *ngFor="let day of weekDays" class="calendar-weekday">{{ day }}</div>
+    </div>
+
+    <div *ngFor="let week of weeks" class="calendar-row">
+      <div *ngFor="let day of week" class="calendar-cell" [class.empty]="!day.date">
+        <div class="cell-header" *ngIf="day.date">
+          <span class="cell-day">{{ day.date.getDate() }}</span>
+          <span class="cell-weekday">{{ day.date.toLocaleDateString('fr-FR', { weekday: 'short' }) }}</span>
+        </div>
+
+        <div *ngIf="day.date" class="events-list">
+          <div *ngFor="let reservation of day.reservations" class="event-pill" [ngClass]="getReservationClass(reservation)">
+            <strong>{{ reservation.salle?.nom || 'Salle' }}</strong>
+            <p>{{ getReservationLabel(reservation) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

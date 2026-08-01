@@ -1,66 +1,71 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Reservation } from '../../../core/models/reservations/reservation';
 import { Router } from '@angular/router'; 
 import { ReservationService } from '../../../core/services/reservation.service';
-import { ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-
-
+import { CalendrierComponent } from '../calendrier/calendrier-component/calendrier-component';
 
 @Component({
   selector: 'app-reservations', 
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-   templateUrl: './liste-reservation-component.html',
-  styleUrl: './liste-reservation-component.scss',
+  standalone: true, 
+  imports: [CommonModule, FormsModule, CalendrierComponent],
+  templateUrl: './liste-reservation-component.html',
+  styleUrls: ['./liste-reservation-component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class ListeReservationComponent implements OnInit {
 
-  reservations: Reservation[] = [];
-  filteredReservations: Reservation[] = [];
+  reservations = signal<Reservation[]>([]);
   
-  searchTerm: string = '';
-  selectedFilter: string = 'Tous';
+  searchTerm = signal<string>('');
+  selectedFilter = signal<string>('Tous');
+  
   activeView: 'list' | 'calendar' = 'list';
 
-  constructor(private reservationService: ReservationService,
-    private router: Router ,
-      private cdr: ChangeDetectorRef 
+  // Signal calculé automatiquement (plus besoin de filterReservations() manuel)
+  filteredReservations = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    const filter = this.selectedFilter();
+    
+    return this.reservations().filter(res => {
+      const clientName = `${res.client?.prenom || ''} ${res.client?.nom || ''}`.toLowerCase();
+      const salleName = (res.salle?.nom || '').toLowerCase();
+      const matchesSearch = clientName.includes(term) || 
+                            salleName.includes(term) ||
+                            (res.numeroReservation && res.numeroReservation.toLowerCase().includes(term));
+
+      const matchesStatus = filter === 'Tous' || res.statut === filter;
+
+      return matchesSearch && matchesStatus;
+    });
+  });
+
+  constructor(
+    private reservationService: ReservationService,
+    private router: Router,
+    private cdr: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {
+    this.activeView = 'list';
     this.loadReservations();
   }
 
   loadReservations(): void {
     this.reservationService.getAllReservations().subscribe({
-      next: (data) => {
-        this.reservations = data;
-        this.filterReservations();
+      next: (data: Reservation[]) => {
+        this.reservations.set(data);
+        this.activeView = 'list';
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Erreur lors du chargement des réservations', err);
       }
     });
   }
+
   goToAddReservation(): void {
     this.router.navigate(['/ajouter-reservation']); 
-  }
-
-  filterReservations(): void {
-    this.filteredReservations = this.reservations.filter(res => {
-      const clientName = `${res.client?.prenom || ''} ${res.client?.nom || ''}`.toLowerCase();
-      const salleName = (res.salle?.nom || '').toLowerCase();
-      const matchesSearch = clientName.includes(this.searchTerm.toLowerCase()) || 
-                            salleName.includes(this.searchTerm.toLowerCase()) ||
-                            (res.numeroReservation && res.numeroReservation.toLowerCase().includes(this.searchTerm.toLowerCase()));
-
-      const matchesStatus = this.selectedFilter === 'Tous' || res.statut === this.selectedFilter;
-
-      return matchesSearch && matchesStatus;
-    });
   }
 
   deleteReservation(id?: number): void {
@@ -76,7 +81,6 @@ export class ListeReservationComponent implements OnInit {
     }
   }
 
-  // Génère les initiales (ex: "Ahmed & Sarra" -> "A&", "Mariem Ben Ali" -> "MB")
   getInitials(prenom: string, nom: string): string {
     if (!prenom && !nom) return '??';
     const first = prenom ? prenom.charAt(0).toUpperCase() : '';
@@ -84,14 +88,12 @@ export class ListeReservationComponent implements OnInit {
     return `${first}${last}`;
   }
 
-  // Classe CSS dynamique pour la couleur du badge initiales
   getAvatarClass(id?: number): string {
     const classes = ['bg-purple', 'bg-green', 'bg-blue', 'bg-pink'];
     const index = id ?? 0;
     return classes[index % classes.length];
   }
 
-  // Classe CSS dynamique pour le badge de statut
   getStatusClass(statut: string): string {
     switch (statut?.toUpperCase()) {
       case 'CONFIRMEE':

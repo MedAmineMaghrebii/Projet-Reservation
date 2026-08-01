@@ -1,20 +1,19 @@
 <div class="reservations-container">
   
   <!-- Header -->
-<!-- Header -->
-<header class="header">
-  <div class="header-title">
-    <span class="subtitle">PLANNING & CLIENTÈLE</span>
-    <h1>Réservations</h1>
-    <p class="count-label">{{ filteredReservations.length }} événements dans votre planning</p>
-  </div>
-  
-  <!-- Ajout de l'événement (click) ici -->
-  <button class="btn-primary" (click)="goToAddReservation()">
-    <i class="icon-plus">+</i>
-    Nouvelle réservation
-  </button>
-</header>
+  <header class="header">
+    <div class="header-title">
+      <span class="subtitle">PLANNING & CLIENTÈLE</span>
+      <h1>Réservations</h1>
+      <!-- Utilisation de filteredReservations() avec les parenthèses car c'est un signal -->
+      <p class="count-label">{{ filteredReservations().length }} événements dans votre planning</p>
+    </div>
+    
+    <button class="btn-primary" (click)="goToAddReservation()">
+      <i class="icon-plus">+</i>
+      Nouvelle réservation
+    </button>
+  </header>
 
   <!-- Control Bar -->
   <div class="controls-card">
@@ -25,11 +24,11 @@
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
+        <!-- Plus besoin de (input)="filterReservations()", le signal réagit automatiquement à ngModel -->
         <input 
           type="text" 
           placeholder="Rechercher..." 
           [(ngModel)]="searchTerm" 
-          (input)="filterReservations()" 
         />
       </div>
 
@@ -38,7 +37,8 @@
         <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
         </svg>
-        <select [(ngModel)]="selectedFilter" (change)="filterReservations()">
+        <!-- Plus besoin de (change)="filterReservations()" -->
+        <select [(ngModel)]="selectedFilter">
           <option value="Tous">Tous</option>
           <option value="CONFIRMEE">Confirmée</option>
           <option value="EN_ATTENTE">En attente</option>
@@ -78,8 +78,11 @@
     </div>
   </div>
 
-  <!-- Tableau des réservations -->
-  <div class="table-card">
+  <div *ngIf="activeView === 'calendar'" class="calendar-view">
+    <app-calendrier-component [reservationsList]="reservations()"></app-calendrier-component>
+  </div>
+
+  <div *ngIf="activeView === 'list'" class="table-card">
     <table class="reservations-table">
       <thead>
         <tr>
@@ -92,7 +95,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let res of filteredReservations">
+        <!-- Appel du signal avec les parenthèses () -->
+        <tr *ngFor="let res of filteredReservations()">
           <!-- Client & Evénement -->
           <td class="client-cell">
             <div class="avatar" [ngClass]="getAvatarClass(res.reservationId)">
@@ -133,8 +137,8 @@
           </td>
         </tr>
 
-        <!-- State vide -->
-        <tr *ngIf="filteredReservations.length === 0">
+        <!-- State vide : utilisation de filteredReservations().length -->
+        <tr *ngIf="filteredReservations().length === 0">
           <td colspan="6" class="empty-message">
             Aucune réservation trouvée.
           </td> 

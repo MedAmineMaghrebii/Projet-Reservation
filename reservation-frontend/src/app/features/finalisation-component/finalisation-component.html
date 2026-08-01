@@ -1,1 +1,47 @@
-<p>finalisation-component works!</p>
+<div class="invoice-page">
+  <div class="invoice-card">
+    <div class="invoice-header">
+      <div>
+        <h1>Facture de réservation</h1>
+        <p>Réservation confirmée avec succès</p>
+      </div>
+      <button class="print-btn" (click)="imprimerFacture()">🖨️ Imprimer</button>
+    </div>
+
+    <div class="invoice-meta">
+      <div>
+        <span class="label">Numéro</span>
+        <strong>{{ reservationNumber }}</strong>
+      </div>
+      <div>
+        <span class="label">Date</span>
+        <strong>{{ reservationDate }}</strong>
+      </div>
+      <div>
+        <span class="label">Période</span>
+        <strong>{{ typePeriode }}</strong>
+      </div>
+    </div>
+
+    <div class="invoice-section">
+      <h3>Client</h3>
+      <p><strong>{{ clientName }}</strong></p>
+      <p *ngIf="reservationData?.client?.email">Email : {{ reservationData.client.email }}</p>
+      <p *ngIf="reservationData?.client?.telephone">Téléphone : {{ reservationData.client.telephone }}</p>
+      <p *ngIf="!reservationData?.client">Aucun client disponible.</p>
+    </div>
+
+    <div class="invoice-section">
+      <h3>Réservation</h3>
+      <p><strong>Salle :</strong> {{ salleName }}</p>
+      <p><strong>Montant total :</strong> {{ montantTotal }} TND</p>
+      <p *ngIf="services.length > 0"><strong>Services :</strong> {{ services.join(', ') }}</p>
+      <p *ngIf="services.length === 0"><strong>Services :</strong> Aucun service sélectionné</p>
+    </div>
+
+    <div class="invoice-footer">
+      <p>Merci pour votre confiance.</p>
+      <p>Reservation-Frontend</p>
+    </div>
+  </div>
+</div>

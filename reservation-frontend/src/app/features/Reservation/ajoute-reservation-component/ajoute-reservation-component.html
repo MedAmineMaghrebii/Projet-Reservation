@@ -64,7 +64,7 @@
             class="client-card" 
             *ngFor="let c of clientsFiltres" 
             [class.selected]="clientSelectionne?.clientId === c.clientId"
-            (click)="clientSelectionne = c">
+            (click)="selectionnerClient(c)">
             <div class="client-info">
               <strong>{{ c.nom }} {{ c.prenom }}</strong>
               <small>CIN: {{ c.cin }} • Tel: {{ c.telephone || 'N/A' }} • Email: {{ c.email || 'N/A' }}</small>
@@ -303,3 +303,16 @@
     </div>
   </div>
 </div>
+
+<app-toast [visible]="toastVisible" [message]="toastMessage" [type]="toastType"></app-toast>
+
+<app-alert
+  [visible]="alertVisible"
+  [title]="alertTitle"
+  [message]="alertMessage"
+  [type]="alertType"
+  [confirmText]="'OK'"
+  [cancelText]="'Fermer'"
+  (confirmed)="onAlertConfirm()"
+  (cancelled)="onAlertCancel()"
+></app-alert>
