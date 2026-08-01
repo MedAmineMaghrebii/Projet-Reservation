@@ -134,7 +134,7 @@
       <button 
         type="button" 
         class="btn-more" 
-        (click)="toggleMenu(res.reservationId, $event)">
+        (click)="res.reservationId && toggleMenu(res.reservationId, $event)">
         •••
       </button>
 
