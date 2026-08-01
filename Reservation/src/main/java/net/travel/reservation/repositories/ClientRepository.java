@@ -37,7 +37,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     )
     FROM Client c
     LEFT JOIN c.reservations r
-    LEFT JOIN r.paiement p
+    LEFT JOIN r.paiements p
     GROUP BY
         c.clientId,
         c.cin,
@@ -46,7 +46,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
         c.email,
         c.telephone
 """)
-
-
     List<ClientSummary> getClientsSummary();
+
 }

@@ -3,8 +3,10 @@ import { Reservation } from "../reservations/reservation";
 
 export class Contrat {
 
-  contratId!: string;
-  numeroContrat!: string;
+contratId?: string; 
+
+
+numeroContrat!: string;
   titre!: string;
   description?: string;
   conditions?: string;

@@ -25,7 +25,7 @@ public class RefreshToken {
     @Column(nullable = false, unique = true, length = 500)
     private String token;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore // JsonIgnore est utilisé pour éviter de sérialiser l'utilisateur dans la réponse JSON
     private User user;

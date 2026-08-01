@@ -201,7 +201,12 @@ activeMenuId = signal<number | string | null>(null);
     });
   }
 
-  deleteReservation(id: number): void {
+  deleteReservation(id?: number): void {
+    if (!id) {
+      console.error('ID de réservation manquant');
+      return;
+    }
+
     if (confirm('Voulez-vous vraiment supprimer cette réservation ?')) {
       this.reservationService.deleteReservation(id).subscribe(() => {
         this.loadReservations();
@@ -218,9 +223,10 @@ activeMenuId = signal<number | string | null>(null);
   }
 
   // Classe CSS dynamique pour la couleur du badge initiales
-  getAvatarClass(id: number): string {
+  getAvatarClass(id?: number): string {
     const classes = ['bg-purple', 'bg-green', 'bg-blue', 'bg-pink'];
-    return classes[id % classes.length];
+    const index = id ?? 0;
+    return classes[index % classes.length];
   }
 
   // Classe CSS dynamique pour le badge de statut

@@ -1,5 +1,6 @@
 package net.travel.reservation.entites;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,8 +23,9 @@ public class Paiement {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID paiementId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
+    @JsonIgnore
     private Reservation reservation;
 
 

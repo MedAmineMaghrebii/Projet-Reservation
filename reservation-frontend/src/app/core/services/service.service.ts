@@ -9,43 +9,48 @@ import { environment } from '../../../environments/environment.development';
 })
 export class ServiceService {
 
-  // URL correspondant au @RequestMapping("/api/services") de Spring Boot
   private readonly API_URL = `${environment.apiUrl}/api/services`;
 
   constructor(private http: HttpClient) {}
 
-  // --- CREATE ---
-  // POST /api/services
+  /**
+   * Créer un nouveau service
+   */
   createService(service: Service): Observable<Service> {
     return this.http.post<Service>(this.API_URL, service);
   }
 
-  // --- READ ALL ---
-  // GET /api/services
+  /**
+   * Récupérer tous les services
+   */
   getAllServices(): Observable<Service[]> {
     return this.http.get<Service[]>(this.API_URL);
   }
 
-  // --- READ BY ID ---
-  // GET /api/services/{id}
+  /**
+   * Récupérer un service par son ID
+   */
   getServiceById(id: number): Observable<Service> {
     return this.http.get<Service>(`${this.API_URL}/${id}`);
   }
 
-  // --- READ BY SALLE ID ---
-  // GET /api/services/salle/{salleId}
+  /**
+   * Récupérer les services associés à une salle
+   */
   getServicesBySalleId(salleId: number): Observable<Service[]> {
     return this.http.get<Service[]>(`${this.API_URL}/salle/${salleId}`);
   }
 
-  // --- UPDATE ---
-  // PUT /api/services/{id}
+  /**
+   * Mettre à jour un service existant
+   */
   updateService(id: number, service: Service): Observable<Service> {
     return this.http.put<Service>(`${this.API_URL}/${id}`, service);
   }
 
-  // --- DELETE ---
-  // DELETE /api/services/{id}
+  /**
+   * Supprimer un service par son ID
+   */
   deleteService(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`);
   }

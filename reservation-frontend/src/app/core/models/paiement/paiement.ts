@@ -8,8 +8,8 @@ import { MethodePaiement } from "./MethodePaiement.enum";
 
 export class Paiement {
 
-  paiementId!: string;
-  reservation!: Reservation;
+paiementId?: string;
+ reservation!: Reservation;
   montant!: number;
   typePaiement!: TypePaiement;
   methodePaiement!: MethodePaiement;

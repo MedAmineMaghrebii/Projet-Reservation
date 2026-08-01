@@ -1,4 +1,6 @@
 package net.travel.reservation.controller;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Contrat;
 import net.travel.reservation.entites.StatutContrat;
@@ -10,143 +12,65 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-
 @RestController
 @RequestMapping("/api/contrats")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ContratController {
 
-
     private final ContratService contratService;
 
-
-
-    // Récupérer tous les contrats
+    // --- Récupérer tous les contrats ---
     @GetMapping
     public ResponseEntity<List<Contrat>> getAllContrats() {
-
-        return ResponseEntity.ok(
-                contratService.getAllContrats()
-        );
+        return ResponseEntity.ok(contratService.getAllContrats());
     }
 
-
-
-
-
-    // Récupérer un contrat par ID
+    // --- Récupérer un contrat par ID ---
     @GetMapping("/{id}")
-    public ResponseEntity<Contrat> getContratById(
-            @PathVariable UUID id) {
-
-
-        return ResponseEntity.ok(
-                contratService.getContratById(id)
-        );
+    public ResponseEntity<Contrat> getContratById(@PathVariable UUID id) {
+        return ResponseEntity.ok(contratService.getContratById(id));
     }
 
-
-
-
-
-    // Créer un contrat
+    // --- Créer un contrat ---
     @PostMapping
-    public ResponseEntity<Contrat> createContrat(
-            @RequestBody Contrat contrat) {
-
-
-        Contrat nouveauContrat =
-                contratService.createContrat(contrat);
-
-
-        return new ResponseEntity<>(
-                nouveauContrat,
-                HttpStatus.CREATED
-        );
+    public ResponseEntity<Contrat> createContrat(@Valid @RequestBody Contrat contrat) {
+        Contrat nouveauContrat = contratService.createContrat(contrat);
+        return new ResponseEntity<>(nouveauContrat, HttpStatus.CREATED);
     }
 
-
-
-
-
-    // Modifier un contrat
+    // --- Modifier un contrat ---
     @PutMapping("/{id}")
     public ResponseEntity<Contrat> updateContrat(
             @PathVariable UUID id,
-            @RequestBody Contrat contrat) {
-
-
-        return ResponseEntity.ok(
-                contratService.updateContrat(
-                        id,
-                        contrat
-                )
-        );
+            @Valid @RequestBody Contrat contrat) {
+        return ResponseEntity.ok(contratService.updateContrat(id, contrat));
     }
 
-
-
-
-
-    // Modifier le statut
+    // --- Modifier uniquement le statut ---
     @PutMapping("/{id}/statut")
     public ResponseEntity<Contrat> updateStatut(
             @PathVariable UUID id,
             @RequestParam StatutContrat statut) {
-
-
-        return ResponseEntity.ok(
-                contratService.updateStatut(
-                        id,
-                        statut
-                )
-        );
+        return ResponseEntity.ok(contratService.updateStatut(id, statut));
     }
 
-
-
-
-
-    // Chercher par numéro contrat
+    // --- Chercher par numéro de contrat ---
     @GetMapping("/numero/{numero}")
-    public ResponseEntity<Contrat> getByNumeroContrat(
-            @PathVariable String numero) {
-
-
-        return ResponseEntity.ok(
-                contratService.getByNumeroContrat(numero)
-        );
+    public ResponseEntity<Contrat> getByNumeroContrat(@PathVariable String numero) {
+        return ResponseEntity.ok(contratService.getByNumeroContrat(numero));
     }
 
-
-
-
-
-    // Contrats signés
+    // --- Récupérer la liste des contrats signés ---
     @GetMapping("/signes")
     public ResponseEntity<List<Contrat>> getContratsSignes() {
-
-
-        return ResponseEntity.ok(
-                contratService.getContratsSignes()
-        );
+        return ResponseEntity.ok(contratService.getContratsSignes());
     }
 
-
-
-
-
-    // Supprimer un contrat
+    // --- Supprimer un contrat ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteContrat(
-            @PathVariable UUID id) {
-
-
+    public ResponseEntity<Void> deleteContrat(@PathVariable UUID id) {
         contratService.deleteContrat(id);
-
-
         return ResponseEntity.noContent().build();
     }
-
 }

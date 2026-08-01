@@ -1,7 +1,7 @@
 import { User } from "../user/user";
 export class Log {
 
-  logId!: number;
+  logId?: number;
   user?: User;
   action!: string;
   entite?: string;

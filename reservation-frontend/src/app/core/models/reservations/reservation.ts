@@ -2,47 +2,66 @@ import { StatutReservation } from './statut-reservation.enum';
 import { Client } from '../clients/client';
 import { Salle } from '../salle/salle';
 import { Service } from '../service/service';
+import { TarificationSalle } from '../salle/tarification-salle';
+import { Contrat } from '../contrats/contrat';
+import { Paiement } from '../paiement/paiement';
+import { TypePeriode } from '../salle/TypePeriode.enum';
+
 export class Reservation {
-  reservationId!: number;
+  reservationId?: number;
   numeroReservation!: string;
-  date!: string;
-  heureDebut!: string;
-  heureFin!: string;
+  date!: string; // Format YYYY-MM-DD
   statut!: StatutReservation;
   montantTotal!: number;
   tokenReservation?: string;
   notes?: string;
 
+  // Relations
   client!: Client;
   salle!: Salle;
-
-  // ✅ AJOUT DES SERVICES CHOISIS
   services: Service[] = [];
+  typePeriode?: TypePeriode;
+  tarificationAppliquee?: TarificationSalle;
+  contrat?: Contrat;
+  paiements?: Paiement[] = [];
 
-  dateCreation!: string;
+  // Métadonnées système
+  dateCreation?: string;
   dateModification?: string;
 
   constructor(
     reservationId?: number,
     numeroReservation?: string,
     date?: string,
-    heureDebut?: string,
-    heureFin?: string,
     statut?: StatutReservation,
     montantTotal?: number,
     client?: Client,
     salle?: Salle,
-    services: Service[] = [] // 👈 Optionnel dans le constructeur
+    services: Service[] = [],
+    notes?: string,
+    tokenReservation?: string,
+    tarificationAppliquee?: TarificationSalle,
+    contrat?: Contrat,
+    paiements: Paiement[] = [],
+    dateCreation?: string,
+    dateModification?: string,
+    typePeriode?: TypePeriode
   ) {
-    if (reservationId) this.reservationId = reservationId;
+    if (reservationId !== undefined) this.reservationId = reservationId;
     if (numeroReservation) this.numeroReservation = numeroReservation;
     if (date) this.date = date;
-    if (heureDebut) this.heureDebut = heureDebut;
-    if (heureFin) this.heureFin = heureFin;
     if (statut) this.statut = statut;
-    if (montantTotal) this.montantTotal = montantTotal;
+    if (montantTotal !== undefined) this.montantTotal = montantTotal;
     if (client) this.client = client;
     if (salle) this.salle = salle;
     this.services = services;
+    if (notes) this.notes = notes;
+    if (tokenReservation) this.tokenReservation = tokenReservation;
+    if (tarificationAppliquee) this.tarificationAppliquee = tarificationAppliquee;
+    if (contrat) this.contrat = contrat;
+    this.paiements = paiements;
+    if (dateCreation) this.dateCreation = dateCreation;
+    if (dateModification) this.dateModification = dateModification;
+    if (typePeriode) this.typePeriode = typePeriode;
   }
 }

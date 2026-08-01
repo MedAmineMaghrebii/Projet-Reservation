@@ -12,17 +12,17 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
     /**
-     * Créer un nouveau Refresh Token
+     * Créer un nouveau Refresh Token (supprime l'ancien au préalable)
      */
     @Transactional
     public RefreshToken createRefreshToken(User user) {
-
-        // Un seul Refresh Token par utilisateur
+        // Supprime l'ancien jeton de l'utilisateur pour éviter les doublons
         refreshTokenRepository.deleteByUser(user);
 
         RefreshToken refreshToken = RefreshToken.builder()
@@ -36,21 +36,19 @@ public class RefreshTokenService {
     }
 
     /**
-     * Vérifier qu'un Refresh Token est valide
+     * Vérifier qu'un Refresh Token est valide et non expiré
      */
     public RefreshToken verifyToken(String token) {
-
         RefreshToken refreshToken = refreshTokenRepository
                 .findByToken(token)
-                .orElseThrow(() ->
-                        new RuntimeException("Refresh Token not found"));
+                .orElseThrow(() -> new RuntimeException("Refresh Token non trouvé"));
 
         if (refreshToken.isRevoked()) {
-            throw new RuntimeException("Refresh Token revoked");
+            throw new RuntimeException("Refresh Token révoqué");
         }
 
         if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Refresh Token expired");
+            throw new RuntimeException("Refresh Token expiré");
         }
 
         return refreshToken;
@@ -59,21 +57,18 @@ public class RefreshTokenService {
     /**
      * Révoquer un Refresh Token
      */
+    @Transactional
     public void revokeToken(String token) {
-
         RefreshToken refreshToken = verifyToken(token);
-
         refreshToken.setRevoked(true);
-
         refreshTokenRepository.save(refreshToken);
     }
 
     /**
      * Supprimer le Refresh Token d'un utilisateur
      */
+    @Transactional
     public void deleteByUser(User user) {
         refreshTokenRepository.deleteByUser(user);
     }
-
 }
-

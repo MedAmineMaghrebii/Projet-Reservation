@@ -1,6 +1,5 @@
 package net.travel.reservation.controller;
 
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.User;
@@ -19,79 +18,49 @@ public class UserController {
 
     private final UserService userService;
 
-
-    // Récupérer tous les utilisateurs
+    // --- Récupérer tous les utilisateurs ---
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        List<User> User = userService.getAllUsers();
-
-        if (User.isEmpty()) {
-            throw new RuntimeException("Utilisateurs non trouvé");
-        }
-        return ResponseEntity.ok(User);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-
-    // Récupérer un utilisateur par ID
-    @GetMapping("/id/{id}")
-    public ResponseEntity<User> getUserById(
-            @PathVariable Long id) {
-
+    // --- Récupérer un utilisateur par ID ---
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-
-    // Récupérer un utilisateur par email
+    // --- Récupérer un utilisateur par email ---
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> getUserByEmail(
-            @PathVariable String email) {
-
+    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
-
-    // Ajouter un utilisateur
+    // --- Ajouter un utilisateur ---
     @PostMapping
-    public ResponseEntity<User> createUser( @Valid
-            @RequestBody User user) {
-
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         User savedUser = userService.createUser(user);
-
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
+    // --- Modifier un utilisateur ---
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody User user) {
+        return ResponseEntity.ok(userService.updateUser(id, user));
+    }
 
-    // Modifier un utilisateur
-    //@PutMapping("/{id}")
-   // public ResponseEntity<User> updateUser(
-    //        //@PathVariable Long id,
-      //      @RequestBody User user) {
-
-       // return ResponseEntity.ok(
-       //         userService.updateUser(id, user)
-//);
-  //  }
-
-
-    // Supprimer un utilisateur
+    // --- Supprimer un utilisateur ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(
-            @PathVariable Long id) {
-
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-
         return ResponseEntity.noContent().build();
     }
 
-
-    // Vérifier si un email existe
+    // --- Vérifier si un email existe ---
     @GetMapping("/exists/{email}")
-    public ResponseEntity<Boolean> existsByEmail(
-            @PathVariable String email) {
-
-        return ResponseEntity.ok(
-                userService.existsByEmail(email)
-        );
+    public ResponseEntity<Boolean> existsByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.existsByEmail(email));
     }
-
 }
