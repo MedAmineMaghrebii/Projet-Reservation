@@ -3,6 +3,7 @@ package net.travel.reservation.services;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.StatutReservation;
+import net.travel.reservation.entites.TypePeriode;
 import net.travel.reservation.repositories.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,10 +35,7 @@ public class ReservationService {
     }
 
     /**
-     * Récupérer une réservation par son token unique (portail client
-
-    /**
-     * Créer une réservation
+     * Créer une réservation avec vérification de la date et du type de période
      */
     @Transactional
     public Reservation createReservation(Reservation reservation) {
@@ -46,22 +44,64 @@ public class ReservationService {
             reservation.setReservationId(null);
         }
 
-        // 1. Validation de la date
+        // 1. Validation des données obligatoires
         if (reservation.getDate() == null) {
             throw new RuntimeException("La date de l'événement est obligatoire");
         }
+        if (reservation.getSalle() == null || reservation.getSalle().getSalleId() == null) {
+            throw new RuntimeException("La salle est obligatoire");
+        }
+        if (reservation.getTarificationAppliquee() == null || reservation.getTarificationAppliquee().getPeriode() == null) {
+            throw new RuntimeException("Le type de période (tarification) est obligatoire");
+        }
 
-        // 2. Génération automatique du numéro de réservation s'il n'est pas renseigné
+        // 2. Vérification des conflits de date et période
+        verifierDisponibilite(
+                reservation.getSalle().getSalleId(),
+                reservation.getDate(),
+                reservation.getTarificationAppliquee().getPeriode()
+        );
+
+        // 3. Génération automatique du numéro de réservation s'il n'est pas renseigné
         if (reservation.getNumeroReservation() == null || reservation.getNumeroReservation().isBlank()) {
             reservation.setNumeroReservation("RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
 
-        // 3. Statut par défaut si non spécifié
+        // 4. Statut par défaut si non spécifié
         if (reservation.getStatut() == null) {
             reservation.setStatut(StatutReservation.EN_ATTENTE);
         }
 
         return reservationRepository.save(reservation);
+    }
+
+    /**
+     * Méthode privée de contrôle des chevauchements de créneaux
+     */
+    private void verifierDisponibilite(Long salleId, LocalDate date, TypePeriode nouvellePeriode) {
+        List<Reservation> reservationsExistantes = reservationRepository
+                .findBySalleSalleIdAndDateAndStatutNot(salleId, date, StatutReservation.ANNULEE);
+
+        for (Reservation res : reservationsExistantes) {
+            if (res.getTarificationAppliquee() != null) {
+                TypePeriode periodeExistante = res.getTarificationAppliquee().getPeriode();
+
+                // Conflit 1 : Même période demandée (ex: NUIT vs NUIT)
+                if (periodeExistante == nouvellePeriode) {
+                    throw new RuntimeException("La salle est déjà réservée pour la période : " + nouvellePeriode);
+                }
+
+                // Conflit 2 : La journée complète est déjà réservée
+                if (periodeExistante == TypePeriode.JOURNEE) {
+                    throw new RuntimeException("La salle est déjà réservée pour toute la journée");
+                }
+
+                // Conflit 3 : Une demi-journée ou nuit existe et la nouvelle demande est JOURNEE
+                if (nouvellePeriode == TypePeriode.JOURNEE) {
+                    throw new RuntimeException("Impossible de réserver la journée entière : le créneau " + periodeExistante + " est déjà pris");
+                }
+            }
+        }
     }
 
     /**

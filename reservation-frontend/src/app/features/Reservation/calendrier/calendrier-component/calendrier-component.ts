@@ -21,7 +21,7 @@ export class CalendrierComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['reservationsList'] && changes['reservationsList'].currentValue) {
+    if (changes['reservationsList']) {
       this.buildCalendar();
     }
   }

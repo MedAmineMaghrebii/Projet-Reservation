@@ -5,5 +5,7 @@ public enum TypePaiement {
     ACOMPTE,
     VERSEMENT_ECHELONNE,
 
+
+    
     SOLDE_FINAL
 }

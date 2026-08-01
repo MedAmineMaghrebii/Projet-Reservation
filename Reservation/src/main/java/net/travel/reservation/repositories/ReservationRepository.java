@@ -31,4 +31,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByDate(LocalDate date);
 
     boolean existsByDate(LocalDate date);
+    // 🔍 Récupère les réservations actives pour une salle à une date donnée
+    List<Reservation> findBySalleSalleIdAndDateAndStatutNot(Long salleId, LocalDate date, StatutReservation statut);
 }
