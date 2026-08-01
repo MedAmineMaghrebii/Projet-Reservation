@@ -19,7 +19,7 @@ export const routes: Routes = [
     component:SidebarComponent,
     children: [
       {
-        path: 'Allreservations',
+        path: 'all-reservations',
         component: ListeReservationComponent
       },
       {
@@ -36,7 +36,7 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'Allreservations',
+        redirectTo: 'all-reservations',
         pathMatch: 'full'
       }
     ]

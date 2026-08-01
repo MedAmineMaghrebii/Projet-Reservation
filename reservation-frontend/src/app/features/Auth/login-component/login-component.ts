@@ -77,7 +77,7 @@ export class LoginComponent {
       );
 
 
-      this.router.navigate(['/Allreservations']);
+      this.router.navigate(['/all-reservations']);
     },
 
     error: (error) => {

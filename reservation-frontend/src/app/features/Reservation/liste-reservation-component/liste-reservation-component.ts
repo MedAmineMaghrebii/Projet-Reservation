@@ -10,7 +10,7 @@ import { ModalComponent, ModalMode } from '../../../shared/modal/modal-component
 @Component({
   selector: 'app-reservations', 
   standalone: true, 
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CalendrierComponent],
+  imports: [CommonModule,ModalComponent, FormsModule, ReactiveFormsModule, CalendrierComponent],
   templateUrl: './liste-reservation-component.html',
   styleUrls: ['./liste-reservation-component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush 
