@@ -19,7 +19,10 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class User implements UserDetails {
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,11 +47,22 @@ public class User implements UserDetails {
     @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
     @Column(nullable = false)
     private String hashPassword;
-
+    private Statut statut;
+    private String post;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
+    @Pattern(regexp = "^[0-9]{8}$", message = "Le numéro de téléphone doit contenir exactement 8 chiffres")
+    private String telephone;
 
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_permissions",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    @Builder.Default
+    private Set<Permission> permissions = new HashSet<>();
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
@@ -69,11 +83,20 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(
-                new SimpleGrantedAuthority(
-                        "ROLE_" + role.name()
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        // Ajouter le rôle
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
+
+        // Ajouter les permissions
+        permissions.forEach(permission ->
+                authorities.add(
+                        new SimpleGrantedAuthority(permission.getName())
                 )
         );
+
+        return authorities;
     }
 
     @Override

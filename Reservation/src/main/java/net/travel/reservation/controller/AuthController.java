@@ -20,7 +20,7 @@ public class AuthController {
     private final AuthService authService;
 
     // --- REGISTER ---
-    @PostMapping("/register")
+ /*   @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest request
     ) {
@@ -29,7 +29,7 @@ public class AuthController {
                 HttpStatus.CREATED
         );
     }
-
+*/
     // --- LOGIN ---
     @PostMapping("/login")
     public ResponseEntity<?> login(

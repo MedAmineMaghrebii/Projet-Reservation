@@ -42,9 +42,9 @@ public class PaiementService {
         BigDecimal totalDejaPaye = calculerTotalPaye(reservation.getReservationId());
         BigDecimal nouveauTotal = totalDejaPaye.add(paiement.getMontant());
 
-        if (reservation.getMontantTotal() != null && nouveauTotal.compareTo(reservation.getMontantTotal()) > 0) {
+        if (reservation.getMontantAPayer() != null && nouveauTotal.compareTo(reservation.getMontantAPayer()) > 0) {
             throw new RuntimeException("Le montant total payé (" + nouveauTotal +
-                    ") dépasse le montant total de la réservation (" + reservation.getMontantTotal() + ")");
+                    ") dépasse le montant total de la réservation (" + reservation.getMontantAPayer() + ")");
         }
 
         return paiementRepository.save(paiement);

@@ -39,7 +39,7 @@ public class Reservation {
     private StatutReservation statut;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal montantTotal;
+    private BigDecimal montantAPayer;
 
     // ✅ Token portail client
     @Column(unique = true)

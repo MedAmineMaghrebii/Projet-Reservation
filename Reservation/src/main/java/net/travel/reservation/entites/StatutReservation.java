@@ -1,11 +1,10 @@
 package net.travel.reservation.entites;
 
 public enum StatutReservation {
-    EN_ATTENTE,
+
+    PAYEE,
     CONFIRMEE,
-
-
-
+    EN_ATTENTE,
     TERMINEE,
     ANNULEE
 }

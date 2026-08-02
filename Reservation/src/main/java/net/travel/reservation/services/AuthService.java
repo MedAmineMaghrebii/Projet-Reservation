@@ -30,7 +30,14 @@ public class AuthService {
 
 
 
-    public AuthResponse register(RegisterRequest request){
+
+
+
+
+
+
+
+   /* public AuthResponse register(RegisterRequest request){
 
 
         if(userRepository.existsByEmail(request.getEmail())){
@@ -43,7 +50,7 @@ public class AuthService {
                 .firstname(request.getFirstName()) // <-- AJOUTÉ
                 .lastname(request.getLastName())   // <-- AJOUTÉ
                 .hashPassword(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(Role.SUPER_ADMIN)
                 .build();
 
 
@@ -72,7 +79,7 @@ public class AuthService {
 
     }
 
-
+*/
 
 
     public AuthResponse login(LoginRequest request){

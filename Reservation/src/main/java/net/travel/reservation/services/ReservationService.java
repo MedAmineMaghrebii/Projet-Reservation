@@ -4,14 +4,19 @@ import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.StatutReservation;
 import net.travel.reservation.entites.TypePeriode;
+import net.travel.reservation.entites.User;
 import net.travel.reservation.repositories.ReservationRepository;
+import net.travel.reservation.security.SecurityUtils;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -22,11 +27,14 @@ import java.util.UUID;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final SecurityUtils securityUtils;
 
     /**
      * Récupérer toutes les réservations
      */
     public List<Reservation> getAllReservations() {
+         User u = securityUtils.getCurrentUser();
+        System.out.println(u);
         return reservationRepository.findAll();
     }
 
@@ -137,8 +145,10 @@ public class ReservationService {
         if (reservationRequest.getDate() != null) {
             reservation.setDate(reservationRequest.getDate());
         }
-        if (reservationRequest.getMontantTotal() != null) {
-            reservation.setMontantTotal(reservationRequest.getMontantTotal());
+        if (reservationRequest.getMontantAPayer() != null
+                && reservationRequest.getMontantAPayer().compareTo(BigDecimal.ZERO) != 0) {
+
+            reservation.setMontantAPayer(reservationRequest.getMontantAPayer());
         }
         if (reservationRequest.getStatut() != null) {
             reservation.setStatut(reservationRequest.getStatut());
