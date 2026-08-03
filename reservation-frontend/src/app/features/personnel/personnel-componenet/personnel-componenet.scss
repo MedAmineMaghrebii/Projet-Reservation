@@ -1,5 +1,14 @@
 @use 'sass:color';
 
+$color-border: #d0d5dd;
+$color-border-hover: #b8c1cc;
+$color-text: #2c3038;
+$color-icon: #6c757d;
+$color-bg-hover: #f8f9fa;
+$color-bg-active: #f0f2f5;
+$radius-pill: 50px;
+$radius-input: 8px;
+
 $primary-color: #7c4dff;
 $bg-color: #f8f9fe;
 $card-bg: #ffffff;
@@ -150,6 +159,46 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
         cursor: pointer;
         outline: none;
         appearance: none;
+      }
+    }
+  }
+
+  /* Export Button (Direct child of .controls-card) */
+  .action-wrapper {
+    flex-shrink: 0;
+
+    .btn-export {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      
+      padding: 0.5rem 1.1rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: $text-dark;
+      
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 50px;
+      
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+
+      i {
+        font-size: 0.9rem;
+        display: inline-block;
+        line-height: 1;
+      }
+
+      &:hover {
+        background-color: #f8f9fa;
+        border-color: #cbd5e1;
+      }
+
+      &:active {
+        background-color: #f1f5f9;
       }
     }
   }
@@ -725,3 +774,5 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
     }
   }
 }
+
+

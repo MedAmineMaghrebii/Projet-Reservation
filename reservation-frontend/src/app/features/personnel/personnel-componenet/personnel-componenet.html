@@ -33,13 +33,19 @@
         />
       </div>
 </div>
-  <div class="p-3 flex-grow-0">
-            
-            <button type="button" class="btn btn-icon btn-success" title="Export vers Excel" (click)="exportTable()">
-              <i class="feather icon-file-text"></i>
-            </button>
-            
-          </div>
+
+<!-- Action Button Wrapper -->
+  <div class="action-wrapper">
+    <button 
+      type="button" 
+      class="btn-export" 
+      title="Export vers Excel" 
+      (click)="exportTable()">
+      <i class="feather icon-download"></i>
+      <span>Exporter</span>
+    </button>
+  </div>
+  
 </div>
 
   
@@ -57,7 +63,7 @@
         <th>Contact</th>
         <th>Événements</th>
         <th>Statut</th>
-        <th></th>
+        <th class="noExport"></th>
       </tr>
     </thead>
 
