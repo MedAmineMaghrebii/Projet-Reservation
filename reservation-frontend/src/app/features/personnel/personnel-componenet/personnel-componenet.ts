@@ -11,6 +11,8 @@ import { ReservationService } from '../../../core/services/reservation.service';
 import { Reservation } from '../../../core/models/reservations/reservation';
 import { SalleService } from '../../../core/services/salle.service';
 import { Salle } from '../../../core/models/salle/salle';
+import * as XLSX from 'xlsx';
+import { saveAs }  from 'file-saver';
 
 @Component({
   selector: 'app-personnel-componenet',
@@ -81,6 +83,39 @@ activeMenuId = signal<number | string | null>(null);
   }
 
 
+
+//test excel
+private saveAsExcelFile(buffer: any, fileName: string): void {
+  const data: Blob = new Blob([buffer], {
+    type:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+  });
+  saveAs(data, `${fileName}_${new Date().getDate()}_${new Date().getMonth()+1}_${new Date().getFullYear()}_${new Date().getHours()}_${new Date().getMinutes()}.xlsx`);
+}
+exportTable(): void {
+ 
+  const tableElement = document.getElementById('exportTable')!;
+  const rows = tableElement.querySelectorAll('tr:not(.noExport)');
+  
+  
+  if (rows.length <= 1) { 
+    alert('Table vide. Ne peut pas export.');
+    return;
+  }
+  
+  const clonedTable = tableElement.cloneNode(true) as HTMLElement;
+ 
+  clonedTable.querySelectorAll('.noExport').forEach((el) => el.remove());
+  
+  const worksheet = XLSX.utils.table_to_sheet(clonedTable);
+  const workbook: XLSX.WorkBook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+  const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  this.saveAsExcelFile(excelBuffer, 'dom_table_export');
+}
+
+
+
+// Salles
 loadSalles(): void {
     this.salleService.getAllSalles().subscribe({
       next: (data) => {
