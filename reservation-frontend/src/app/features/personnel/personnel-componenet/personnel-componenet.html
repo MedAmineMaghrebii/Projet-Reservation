@@ -1,0 +1,524 @@
+<div class="table-wrapper">
+  
+  <!-- Header -->
+<!-- Header -->
+<header class="header">
+  <div class="header-title">
+    <span class="subtitle">Équipe & opérations</span>
+    <h1>Personnel</h1>
+    <p class="count-label"> Les bonnes personnes, au bon endroit, au bon moment.</p>
+  </div>
+  
+  <!-- Ajout de l'événement (click) ici -->
+  <button class="btn-primary" (click)="openAddModal()">
+    <i class="icon-plus">+</i>
+    Nouveau Personnel
+  </button>
+</header>
+
+  <!-- Control Bar -->
+  <div class="controls-card">
+    <div class="search-and-filter">
+      <!-- Barre de recherche -->
+      <div class="search-input">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Rechercher..." 
+          [(ngModel)]="searchTerm" 
+          (input)="filterUsers()" 
+        />
+      </div>
+</div>
+</div>
+
+  
+      
+
+    
+
+  <!-- Tableau des réservations -->
+  <div class="table-card">
+  <table class="reservations-table">
+    <thead>
+      <tr>
+        <th>Membre</th>
+        <th>Rôle</th>
+        <th>Contact</th>
+        <th>Événements</th>
+        <th>Statut</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let res of filteredUsers">
+  
+
+        <!-- User -->
+        <td>
+          <div class="user-cell">
+            <div class="avatar" [ngClass]="getAvatarClass(res.userId)">
+              {{ getInitials(res.firstname || '', res.lastname || '') }}
+            </div>
+
+            <div class="user-info">
+              <span class="user-name">
+                {{ res.firstname }} {{ res.lastname }}
+              </span>
+              
+            </div>
+          </div>
+        </td>
+
+
+              <!-- Role -->
+        <td>
+          <span class="role-main">
+            {{ res.role }}
+          </span>
+        </td>
+
+        <!-- Contact -->
+        <td>
+          <div class="contact-cell">
+            <span class="contact-phone">+216 {{ res.telephone }}</span>
+            <span class="contact-email">{{ res.email }}</span>
+          </div>
+        </td>
+
+
+      
+
+
+        <!-- Events -->
+        <td class="text-center">
+          <span class="events-counts">
+            {{ res.nombreEvenements }}
+          </span>
+        </td>
+
+
+        <!-- Statut -->
+          <td class="status-cell">
+            <span class="badge" [ngClass]="getStatusClass(res?.statut)">
+              {{ res?.statut }}
+            </span>
+          </td>
+
+
+        <!-- Actions -->
+        <td class="actions-cell">
+    <div class="action-menu-container">
+      <button 
+        type="button" 
+        class="btn-more" 
+        (click)="toggleMenu(res.userId, $event)">
+        •••
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (activeMenuId() === res.userId) {
+        <div class="action-dropdown">
+          <button type="button" (click)="openViewModal(res)">
+            👁️ Voir
+          </button>
+          <button type="button" (click)="openEditModal(res)">
+            ✏️ Modifier
+          </button>
+          <button type="button" class="delete-action" (click)="openDeleteModal(res)">
+            🗑️ Supprimer
+          </button>
+        </div>
+      }
+    </div>
+  </td>
+
+      </tr>
+
+
+      <tr *ngIf="filteredUsers.length === 0">
+        <td colspan="6" class="empty-message">
+          Aucun Personnel trouvé.
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+</div>
+
+
+
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. VIEW MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'view'"
+  [showFooter]="false"
+  (closed)="closeModal()">
+  
+  <!-- Centered Header Section -->
+  <div class="user-header">
+    <div class="avatar">
+      {{ selectedUser()?.lastname?.[0] }}{{ selectedUser()?.firstname?.[0] }}
+    </div>
+    
+    <h2 class="user-name">
+      {{ selectedUser()?.lastname }} {{ selectedUser()?.firstname }}
+    </h2>
+    
+    <span class="client-type">{{ selectedUser()?.role }}</span>
+    
+    <div class="status-badge ">
+      <span class="status-badge " [ngClass]="getStatusClass(selectedUser()?.statut)">
+              {{ selectedUser()?.statut }}
+            </span>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedUser()?.nombreEvenements ?? 0 }}</span>
+      <span class="stat-label">Événements</span>
+    </div>
+
+    
+  </div>
+
+  <!-- Detailed Contact Information -->
+  <div class="info-list">
+    <div class="info-item">
+      <span class="icon">📞</span>
+      <div class="info-content">
+        <label>Téléphone</label>
+        <p>{{ selectedUser()?.telephone }}</p>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon">✉️</span>
+      <div class="info-content">
+        <label>Email</label>
+        <p>{{ selectedUser()?.email }}</p>
+      </div>
+    </div>
+
+    
+  </div>
+
+  <!-- Reservation History 
+  <div class="history-section">
+    <h3>Historique des réservations</h3>
+    
+    <div class="history-list">
+      @for (item of reservations(); track item.reservationId) {
+        <div class="history-card">
+          <div class="history-icon">📅</div>
+          <div class="history-details">
+            <span class="title">{{ item.numeroReservation }}</span>
+            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.salle.nom }}</span>
+          </div>
+          <span class="history-price">{{ item.montantTotal | number:'1.0-0' }} DT</span>
+        </div>
+      }
+    </div>
+  </div>-->
+
+  <!-- Full Width Action Button -->
+  <button type="button" class="action-btn">
+    ✉️ Contacter le client
+  </button>
+</app-modal>
+
+<!-- 2. UPDATE / EDIT MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'edit'"
+  [title]="'Modifier le client'"
+  [subtitle]="'Mettre à jour les informations'"
+  [mode]="'edit'"
+  (closed)="closeModal()"
+  (saved)="saveUserChanges()">
+
+  <!-- Mode Nouveau Client avec Reactive Forms -->
+      <form [formGroup]="myForm" class="edit-form" >
+
+        <div class="form-group" hidden> 
+          
+          <input type="text" formControlName="userId" placeholder="id..."  hidden/>
+          
+        </div>
+        
+        <!-- POST -->
+        <div class="form-group"> 
+          <label>Post *</label>
+          <input type="text" formControlName="post" placeholder="POST..." />
+          <small class="text-danger" *ngIf="myForm.get('post')?.invalid && (myForm.get('post')?.dirty || myForm.get('post')?.touched)">
+            <span *ngIf="myForm.get('post')?.errors?.['required']">Le POST est obligatoire.</span>
+            
+          </small>
+        </div>
+
+        <!-- NOM -->
+        <div class="form-group">
+          <label>Nom *</label>
+          <input type="text" formControlName="lastname" placeholder="Nom..." />
+          <small class="text-danger" *ngIf="myForm.get('lastname')?.invalid && (myForm.get('lastname')?.dirty || myForm.get('lastname')?.touched)">
+            <span *ngIf="myForm.get('lastname')?.errors?.['required']">Le nom est obligatoire.</span>
+            <span *ngIf="myForm.get('lastname')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- PRÉNOM -->
+        <div class="form-group">
+          <label>Prénom *</label>
+          <input type="text" formControlName="firstname" placeholder="Prenom..." />
+          <small class="text-danger" *ngIf="myForm.get('prenom')?.invalid && (myForm.get('firstname')?.dirty || myForm.get('firstname')?.touched)">
+            <span *ngIf="myForm.get('firstname')?.errors?.['required']">Le prénom est obligatoire.</span>
+            <span *ngIf="myForm.get('firstname')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="form-group full-width">
+          <label>Email *</label>
+          <input type="email" formControlName="email" placeholder="email@exemple.com" />
+          <small class="text-danger" *ngIf="myForm.get('email')?.invalid && (myForm.get('email')?.dirty || myForm.get('email')?.touched)">
+            <span *ngIf="myForm.get('email')?.errors?.['required']">L'email est obligatoire.</span>
+            <span *ngIf="myForm.get('email')?.errors?.['email']">Format d'email invalide.</span>
+          </small>
+        </div>
+
+        <!-- TÉLÉPHONE -->
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="text" formControlName="telephone" placeholder="Telephone..." />
+          <small class="text-danger" *ngIf="myForm.get('telephone')?.invalid && (myForm.get('telephone')?.dirty || myForm.get('telephone')?.touched)">
+            <span *ngIf="myForm.get('telephone')?.errors?.['pattern']">Doit contenir exactement 8 chiffres.</span>
+          </small>
+        </div>
+
+
+        <!-- STATUT -->
+<div class="form-group">
+  <label>Statut</label>
+
+  <select formControlName="statut">
+    <option value="" disabled selected>Choisir un statut...</option>
+    <option value="ACTIF">Actif</option>
+    <option value="EN_CONGE">En congé</option>
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="myForm.get('statut')?.invalid && (myForm.get('statut')?.dirty || myForm.get('statut')?.touched)">
+    <span *ngIf="myForm.get('statut')?.errors?.['required']">
+      Le statut est obligatoire.
+    </span>
+  </small>
+</div>
+
+ <!-- ROLE -->
+<div class="form-group">
+  <label>role</label>
+
+  <select formControlName="role">
+     <option value="" disabled >Choisir un rôle...</option>
+    <option value="SUPER_ADMIN">Super Admin</option>
+    <option value="GERANT">Gérant</option>
+    <option value="COLLABORATEUR">Collaborateur</option>
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="myForm.get('role')?.invalid && (myForm.get('role')?.dirty || myForm.get('role')?.touched)">
+    <span *ngIf="myForm.get('role')?.errors?.['required']">
+      Le role est obligatoire.
+    </span>
+  </small>
+</div>
+
+        
+
+      </form>
+  
+</app-modal>
+
+<!-- 3. DELETE CONFIRMATION MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'delete'"
+  [title]="'Confirmer la suppression'"
+  [saveText]="'Supprimer'"
+  [cancelText]="'Annuler'"
+  (closed)="closeModal()"
+  (saved)="confirmDelete()">
+
+  <div class="delete-confirmation">
+    <p>Êtes-vous sûr de vouloir supprimer <strong>{{ selectedUser()?.firstname }} {{ selectedUser()?.lastname }}</strong> ?</p>
+    <p class="warning-text">Cette action est irréversible.</p>
+  </div>
+</app-modal>
+
+
+
+
+
+
+<!-- ADD USER MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'add'"
+  [title]="'Ajouter un utilisateur'"
+  [subtitle]="'Créer un nouvel utilisateur'"
+  [mode]="'create'"
+  (closed)="closeModal()"
+  (saved)="createUser()">
+
+  <form [formGroup]="addForm" class="edit-form">
+
+    <!-- POST -->
+    <div class="form-group">
+      <label>Post *</label>
+      <input type="text" formControlName="post" placeholder="POST..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('post')?.invalid && (addForm.get('post')?.dirty || addForm.get('post')?.touched)">
+        <span *ngIf="addForm.get('post')?.errors?.['required']">
+          Le post est obligatoire.
+        </span>
+      </small>
+    </div>
+
+    <!-- NOM -->
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" formControlName="lastname" placeholder="Nom..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('lastname')?.invalid && (addForm.get('lastname')?.dirty || addForm.get('lastname')?.touched)">
+        <span *ngIf="addForm.get('lastname')?.errors?.['required']">Le nom est obligatoire.</span>
+      </small>
+    </div>
+
+    <!-- PRÉNOM -->
+    <div class="form-group">
+      <label>Prénom *</label>
+      <input type="text" formControlName="firstname" placeholder="Prénom..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('firstname')?.invalid && (addForm.get('firstname')?.dirty || addForm.get('firstname')?.touched)">
+        <span *ngIf="addForm.get('firstname')?.errors?.['required']">Le prénom est obligatoire.</span>
+      </small>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="form-group full-width">
+      <label>Email *</label>
+      <input type="email" formControlName="email" placeholder="email@exemple.com" />
+      <small class="text-danger"
+        *ngIf="addForm.get('email')?.invalid && (addForm.get('email')?.dirty || addForm.get('email')?.touched)">
+        <span *ngIf="addForm.get('email')?.errors?.['required']">L'email est obligatoire.</span>
+        <span *ngIf="addForm.get('email')?.errors?.['email']">Format d'email invalide.</span>
+      </small>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="form-group">
+      <label>Mot de passe *</label>
+      <input
+        type="password"
+        formControlName="hashPassword"
+        placeholder="Mot de passe..." />
+
+      <small class="text-danger"
+        *ngIf="addForm.get('hashPassword')?.invalid &&
+               (addForm.get('hashPassword')?.dirty || addForm.get('hashPassword')?.touched)">
+        <span *ngIf="addForm.get('hashPassword')?.errors?.['required']">
+          Le mot de passe est obligatoire.
+        </span>
+        <span *ngIf="addForm.get('hashPassword')?.errors?.['minlength']">
+          Au moins 8 caractères.
+        </span>
+      </small>
+    </div>
+
+    <!-- TÉLÉPHONE -->
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input type="text" formControlName="telephone" placeholder="Téléphone..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('telephone')?.invalid &&
+               (addForm.get('telephone')?.dirty || addForm.get('telephone')?.touched)">
+        <span *ngIf="addForm.get('telephone')?.errors?.['pattern']">
+          Doit contenir exactement 8 chiffres.
+        </span>
+      </small>
+    </div>
+
+    <!-- ROLE -->
+<div class="form-group">
+  <label>Rôle *</label>
+
+  <select formControlName="role">
+    <option value="" disabled>Choisir un rôle...</option>
+    <option value="SUPER_ADMIN">Super Admin</option>
+    <option value="GERANT">Gérant</option>
+    <option value="COLLABORATEUR">Collaborateur</option>
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="addForm.get('role')?.invalid &&
+           (addForm.get('role')?.dirty || addForm.get('role')?.touched)">
+    <span *ngIf="addForm.get('role')?.errors?.['required']">
+      Le rôle est obligatoire.
+    </span>
+  </small>
+</div>
+
+    <!-- STATUT -->
+    <div class="form-group">
+      <label>Statut *</label>
+
+      <select formControlName="statut">
+        <option value="" disabled>Choisir un statut...</option>
+        <option value="ACTIF">Actif</option>
+        <option value="EN_CONGE">En congé</option>
+      </select>
+
+      <small class="text-danger"
+        *ngIf="addForm.get('statut')?.invalid &&
+               (addForm.get('statut')?.dirty || addForm.get('statut')?.touched)">
+        <span *ngIf="addForm.get('statut')?.errors?.['required']">
+          Le statut est obligatoire.
+        </span>
+      </small>
+    </div>
+
+    <!-- SALLE -->
+    <div class="form-group">
+      <label>Salle *</label>
+
+      <select formControlName="salle">
+        <option value="" disabled>Choisir une salle...</option>
+
+        <option *ngFor="let salle of sallesDisponibles()" [ngValue]="salle">
+          {{ salle.nom }}
+        </option>
+      </select>
+
+      <small class="text-danger"
+        *ngIf="addForm.get('salle')?.invalid &&
+               (addForm.get('salle')?.dirty || addForm.get('salle')?.touched)">
+        <span *ngIf="addForm.get('salle')?.errors?.['required']">
+          La salle est obligatoire.
+        </span>
+      </small>
+    </div>
+
+  </form>
+
+</app-modal>

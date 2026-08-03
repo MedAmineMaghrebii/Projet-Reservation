@@ -5,6 +5,7 @@ import { AjouterReservationComponent } from './features/Reservation/ajoute-reser
 import { SidebarComponent } from './shared/main-layout-component/main-layout-component';
 import { FinalisationComponent } from './features/finalisation-component/finalisation-component';
 import { ListeClientsComponent } from './features/clients/liste-clients-component/liste-clients-component';
+import { PersonnelComponenet } from './features/personnel/personnel-componenet/personnel-componenet';
 
 export const routes: Routes = [
   // Page de connexion (hors layout, sans la sidebar)
@@ -33,6 +34,10 @@ export const routes: Routes = [
       {
         path: 'clients',
         component: ListeClientsComponent
+      },
+        {
+        path: 'personnel',
+        component: PersonnelComponenet
       },
       {
         path: '',

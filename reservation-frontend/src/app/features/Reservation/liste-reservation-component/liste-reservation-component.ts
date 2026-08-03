@@ -101,6 +101,7 @@ export class ListeReservationComponent implements OnInit {
   // --- Modal Open Actions ---
   openViewModal(reservation: any) {
     this.selectedReservation.set(reservation);
+    console.log(this.selectedReservation())
     this.activeModal.set('view');
     this.activeMenuId.set(null);
   }

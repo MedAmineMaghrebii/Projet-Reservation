@@ -82,7 +82,16 @@ public class UserService {
         if (userRequest.getEmail() != null) existingUser.setEmail(userRequest.getEmail());
         if (userRequest.getRole() != null) existingUser.setRole(userRequest.getRole());
         if (userRequest.getSalle() != null) existingUser.setSalle(userRequest.getSalle());
+        if (userRequest.getPost() != null) {
+            existingUser.setPost(userRequest.getPost());
+        }
 
+        if (userRequest.getTelephone() != null) {
+            existingUser.setTelephone(userRequest.getTelephone());
+        }
+        if (userRequest.getStatut() != null) {
+            existingUser.setStatut(userRequest.getStatut());
+        }
         // Si le mot de passe est modifié
         if (userRequest.getHashPassword() != null && !userRequest.getHashPassword().isBlank()) {
             existingUser.setHashPassword(passwordEncoder.encode(userRequest.getHashPassword()));

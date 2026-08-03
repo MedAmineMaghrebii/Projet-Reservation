@@ -45,7 +45,7 @@ public class Client {
     @Pattern(regexp = "^[0-9]{8}$", message = "Le numéro de téléphone doit contenir exactement 8 chiffres")
     private String telephone;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Enumerated(EnumType.STRING)
     private TypeClient typeClient;
     @NotBlank(message = "L'email est obligatoire")
