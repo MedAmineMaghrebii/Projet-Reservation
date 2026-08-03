@@ -503,7 +503,7 @@
       <label>Salle *</label>
 
       <select formControlName="salle">
-        <option value="" disabled>Choisir une salle...</option>
+        <option value="null" disabled>Choisir une salle...</option>
 
         <option *ngFor="let salle of sallesDisponibles()" [ngValue]="salle">
           {{ salle.nom }}

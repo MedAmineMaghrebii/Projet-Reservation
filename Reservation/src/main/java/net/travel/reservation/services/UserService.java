@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -55,6 +56,11 @@ public class UserService {
 
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new BadRequestException("Un utilisateur existe déjà avec l'email : " + user.getEmail());
+        }
+
+        // Initialiser les collections
+        if (user.getPermissions() == null) {
+            user.setPermissions(new HashSet<>());
         }
 
         // Hachage du mot de passe avec BCrypt

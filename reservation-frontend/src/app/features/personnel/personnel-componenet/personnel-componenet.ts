@@ -10,6 +10,7 @@ import { ModalComponent, ModalMode } from '../../../shared/modal/modal-component
 import { ReservationService } from '../../../core/services/reservation.service';
 import { Reservation } from '../../../core/models/reservations/reservation';
 import { SalleService } from '../../../core/services/salle.service';
+import { Salle } from '../../../core/models/salle/salle';
 
 @Component({
   selector: 'app-personnel-componenet',
@@ -21,7 +22,7 @@ export class PersonnelComponenet {
 reservations = signal<Reservation[]>([]);
   users: any[] = [];
   filteredUsers: any[] = [];
-  sallesDisponibles = signal<any>([]);
+  sallesDisponibles = signal<Salle[]>([]);
   
   searchTerm: string = '';
   selectedFilter: string = 'Tous';
@@ -55,6 +56,7 @@ activeMenuId = signal<number | string | null>(null);
     statut: ['', [Validators.required]],
     hashPassword: ['', [Validators.required, Validators.minLength(8)]],
     salle: [null, Validators.required],
+     role: ['', Validators.required]
   });
 
   // Initialize your Reactive Form with Validators
@@ -66,6 +68,7 @@ activeMenuId = signal<number | string | null>(null);
     email: ['', [Validators.required, Validators.email]],
     telephone: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
     statut: ['', [Validators.required]],
+     role: ['', Validators.required]
     
   });
 
@@ -74,13 +77,16 @@ activeMenuId = signal<number | string | null>(null);
 
   ngOnInit(): void {
     this.loadUsers();
+    
   }
 
 
 loadSalles(): void {
     this.salleService.getAllSalles().subscribe({
       next: (data) => {
-        this.sallesDisponibles().set(data || []);
+        this.sallesDisponibles.set(data);
+        console.log("data", data);
+        console.log("salles", this.sallesDisponibles())
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Erreur lors du chargement des salles :', err)
@@ -109,7 +115,8 @@ loadSalles(): void {
   }
   
 openAddModal(){
-  this.activeModal.set('add')
+  this.loadSalles();
+  this.activeModal.set('add');
 }
   openEditModal(user: any) {
     this.selectedUser.set(user);
@@ -118,6 +125,7 @@ openAddModal(){
       userId : user.userId ?? '',
       lastname: user.lastname ?? '',
       firstname: user.firstname ?? '',
+      role: user.role ?? '',
       post: user.post ?? '',
       email: user.email ?? '',
       telephone: user.telephone ?? '',
@@ -156,6 +164,7 @@ openAddModal(){
     email: this.addForm.value.email,
     telephone: this.addForm.value.telephone,
     post: this.addForm.value.post,
+    role: this.addForm.value.role,
     statut: this.addForm.value.statut,
     hashPassword: this.addForm.value.hashPassword,
 
