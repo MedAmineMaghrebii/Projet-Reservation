@@ -1,0 +1,122 @@
+<div class="stats-dashboard">
+  <!-- Filtre Période -->
+  <div class="period-filter-wrapper">
+    <select [(ngModel)]="selectedPeriod" class="period-select">
+      <option value="Juin 2024">Juin 2024</option>
+      <option value="Mai 2024">Mai 2024</option>
+      <option value="Avril 2024">Avril 2024</option>
+    </select>
+  </div>
+
+  <!-- Cards KPI -->
+  <div class="kpi-grid">
+    <!-- Revenus -->
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="icon-circle success">
+          <i class="fa-solid fa-arrow-trend-up"></i>
+        </div>
+        <span class="badge-trend positive">
+          <i class="fa-solid fa-arrow-up"></i> +8,2%
+        </span>
+      </div>
+      <span class="kpi-title">Revenus</span>
+      <h2 class="kpi-value">{{ stats.revenus | number }} DT</h2>
+      <span class="kpi-subtext">vs. mois dernier</span>
+    </div>
+
+    <!-- Dépenses -->
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="icon-circle danger">
+          <i class="fa-solid fa-arrow-trend-down"></i>
+        </div>
+        <span class="badge-trend negative">
+          <i class="fa-solid fa-arrow-down"></i> -3,1%
+        </span>
+      </div>
+      <span class="kpi-title">Dépenses</span>
+      <h2 class="kpi-value">{{ stats.depenses | number }} DT</h2>
+      <span class="kpi-subtext">vs. mois dernier</span>
+    </div>
+
+    <!-- Bénéfice net -->
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="icon-circle primary">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <span class="badge-trend positive">
+          <i class="fa-solid fa-arrow-up"></i> +11,8%
+        </span>
+      </div>
+      <span class="kpi-title">Bénéfice net</span>
+      <h2 class="kpi-value">{{ stats.beneficeNet | number }} DT</h2>
+      <span class="kpi-subtext">marge de 73,6%</span>
+    </div>
+
+    <!-- En attente -->
+    <div class="kpi-card">
+      <div class="kpi-header">
+        <div class="icon-circle warning">
+          <i class="fa-regular fa-clock"></i>
+        </div>
+        <span class="badge-trend neutral">
+          <i class="fa-solid fa-file-invoice"></i> 8 factures
+        </span>
+      </div>
+      <span class="kpi-title">En attente</span>
+      <h2 class="kpi-value">{{ stats.enAttente | number }} DT</h2>
+      <span class="kpi-subtext">à encaisser</span>
+    </div>
+  </div>
+
+  <!-- Section Graphiques (Inchangée) -->
+  <div class="charts-grid">
+    <!-- Chart 1: Revenus vs Dépenses -->
+    <div class="chart-card evolution-chart">
+      <div class="chart-header">
+        <div>
+          <h3>Revenus vs dépenses</h3>
+          <p>Évolution sur les 6 derniers mois</p>
+        </div>
+        <div class="legend">
+          <span><i class="dot purple"></i> Revenus</span>
+          <span><i class="dot orange"></i> Dépenses</span>
+        </div>
+      </div>
+      
+      <div class="chart-container" style="position: relative; height:260px;">
+        <canvas baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          [type]="barChartType">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Dépenses par catégorie -->
+    <div class="chart-card category-chart">
+      <h3>Dépenses par catégorie</h3>
+      
+      <div class="donut-wrapper" style="position: relative; height: 180px; margin-top: 10px;">
+        <canvas baseChart
+          [data]="doughnutChartData"
+          [options]="doughnutChartOptions"
+          [type]="doughnutChartType">
+        </canvas>
+        <div class="donut-center-text">
+          <strong>{{ stats.depenses | number }}</strong>
+          <span>DT total</span>
+        </div>
+      </div>
+
+      <ul class="category-legend">
+        <li><span><i class="dot purple"></i> Fournisseurs</span> <strong>40%</strong></li>
+        <li><span><i class="dot orange"></i> Personnel</span> <strong>25%</strong></li>
+        <li><span><i class="dot teal"></i> Maintenance</span> <strong>18%</strong></li>
+        <li><span><i class="dot lavender"></i> Autres</span> <strong>17%</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>

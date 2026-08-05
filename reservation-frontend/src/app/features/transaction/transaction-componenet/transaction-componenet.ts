@@ -6,10 +6,11 @@ import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { saveAs }  from 'file-saver';
 import { CommonModule } from '@angular/common';
+import { FinanceStatsComponent } from '../transactionstats/finance-stats-component/finance-stats-component';
 
 @Component({
   selector: 'app-transaction-componenet',
-  imports: [CommonModule, FormsModule,ModalComponent,ReactiveFormsModule],
+  imports: [CommonModule, FormsModule,ModalComponent,ReactiveFormsModule,FinanceStatsComponent],
   templateUrl: './transaction-componenet.html',
   styleUrl: './transaction-componenet.scss',
 })
@@ -334,6 +335,18 @@ openAddModal(){
     return classes[id % classes.length];
   }
 
+getTransactionAvatar(type: string) {
+  return type === 'REVENU'
+    ? {
+        icon: 'fa-solid fa-arrow-trend-up',
+        class: 'bg-green'
+      }
+    : {
+        icon: 'fa-solid fa-arrow-trend-down',
+        class: 'bg-red'
+      };
+}
+
   // Classe CSS dynamique pour le badge de statut
   getStatusClass(statut: string): string {
     switch (statut?.toUpperCase()) {
@@ -361,4 +374,10 @@ openAddModal(){
         return 'badge-default';
     }
   }
+
+  getMontantClass(type: string) {
+  return type === 'REVENU'
+    ? 'bg-green'
+    : 'bg-red';
+}
 }

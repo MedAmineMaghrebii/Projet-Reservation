@@ -16,6 +16,7 @@
   </button>
 </header>
 
+<app-finance-stats-component ></app-finance-stats-component>
   <!-- Control Bar -->
   <div class="controls-card">
     <div class="search-and-filter">
@@ -80,13 +81,16 @@
         <!-- transaction -->
         <td>
           <div class="transaction-cell">
-            <div class="avatar" [ngClass]="getAvatarClass(res.transactionId)">
-              {{ getInitials(res.libelle || '', res.description || '') }}
+            <div class="avatar" [ngClass]="getTransactionAvatar(res.type).class">
+            <i [class]="getTransactionAvatar(res.type).icon"></i>
             </div>
 
             <div class="transaction-info">
               <span class="transaction-name">
-                {{ res.libelle }} {{ res.description }}
+                {{ res.libelle }} 
+              </span>
+              <span class="transaction-desc">
+                 {{ res.description }}
               </span>
               
             </div>
@@ -103,8 +107,8 @@
 
         <!-- Events -->
         <td class="text-center">
-          <span class="total-paid">
-            {{ res.montant }}
+          <span class="total-paid" [ngClass]="getMontantClass(res?.type)">
+            {{ res.montant }} DT
           </span>
         </td>
 
@@ -173,21 +177,24 @@
   
   <!-- Centered Header Section -->
   <div class="transaction-header">
-    <div class="avatar">
-      {{ selectedTransaction()?.libelle?.[0] }}{{ selectedTransaction()?.description?.[0] }}
-    </div>
+     <div class="avatar" [ngClass]="getTransactionAvatar(selectedTransaction()?.type).class">
+            <i [class]="getTransactionAvatar(selectedTransaction()?.type).icon"></i>
+            </div>
     
     <h2 class="Transaction-name">
-      {{ selectedTransaction()?.libelle }} {{ selectedTransaction()?.description }}
+      {{ selectedTransaction()?.libelle }}
     </h2>
+    <span class="Transaction-desc">
+      {{ selectedTransaction()?.description }}
+    </span>
     
-    <span class="transaction-type">{{ selectedTransaction()?.type }}</span>
-    
-    <div class="status-badge ">
-      <span class="status-badge " [ngClass]="getStatusClass(selectedTransaction()?.statut)">
-              {{ selectedTransaction()?.statut }}
+     <div class="status-badge ">
+      <span class="status-badge " [ngClass]="getTypeClass(selectedTransaction()?.type)">
+              {{ selectedTransaction()?.type }}
             </span>
     </div>
+    
+  
   </div>
 
   <!-- Key Metrics Row -->
@@ -197,6 +204,15 @@
       <span class="stat-label">Montant</span>
     </div>
 
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedTransaction()?.statut}}</span>
+      <span class="stat-label">Statut</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedTransaction()?.dateTransaction | date:'MMM yy' }}</span>
+      <span class="stat-label">Date Transaction</span>
+    </div>
+  
     
   </div>
 
@@ -240,7 +256,7 @@
   </div>-->
 
   <!-- Full Width Action Button -->
-  <button type="button" class="action-btn">
+  <button type="button" class="action-btn" (click)="openEditModal(selectedTransaction())">
     ✉️ Modifier la transaction
   </button>
 </app-modal>

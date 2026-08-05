@@ -1,0 +1,228 @@
+:host {
+  display: block;
+  margin-bottom: 2rem;
+  font-family: inherit;
+}
+
+/* ==========================================
+   1. FILTRE PÉRIODE
+   ========================================== */
+.period-filter-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+
+  .period-select {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    font-weight: 500;
+    color: #334155;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+
+    &:hover, &:focus {
+      border-color: #cbd5e1;
+    }
+  }
+}
+
+/* ==========================================
+   2. GRILLE DES KPI CARDS
+   ========================================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  .kpi-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+
+        /* Variantes de couleurs des cercles */
+        &.success { background: #e6f4ea; color: #1e8e3e; }
+        &.danger  { background: #fce8e6; color: #d93025; }
+        &.primary { background: #f1f0fe; color: #7c3aed; }
+        &.warning { background: #fef7e0; color: #b06000; }
+      }
+
+      .badge-trend {
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+
+        &.positive { color: #16a34a; }
+        &.negative { color: #dc2626; }
+        &.neutral  { color: #16a34a; }
+      }
+    }
+
+    .kpi-title {
+      color: #64748b;
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .kpi-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .kpi-subtext {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+/* ==========================================
+   3. SECTION GRAPHIQUES
+   ========================================== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #1e293b;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+
+      p {
+        margin: 4px 0 0;
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+
+      .legend {
+        span {
+          font-size: 0.8rem;
+          color: #64748b;
+          margin-left: 1rem;
+          display: inline-flex;
+          align-items: center;
+        }
+      }
+    }
+  }
+}
+
+/* ==========================================
+   4. ÉLÉMENTS GRAPHIQUES & DONUT
+   ========================================== */
+/* Puces de couleur (Légendes) */
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+
+  &.purple   { background-color: #7c3aed; }
+  &.orange   { background-color: #f97316; }
+  &.teal     { background-color: #14b8a6; }
+  &.lavender { background-color: #ddd6fe; }
+}
+
+/* Anneau / Donut Centrage */
+.donut-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  .donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none; /* Permet le survol du graphique canvas derrière */
+
+    strong {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+
+    span {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+  }
+}
+
+/* Légende des catégories sous le Donut */
+.category-legend {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #475569;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    strong {
+      color: #1e293b;
+    }
+  }
+}

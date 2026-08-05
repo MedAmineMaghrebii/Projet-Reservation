@@ -2,6 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
@@ -10,6 +11,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes), provideClientHydration(),
+    provideCharts(withDefaultRegisterables()),
     provideHttpClient(
       withInterceptors([jwtInterceptor]) // <-- On injecte l'intercepteur ici !
     )
