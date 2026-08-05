@@ -1,6 +1,5 @@
 import { TarificationSalle } from './tarification-salle';
 import { Service } from '../service/service';
-import { User } from '../user/user';
 
 export class Salle {
   salleId?: number;
@@ -12,34 +11,21 @@ export class Salle {
   telephone?: string;
   email?: string;
 
-  // Relations (Optionnelles côté Angular)
-  tarifications?: TarificationSalle[] = [];
-  services?: Service[] = [];
-  users?: User[] = [];
+  // Relations
+  tarifications: TarificationSalle[] = [];
+  services: Service[] = [];
 
   constructor(
     salleId?: number,
-    nom?: string,
-    capaciteMax?: number,
-    description?: string,
-    adresse?: string,
-    ville?: string,
-    telephone?: string,
-    email?: string,
+    nom: string = '',
+    capaciteMax: number = 0,
     tarifications: TarificationSalle[] = [],
-    services: Service[] = [],
-    users: User[] = []
+    services: Service[] = []
   ) {
     if (salleId !== undefined) this.salleId = salleId;
-    if (nom) this.nom = nom;
-    if (capaciteMax !== undefined) this.capaciteMax = capaciteMax;
-    if (description) this.description = description;
-    if (adresse) this.adresse = adresse;
-    if (ville) this.ville = ville;
-    if (telephone) this.telephone = telephone;
-    if (email) this.email = email;
+    this.nom = nom;
+    this.capaciteMax = capaciteMax;
     this.tarifications = tarifications;
     this.services = services;
-    this.users = users;
   }
 }

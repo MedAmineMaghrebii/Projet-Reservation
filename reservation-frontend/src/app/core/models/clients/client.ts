@@ -1,22 +1,25 @@
 import { Reservation } from "../reservations/reservation";
-export class Client {
+import { TypeClient } from "./typeClient.enum";
 
-clientId?: number;
+
+export class Client {
+  clientId?: number;
   cin!: string;
   imageCin?: string;
   nom!: string;
   prenom!: string;
   telephone?: string;
-  reservations: Reservation[] = [];
+  typeClient?: TypeClient; // Ajouté pour correspondre au backend
   email?: string;
   adresse?: string;
   ville?: string;
+  reservations: Reservation[] = [];
 
   constructor(
-    clientId: number,
-    cin: string,
-    nom: string,
-    prenom: string
+    clientId?: number,
+    cin: string = '',
+    nom: string = '',
+    prenom: string = ''
   ) {
     this.clientId = clientId;
     this.cin = cin;
