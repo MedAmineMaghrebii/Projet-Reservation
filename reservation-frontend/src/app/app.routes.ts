@@ -6,6 +6,7 @@ import { SidebarComponent } from './shared/main-layout-component/main-layout-com
 import { FinalisationComponent } from './features/finalisation-component/finalisation-component';
 import { ListeClientsComponent } from './features/clients/liste-clients-component/liste-clients-component';
 import { PersonnelComponenet } from './features/personnel/personnel-componenet/personnel-componenet';
+import { TransactionComponenet } from './features/transaction/transaction-componenet/transaction-componenet';
 
 export const routes: Routes = [
   // Page de connexion (hors layout, sans la sidebar)
@@ -38,6 +39,10 @@ export const routes: Routes = [
         {
         path: 'personnel',
         component: PersonnelComponenet
+      },
+        {
+        path: 'finances',
+        component: TransactionComponenet
       },
       {
         path: '',

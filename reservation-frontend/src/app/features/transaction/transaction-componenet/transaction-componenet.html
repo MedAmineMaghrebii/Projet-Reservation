@@ -1,0 +1,457 @@
+<div class="table-wrapper">
+  
+  <!-- Header -->
+<!-- Header -->
+<header class="header">
+  <div class="header-title">
+    <span class="subtitle">Pilotage financier</span>
+    <h1>Finances</h1>
+    <p class="count-label"> Une lecture simple et précise de la santé de votre activité.</p>
+  </div>
+  
+  <!-- Ajout de l'événement (click) ici -->
+  <button class="btn-primary" (click)="openAddModal()">
+    <i class="icon-plus">+</i>
+    Nouvelle Transaction
+  </button>
+</header>
+
+  <!-- Control Bar -->
+  <div class="controls-card">
+    <div class="search-and-filter">
+      <!-- Barre de recherche -->
+      <div class="search-input">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Rechercher..." 
+          [(ngModel)]="searchTerm" 
+          (input)="filterTransactions()" 
+        />
+      </div>
+</div>
+
+<!-- Action Button Wrapper -->
+  <div class="action-wrapper">
+    <button 
+      type="button" 
+      class="btn-export" 
+      title="Export vers Excel" 
+      (click)="exportTable()">
+      <i class="feather icon-download"></i>
+      <span>Exporter</span>
+    </button>
+  </div>
+  
+</div>
+
+  
+      
+
+    
+
+  <!-- Tableau des réservations -->
+  <div class="table-card">
+  <table class="reservations-table" id="exportTable">
+    <thead>
+      <tr>
+        <th>Date Transaction</th>
+        <th>Transaction</th>
+        <th>Type</th>
+        <th>Montant</th>
+        <th>Statut</th>
+        <th class="noExport"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let res of filteredTransactions()">
+  
+         <!-- Date -->
+        <td>
+          <span class="date-main">
+            {{ res.dateTransaction | date:'dd/MM/yyyy' }}
+          </span>
+        </td>
+
+        <!-- transaction -->
+        <td>
+          <div class="transaction-cell">
+            <div class="avatar" [ngClass]="getAvatarClass(res.transactionId)">
+              {{ getInitials(res.libelle || '', res.description || '') }}
+            </div>
+
+            <div class="transaction-info">
+              <span class="transaction-name">
+                {{ res.libelle }} {{ res.description }}
+              </span>
+              
+            </div>
+          </div>
+        </td>
+
+
+         <!-- type transaction -->
+          <td class="type-cell">
+            <span class="badge" [ngClass]="getTypeClass(res?.type)">
+              {{ res?.type }}
+            </span>
+          </td>
+
+        <!-- Events -->
+        <td class="text-center">
+          <span class="total-paid">
+            {{ res.montant }}
+          </span>
+        </td>
+
+
+        <!-- Statut -->
+          <td class="status-cell">
+            <span class="badge" [ngClass]="getStatusClass(res?.statut)">
+              {{ res?.statut }}
+            </span>
+          </td>
+
+
+        <!-- Actions -->
+        <td class="actions-cell">
+    <div class="action-menu-container">
+      <button 
+        type="button" 
+        class="btn-more" 
+        (click)="toggleMenu(res.transactionId, $event)">
+        •••
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (activeMenuId() === res.transactionId) {
+        <div class="action-dropdown">
+          <button type="button" (click)="openViewModal(res)">
+            👁️ Voir
+          </button>
+          <button type="button" (click)="openEditModal(res)">
+            ✏️ Modifier
+          </button>
+          <button type="button" class="delete-action" (click)="openDeleteModal(res)">
+            🗑️ Supprimer
+          </button>
+        </div>
+      }
+    </div>
+  </td>
+
+      </tr>
+
+
+      <tr *ngIf="filteredTransactions().length === 0">
+        <td colspan="6" class="empty-message">
+          Aucune Transaction trouvée.
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+</div>
+
+
+
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. VIEW MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'view'"
+  [showFooter]="false"
+  (closed)="closeModal()">
+  
+  <!-- Centered Header Section -->
+  <div class="transaction-header">
+    <div class="avatar">
+      {{ selectedTransaction()?.libelle?.[0] }}{{ selectedTransaction()?.description?.[0] }}
+    </div>
+    
+    <h2 class="Transaction-name">
+      {{ selectedTransaction()?.libelle }} {{ selectedTransaction()?.description }}
+    </h2>
+    
+    <span class="transaction-type">{{ selectedTransaction()?.type }}</span>
+    
+    <div class="status-badge ">
+      <span class="status-badge " [ngClass]="getStatusClass(selectedTransaction()?.statut)">
+              {{ selectedTransaction()?.statut }}
+            </span>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedTransaction()?.montant ?? 0 }}</span>
+      <span class="stat-label">Montant</span>
+    </div>
+
+    
+  </div>
+
+  <!-- Detailed Contact Information 
+  <div class="info-list">
+    <div class="info-item">
+      <span class="icon">📞</span>
+      <div class="info-content">
+        <label>Téléphone</label>
+        <p>{{ selectedTransaction()?.telephone }}</p>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon">✉️</span>
+      <div class="info-content">
+        <label>Email</label>
+        <p>{{ selectedTransaction()?.email }}</p>
+      </div>
+    </div>
+
+    
+  </div>-->
+
+  <!-- Reservation History 
+  <div class="history-section">
+    <h3>Historique des réservations</h3>
+    
+    <div class="history-list">
+      @for (item of reservations(); track item.reservationId) {
+        <div class="history-card">
+          <div class="history-icon">📅</div>
+          <div class="history-details">
+            <span class="title">{{ item.numeroReservation }}</span>
+            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.salle.nom }}</span>
+          </div>
+          <span class="history-price">{{ item.montantTotal | number:'1.0-0' }} DT</span>
+        </div>
+      }
+    </div>
+  </div>-->
+
+  <!-- Full Width Action Button -->
+  <button type="button" class="action-btn">
+    ✉️ Modifier la transaction
+  </button>
+</app-modal>
+
+<!-- 2. UPDATE / EDIT MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'edit'"
+  [title]="'Modifier la transaction'"
+  [subtitle]="'Mettre à jour les informations'"
+  [mode]="'edit'"
+  (closed)="closeModal()"
+  (saved)="saveTransactionChanges()">
+
+  <!-- Mode Nouveau Client avec Reactive Forms -->
+      <form [formGroup]="myForm" class="edit-form" >
+
+        <div class="form-group" hidden> 
+          
+          <input type="text" formControlName="transactionId" placeholder="id..."  hidden/>
+          
+        </div>
+        
+        
+
+        <!-- NOM -->
+        <div class="form-group">
+          <label>Libelle *</label>
+          <input type="text" formControlName="libelle" placeholder="Libelle..." />
+          <small class="text-danger" *ngIf="myForm.get('libelle')?.invalid && (myForm.get('libelle')?.dirty || myForm.get('libelle')?.touched)">
+            <span *ngIf="myForm.get('libelle')?.errors?.['required']">Le nom est obligatoire.</span>
+            <span *ngIf="myForm.get('libelle')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label>Description *</label>
+          <input type="text" formControlName="description" placeholder="Description..." />
+          <small class="text-danger" *ngIf="myForm.get('prenom')?.invalid && (myForm.get('description')?.dirty || myForm.get('description')?.touched)">
+            <span *ngIf="myForm.get('description')?.errors?.['required']">La Description est obligatoire.</span>
+            <span *ngIf="myForm.get('description')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- Montant -->
+        <div class="form-group">
+          <label>Montant *</label>
+          <input type="number" formControlName="montant" placeholder="Montant..." />
+          <small class="text-danger" *ngIf="myForm.get('prenom')?.invalid && (myForm.get('montant')?.dirty || myForm.get('montant')?.touched)">
+            <span *ngIf="myForm.get('montant')?.errors?.['required']">Le montant est obligatoire.</span>
+            <span *ngIf="myForm.get('montant')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+      
+
+
+        <!-- STATUT -->
+<div class="form-group">
+  <label>Statut</label>
+
+  <select formControlName="statut">
+    <option value="" disabled selected>Choisir un statut...</option>
+    <option value="VALIDE">Validée</option>
+    <option value="PAYE">Payée</option>
+    <option value="EN_ATTENTE">En attente</option>
+    <option value="ANNULE">Annuler</option>
+
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="myForm.get('statut')?.invalid && (myForm.get('statut')?.dirty || myForm.get('statut')?.touched)">
+    <span *ngIf="myForm.get('statut')?.errors?.['required']">
+      La statut est obligatoire.
+    </span>
+  </small>
+</div>
+
+ <!-- type -->
+<div class="form-group">
+  <label>type</label>
+
+  <select formControlName="type">
+     <option value="" disabled >Choisir un type...</option>
+    <option value="REVENU">Revenu</option>
+    <option value="DEPENSE">Dépense</option>
+    
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="myForm.get('type')?.invalid && (myForm.get('type')?.dirty || myForm.get('type')?.touched)">
+    <span *ngIf="myForm.get('type')?.errors?.['required']">
+      Le Type est obligatoire.
+    </span>
+  </small>
+</div>
+
+        
+
+      </form>
+  
+</app-modal>
+
+<!-- 3. DELETE CONFIRMATION MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'delete'"
+  [title]="'Confirmer la suppression'"
+  [saveText]="'Supprimer'"
+  [cancelText]="'Annuler'"
+  (closed)="closeModal()"
+  (saved)="confirmDelete()">
+
+  <div class="delete-confirmation">
+    <p>Êtes-vous sûr de vouloir supprimer <strong>{{ selectedTransaction()?.libelle }} {{ selectedTransaction()?.description }}</strong> ?</p>
+    <p class="warning-text">Cette action est irréversible.</p>
+  </div>
+</app-modal>
+
+
+
+
+
+
+<!-- ADD transaction MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'add'"
+  [title]="'Ajouter une transaction'"
+  [subtitle]="'Créer une nouvel transaction'"
+  [mode]="'create'"
+  (closed)="closeModal()"
+  (saved)="createTransaction()">
+
+  <form [formGroup]="addForm" class="edit-form">
+
+     <!-- NOM -->
+        <div class="form-group">
+          <label>Libelle *</label>
+          <input type="text" formControlName="libelle" placeholder="Libelle..." />
+          <small class="text-danger" *ngIf="myForm.get('libelle')?.invalid && (addForm.get('libelle')?.dirty || addForm.get('libelle')?.touched)">
+            <span *ngIf="addForm.get('libelle')?.errors?.['required']">Le nom est obligatoire.</span>
+            <span *ngIf="addForm.get('libelle')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label>Description *</label>
+          <input type="text" formControlName="description" placeholder="Description..." />
+          <small class="text-danger" *ngIf="addForm.get('prenom')?.invalid && (addForm.get('description')?.dirty || addForm.get('description')?.touched)">
+            <span *ngIf="addForm.get('description')?.errors?.['required']">La Description est obligatoire.</span>
+            <span *ngIf="addForm.get('description')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+        <!-- Montant -->
+        <div class="form-group">
+          <label>Montant *</label>
+          <input type="number" formControlName="montant" placeholder="Montant..." />
+          <small class="text-danger" *ngIf="addForm.get('prenom')?.invalid && (addForm.get('montant')?.dirty || addForm.get('montant')?.touched)">
+            <span *ngIf="addForm.get('montant')?.errors?.['required']">Le montant est obligatoire.</span>
+            <span *ngIf="addForm.get('montant')?.errors?.['minlength']">Au moins 3 caractères requis.</span>
+          </small>
+        </div>
+
+      
+
+
+        <!-- STATUT -->
+<div class="form-group">
+  <label>Statut</label>
+
+  <select formControlName="statut">
+    <option value="" disabled selected>Choisir un statut...</option>
+    <option value="VALIDE">Validée</option>
+    <option value="PAYE">Payée</option>
+    <option value="EN_ATTENTE">En attente</option>
+    <option value="ANNULE">Annuler</option>
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="addForm.get('statut')?.invalid && (addForm.get('statut')?.dirty || addForm.get('statut')?.touched)">
+    <span *ngIf="addForm.get('statut')?.errors?.['required']">
+      La statut est obligatoire.
+    </span>
+  </small>
+</div>
+
+ <!-- type -->
+<div class="form-group">
+  <label>type</label>
+
+  <select formControlName="type">
+     <option value="" disabled >Choisir un type...</option>
+    <option value="REVENU">Revenu</option>
+    <option value="DEPENSE">Dépense</option>
+    
+  </select>
+
+  <small
+    class="text-danger"
+    *ngIf="addForm.get('type')?.invalid && (addForm.get('type')?.dirty || addForm.get('type')?.touched)">
+    <span *ngIf="addForm.get('type')?.errors?.['required']">
+      Le Type est obligatoire.
+    </span>
+  </small>
+</div>
+
+
+  </form>
+
+</app-modal>
