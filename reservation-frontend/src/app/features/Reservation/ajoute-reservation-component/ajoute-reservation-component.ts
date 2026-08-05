@@ -12,6 +12,7 @@ import { TypePeriode } from '../../../core/models/salle/TypePeriode.enum';
 import { TarificationSalle } from '../../../core/models/salle/tarification-salle';
 
 import { ClientService } from '../../../core/services/client';
+import { EspaceService } from '../../../core/services/espace.service';
 import { SalleService } from '../../../core/services/salle.service';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { ServiceService } from '../../../core/services/service.service';
@@ -63,6 +64,7 @@ export class AjouterReservationComponent implements OnInit {
     private fb: FormBuilder,
     private reservationService: ReservationService,
     private clientService: ClientService,
+    private espaceService: EspaceService,
     private salleService: SalleService,
     private serviceService: ServiceService,
     private tarificationSalleService: TarificationSalleService,
@@ -73,7 +75,7 @@ export class AjouterReservationComponent implements OnInit {
   ngOnInit(): void {
     this.initForms();
     this.loadClients();
-    this.loadSalles();
+    this.loadSallesByUserEspace();
   }
 
   private initForms(): void {
@@ -125,6 +127,28 @@ export class AjouterReservationComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Erreur lors du chargement des salles :', err)
+    });
+  }
+
+  loadSallesByUserEspace(): void {
+    const userId = Number(localStorage.getItem('userId'));
+    if (!userId) {
+      this.loadSalles();
+      return;
+    }
+
+    this.espaceService.trouverEspaceParUserId(userId).subscribe({
+      next: (espace: any) => {
+        this.sallesDisponibles = Array.isArray(espace?.salles) ? espace.salles : [];
+        if (!this.sallesDisponibles.length) {
+          this.loadSalles();
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des salles par espace utilisateur :', err);
+        this.loadSalles();
+      }
     });
   }
 
@@ -319,14 +343,14 @@ export class AjouterReservationComponent implements OnInit {
       next: (reservations) => {
         const conflit = reservations.find(r => {
           const rSalleId = r.salle?.salleId ?? (r.salle as any)?.id;
-          const rPeriode = r.typePeriode || r.tarificationAppliquee?.typePeriode;
+          const rPeriode = r.typePeriode || r.tarificationAppliquee?.typePeriode || r.tarificationsAppliquees?.[0]?.typePeriode;
           const rStatut = r.statut;
 
           if (rStatut === StatutReservation.ANNULEE) return false;
           if (rSalleId !== salleId) return false;
 
           // Règle de chevauchement
-          if (rPeriode === typePeriode) return true;
+          if (rPeriode === typePeriode) return true; 
           if (rPeriode === 'JOURNEE') return true;
           if (typePeriode === 'JOURNEE') return true;
 
@@ -446,16 +470,14 @@ export class AjouterReservationComponent implements OnInit {
       this.servicesSelectionnes,
       resValue.notes,
       undefined,
-      this.tarificationSelectionnee,
+      this.tarificationSelectionnee ? [this.tarificationSelectionnee] : [],
       undefined,
       [],
-      new Date().toISOString(),
-      new Date().toISOString(),
-      resValue.typePeriode
-    );
+     );
 
     reservationToSave.notes = resValue.notes;
     reservationToSave.typePeriode = resValue.typePeriode;
+    reservationToSave.tarificationAppliquee = this.tarificationSelectionnee;
 
     this.reservationService.createReservation(reservationToSave).subscribe({
       next: (createdReservation) => {

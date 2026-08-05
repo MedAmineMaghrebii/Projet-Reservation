@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 export class FinalisationComponent implements OnInit {
   reservationData: any;
   clientName = '—';
-  salleName = '—';
+  salleName = '—'; 
   reservationDate = '—';
   reservationNumber = '—';
   montantTotal = 0;
@@ -41,7 +41,7 @@ export class FinalisationComponent implements OnInit {
       this.reservationNumber = this.reservationData.numeroReservation ?? '—';
       this.montantTotal = this.reservationData.montantTotal ?? 0;
       this.services = (this.reservationData.services ?? []).map((s: any) => s.nom ?? 'Service');
-      this.typePeriode = this.reservationData.typePeriode ?? this.reservationData.tarificationAppliquee?.typePeriode ?? '—';
+      this.typePeriode = this.reservationData.typePeriode ?? this.reservationData.tarificationAppliquee?.typePeriode ?? this.reservationData.tarificationsAppliquees?.[0]?.typePeriode ?? '—';
     }
   }
 

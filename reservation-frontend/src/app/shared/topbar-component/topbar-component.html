@@ -31,11 +31,18 @@
 
     <!-- Avatar + Nom utilisateur -->
     <div class="user-profile">
-      <div class="avatar">AM</div>
-      <span class="user-name">Amine</span>
+      <div class="avatar">{{ userInitials }}</div>
+      <span class="user-name">{{ userName }}</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
     </div>
   </div>
 </header>
+
+<div class="topbar-user-context">
+  <span class="context-label">Espace :</span>
+  <span class="context-value">{{ espaceName }}</span>
+  <span class="context-label">Salle :</span>
+  <span class="context-value">{{ salleName }}</span>
+</div>

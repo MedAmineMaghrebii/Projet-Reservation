@@ -238,7 +238,7 @@
             <span class="title">{{ item.numeroReservation }}</span>
             <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.salle.nom }}</span>
           </div>
-          <span class="history-price">{{ item.montantTotal | number:'1.0-0' }} DT</span>
+          <span class="history-price">{{ item.montantAPayer| number:'1.0-0' }} DT</span>
         </div>
       }
     </div>

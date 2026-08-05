@@ -3,6 +3,7 @@ import { Client } from '../clients/client';
 import { Salle } from '../salle/salle';
 import { Service } from '../service/service';
 import { TarificationSalle } from '../salle/tarification-salle';
+import { TypePeriode } from '../salle/TypePeriode.enum';
 import { Contrat } from '../contrats/contrat';
 import { Paiement } from '../paiement/paiement';
 import { User } from '../user/user';
@@ -21,6 +22,8 @@ export class Reservation {
   salle!: Salle;
   services: Service[] = [];
   tarificationsAppliquees: TarificationSalle[] = [];
+  tarificationAppliquee?: TarificationSalle;
+  typePeriode?: TypePeriode;
   contrat?: Contrat;
   paiements: Paiement[] = [];
   creePar?: User; // Ajouté pour correspondre au Java
