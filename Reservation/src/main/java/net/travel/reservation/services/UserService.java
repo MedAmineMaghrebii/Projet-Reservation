@@ -87,8 +87,9 @@ public class UserService {
         if (userRequest.getFirstname() != null) existingUser.setFirstname(userRequest.getFirstname());
         if (userRequest.getEmail() != null) existingUser.setEmail(userRequest.getEmail());
         if (userRequest.getRole() != null) existingUser.setRole(userRequest.getRole());
-        if (userRequest.getSalle() != null) existingUser.setSalle(userRequest.getSalle());
-        if (userRequest.getPost() != null) {
+        if (userRequest.getEspace() != null) {
+            existingUser.setEspace(userRequest.getEspace()); // Utilise setEspace au lieu de getEspace
+        }        if (userRequest.getPost() != null) {
             existingUser.setPost(userRequest.getPost());
         }
 

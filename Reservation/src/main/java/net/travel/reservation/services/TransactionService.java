@@ -36,13 +36,16 @@ public class TransactionService {
         Transaction ancienne = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction introuvable"));
 
-        ancienne.setLibelle(transaction.getLibelle());
-        ancienne.setDescription(transaction.getDescription());
-        ancienne.setMontant(transaction.getMontant());
-        ancienne.setType(transaction.getType());
-        ancienne.setStatut(transaction.getStatut());
-        ancienne.setModePaiement(transaction.getModePaiement());
-        ancienne.setReservation(transaction.getReservation());
+        if (transaction.getLibelle() != null) ancienne.setLibelle(transaction.getLibelle());
+        if (transaction.getDescription() != null) ancienne.setDescription(transaction.getDescription());
+        if (transaction.getMontant() != null) ancienne.setMontant(transaction.getMontant());
+        if (transaction.getType() != null) ancienne.setType(transaction.getType());
+        if (transaction.getStatut() != null) ancienne.setStatut(transaction.getStatut());
+        if (transaction.getModePaiement() != null) ancienne.setModePaiement(transaction.getModePaiement());
+        if (transaction.getReservation() != null) ancienne.setReservation(transaction.getReservation());
+
+        // ✅ Ajout de la mise à jour de l'espace
+        if (transaction.getEspace() != null) ancienne.setEspace(transaction.getEspace());
 
         return transactionRepository.save(ancienne);
     }
@@ -88,5 +91,28 @@ public class TransactionService {
      */
     public List<Transaction> getTransactionsByType(TypeTransaction type) {
         return transactionRepository.findByType(type);
+    }
+
+    // --- ✅ NOUVELLES MÉTHODES POUR L'ESPACE ---
+
+    /**
+     * Transactions d'un espace spécifique
+     */
+    public List<Transaction> getTransactionsByEspace(Long espaceId) {
+        return transactionRepository.findByEspaceEspaceId(espaceId);
+    }
+
+    /**
+     * Transactions d'un espace avec un statut précis
+     */
+    public List<Transaction> getTransactionsByEspaceAndStatut(Long espaceId, StatutTransaction statut) {
+        return transactionRepository.findByEspaceEspaceIdAndStatut(espaceId, statut);
+    }
+
+    /**
+     * Transactions d'un espace avec un type précis
+     */
+    public List<Transaction> getTransactionsByEspaceAndType(Long espaceId, TypeTransaction type) {
+        return transactionRepository.findByEspaceEspaceIdAndType(espaceId, type);
     }
 }

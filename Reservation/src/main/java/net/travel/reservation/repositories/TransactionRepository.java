@@ -31,4 +31,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             Long reservationId,
             TypeTransaction type
     );
+
+    // ✅ AJOUT : Toutes les transactions d'un espace spécifique
+    List<Transaction> findByEspaceEspaceId(Long espaceId);
+
+    // ✅ AJOUT : Transactions d'un espace avec un statut précis
+    List<Transaction> findByEspaceEspaceIdAndStatut(
+            Long espaceId,
+            StatutTransaction statut
+    );
+
+    // ✅ AJOUT : Transactions d'un espace avec un type précis
+    List<Transaction> findByEspaceEspaceIdAndType(
+            Long espaceId,
+            TypeTransaction type
+    );
 }

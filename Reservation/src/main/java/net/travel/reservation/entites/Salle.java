@@ -34,7 +34,9 @@ public class Salle {
     private String ville;
 
     private String telephone;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "espace_id")
+    private Espace espace;
     @Column(unique = true)
     private String email;
 
@@ -48,10 +50,4 @@ public class Salle {
     @JsonIgnore
     @Builder.Default
     private List<Service> services = new ArrayList<>();
-
-    // ✅ AJOUT : Relation bidirectionnelle vers User (Les employés/gestionnaires de la salle)
-    @OneToMany(mappedBy = "salle", fetch = FetchType.LAZY)
-    @JsonIgnore // Évite la boucle de référence JSON infinie lors de la sérialisation
-    @Builder.Default
-    private List<User> users = new ArrayList<>();
 }

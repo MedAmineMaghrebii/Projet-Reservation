@@ -1,11 +1,9 @@
 package net.travel.reservation.entites;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-
 
 @Entity
 @Table(name = "transactions")
@@ -16,45 +14,29 @@ import java.time.LocalDateTime;
 @Builder
 public class Transaction {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transactionId;
-
-
-
 
     // Exemple : "Acompte - ABC Consulting"
     @Column(nullable = false)
     private String libelle;
 
-
-
     private String description;
-
-
 
     @Column(nullable = false)
     private Double montant;
-
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TypeTransaction type;
 
-
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatutTransaction statut;
 
-
-
     @Enumerated(EnumType.STRING)
     private ModePaiement modePaiement;
-
-
 
     private LocalDateTime dateTransaction;
 
@@ -64,5 +46,13 @@ public class Transaction {
             nullable = true
     )
     private Reservation reservation;
+
+    // ✅ Ajout indispensable pour correspondre au mappedBy = "espace" de l'entité Espace
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "espace_id",
+            nullable = true
+    )
+    private Espace espace;
 
 }

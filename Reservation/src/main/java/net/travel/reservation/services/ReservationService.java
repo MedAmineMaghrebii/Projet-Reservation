@@ -3,16 +3,15 @@ package net.travel.reservation.services;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.StatutReservation;
+import net.travel.reservation.entites.TarificationSalle;
 import net.travel.reservation.entites.TypePeriode;
 import net.travel.reservation.entites.User;
 import net.travel.reservation.repositories.ReservationRepository;
 import net.travel.reservation.security.SecurityUtils;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,19 +32,19 @@ public class ReservationService {
      * Récupérer toutes les réservations
      */
     public List<Reservation> getAllReservations() {
-         User u = securityUtils.getCurrentUser();
+        User u = securityUtils.getCurrentUser();
         System.out.println(u);
         return reservationRepository.findAll();
     }
 
-
-    //list of reservation by clientId
+    /**
+     * Liste des réservations par clientId avec pagination
+     */
     public Page<Reservation> getReservationHistory(
             Long clientId,
             int page,
             int size
     ) {
-
         Pageable pageable = PageRequest.of(
                 page,
                 size,
@@ -54,7 +53,6 @@ public class ReservationService {
 
         return reservationRepository.findByClientClientId(clientId, pageable);
     }
-
 
     /**
      * Récupérer une réservation par ID
@@ -81,15 +79,21 @@ public class ReservationService {
         if (reservation.getSalle() == null || reservation.getSalle().getSalleId() == null) {
             throw new RuntimeException("La salle est obligatoire");
         }
-        if (reservation.getTarificationAppliquee() == null || reservation.getTarificationAppliquee().getPeriode() == null) {
-            throw new RuntimeException("Le type de période (tarification) est obligatoire");
+        if (reservation.getTarificationsAppliquees() == null || reservation.getTarificationsAppliquees().isEmpty()) {
+            throw new RuntimeException("Au moins un type de période (tarification) est obligatoire");
+        }
+
+        // On prend par exemple la première tarification de la liste pour vérifier la période
+        TypePeriode nouvellePeriode = reservation.getTarificationsAppliquees().get(0).getPeriode();
+        if (nouvellePeriode == null) {
+            throw new RuntimeException("Le type de période est obligatoire");
         }
 
         // 2. Vérification des conflits de date et période
         verifierDisponibilite(
                 reservation.getSalle().getSalleId(),
                 reservation.getDate(),
-                reservation.getTarificationAppliquee().getPeriode()
+                nouvellePeriode
         );
 
         // 3. Génération automatique du numéro de réservation s'il n'est pas renseigné
@@ -113,22 +117,26 @@ public class ReservationService {
                 .findBySalleSalleIdAndDateAndStatutNot(salleId, date, StatutReservation.ANNULEE);
 
         for (Reservation res : reservationsExistantes) {
-            if (res.getTarificationAppliquee() != null) {
-                TypePeriode periodeExistante = res.getTarificationAppliquee().getPeriode();
+            if (res.getTarificationsAppliquees() != null) {
+                for (TarificationSalle tarif : res.getTarificationsAppliquees()) {
+                    TypePeriode periodeExistante = tarif.getPeriode();
 
-                // Conflit 1 : Même période demandée (ex: NUIT vs NUIT)
-                if (periodeExistante == nouvellePeriode) {
-                    throw new RuntimeException("La salle est déjà réservée pour la période : " + nouvellePeriode);
-                }
+                    if (periodeExistante != null) {
+                        // Conflit 1 : Même période demandée
+                        if (periodeExistante == nouvellePeriode) {
+                            throw new RuntimeException("La salle est déjà réservée pour la période : " + nouvellePeriode);
+                        }
 
-                // Conflit 2 : La journée complète est déjà réservée
-                if (periodeExistante == TypePeriode.JOURNEE) {
-                    throw new RuntimeException("La salle est déjà réservée pour toute la journée");
-                }
+                        // Conflit 2 : La journée complète est déjà réservée
+                        if (periodeExistante == TypePeriode.JOURNEE) {
+                            throw new RuntimeException("La salle est déjà réservée pour toute la journée");
+                        }
 
-                // Conflit 3 : Une demi-journée ou nuit existe et la nouvelle demande est JOURNEE
-                if (nouvellePeriode == TypePeriode.JOURNEE) {
-                    throw new RuntimeException("Impossible de réserver la journée entière : le créneau " + periodeExistante + " est déjà pris");
+                        // Conflit 3 : Une demi-journée ou autre existe et la nouvelle demande est JOURNEE
+                        if (nouvellePeriode == TypePeriode.JOURNEE) {
+                            throw new RuntimeException("Impossible de réserver la journée entière : le créneau " + periodeExistante + " est déjà pris");
+                        }
+                    }
                 }
             }
         }
@@ -147,7 +155,6 @@ public class ReservationService {
         }
         if (reservationRequest.getMontantAPayer() != null
                 && reservationRequest.getMontantAPayer().compareTo(BigDecimal.ZERO) != 0) {
-
             reservation.setMontantAPayer(reservationRequest.getMontantAPayer());
         }
         if (reservationRequest.getStatut() != null) {
@@ -162,8 +169,8 @@ public class ReservationService {
         if (reservationRequest.getClient() != null) {
             reservation.setClient(reservationRequest.getClient());
         }
-        if (reservationRequest.getTarificationAppliquee() != null) {
-            reservation.setTarificationAppliquee(reservationRequest.getTarificationAppliquee());
+        if (reservationRequest.getTarificationsAppliquees() != null && !reservationRequest.getTarificationsAppliquees().isEmpty()) {
+            reservation.setTarificationsAppliquees(reservationRequest.getTarificationsAppliquees());
         }
         if (reservationRequest.getModifiePar() != null) {
             reservation.setModifiePar(reservationRequest.getModifiePar());
