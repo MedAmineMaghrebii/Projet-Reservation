@@ -4,12 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 
 import { Espace } from '../models/espace/espace';
+
 @Injectable({
   providedIn: 'root'
 })
 export class EspaceService {
   
-  // URL de ton API Spring Boot (à adapter selon ton environnement / proxy)
+  // URL de ton API Spring Boot
   private readonly apiUrl = `${environment.apiUrl}/api/espaces`;
 
   constructor(private http: HttpClient) {}
@@ -43,4 +44,16 @@ export class EspaceService {
   trouverEspacesParVille(ville: string): Observable<Espace[]> {
     return this.http.get<Espace[]>(`${this.apiUrl}/ville/${ville}`);
   }
-}
+
+  // GET /api/espaces/search?keyword={keyword}
+  rechercherEspaces(keyword: string): Observable<Espace[]> {
+    return this.http.get<Espace[]>(`${this.apiUrl}/search`, {
+      params: { keyword }
+    });
+  }
+
+  // ✅ AJOUT : GET /api/espaces/user/{userId} (Récupérer l'espace et ses salles par l'ID utilisateur)
+  trouverEspaceParUserId(userId: number): Observable<Espace> {
+    return this.http.get<Espace>(`${this.apiUrl}/user/${userId}`);
+  }
+} 

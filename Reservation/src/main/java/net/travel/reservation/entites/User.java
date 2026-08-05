@@ -55,6 +55,10 @@ public class User implements UserDetails {
     private String telephone;
 
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "espace_id")
+    private Espace espace;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_permissions",
@@ -68,9 +72,6 @@ public class User implements UserDetails {
             orphanRemoval = true,
             fetch = FetchType.LAZY)
     private Set<RefreshToken> refreshTokens = new HashSet<>();
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "salle_id", nullable = true) // nullable = true évite l'erreur SQL si des clients existent déjà
-    private Salle salle;
      @Override
     public String getUsername() {
         return email;

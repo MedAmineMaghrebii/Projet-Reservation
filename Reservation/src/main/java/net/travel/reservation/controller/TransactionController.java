@@ -109,4 +109,38 @@ public class TransactionController {
 
         return transactionService.getTransactionsByType(type);
     }
+
+    // --- ✅ NOUVEAUX ENDPOINTS POUR L'ESPACE ---
+
+    /**
+     * Transactions d'un espace spécifique
+     */
+    @GetMapping("/espace/{espaceId}")
+    public List<Transaction> getTransactionsByEspace(
+            @PathVariable Long espaceId) {
+
+        return transactionService.getTransactionsByEspace(espaceId);
+    }
+
+    /**
+     * Transactions d'un espace avec un statut précis
+     */
+    @GetMapping("/espace/{espaceId}/statut/{statut}")
+    public List<Transaction> getTransactionsByEspaceAndStatut(
+            @PathVariable Long espaceId,
+            @PathVariable StatutTransaction statut) {
+
+        return transactionService.getTransactionsByEspaceAndStatut(espaceId, statut);
+    }
+
+    /**
+     * Transactions d'un espace avec un type précis
+     */
+    @GetMapping("/espace/{espaceId}/type/{type}")
+    public List<Transaction> getTransactionsByEspaceAndType(
+            @PathVariable Long espaceId,
+            @PathVariable TypeTransaction type) {
+
+        return transactionService.getTransactionsByEspaceAndType(espaceId, type);
+    }
 }

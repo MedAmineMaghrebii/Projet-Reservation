@@ -33,10 +33,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             Long reservationId,
             TypeTransaction type
     );
-
-
-
-
     // 1. Somme par Type, Statut (optionnel), Année et Mois (optionnel si month = 0)
     @Query("SELECT COALESCE(SUM(t.montant), 0.0) FROM Transaction t " +
             "WHERE t.type = :type " +
@@ -59,4 +55,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("year") int year,
             @Param("month") int month);
 
-}
+
+
+
+
+    // ✅ AJOUT : Toutes les transactions d'un espace spécifique
+    List<Transaction> findByEspaceEspaceId(Long espaceId);
+
+    // ✅ AJOUT : Transactions d'un espace avec un statut précis
+    List<Transaction> findByEspaceEspaceIdAndStatut(
+            Long espaceId,
+            StatutTransaction statut
+    );
+    }
