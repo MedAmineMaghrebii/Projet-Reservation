@@ -1,6 +1,8 @@
 package net.travel.reservation.services;
 
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.CategoryExpenseDTO;
+import net.travel.reservation.dto.MonthlySummaryDTO;
 import net.travel.reservation.entites.StatutTransaction;
 import net.travel.reservation.entites.Transaction;
 import net.travel.reservation.entites.TypeTransaction;
@@ -8,6 +10,7 @@ import net.travel.reservation.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,6 +18,65 @@ import java.util.List;
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
+
+
+
+
+
+
+    public MonthlySummaryDTO getSummary(int year, Integer month) {
+        int targetMonth = (month != null) ? month : 0; // 0 signifie "Toute l'année"
+
+        Double totalRevenus = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
+                TypeTransaction.REVENU, null, year, targetMonth);
+
+        Double totalDepenses = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
+                TypeTransaction.DEPENSE, null, year, targetMonth);
+
+        Double revenusEnAttente = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
+                TypeTransaction.REVENU, StatutTransaction.EN_ATTENTE, year, targetMonth);
+
+        Double depensesEnAttente = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
+                TypeTransaction.DEPENSE, StatutTransaction.EN_ATTENTE, year, targetMonth);
+
+        return MonthlySummaryDTO.builder()
+                .year(year)
+                .month(targetMonth)
+                .totalRevenus(totalRevenus)
+                .totalDepenses(totalDepenses)
+                .totalRevenusEnAttente(revenusEnAttente)
+                .totalDepensesEnAttente(depensesEnAttente)
+                .beneficeNet(totalRevenus - totalDepenses)
+                .build();
+    }
+
+
+    public List<CategoryExpenseDTO> getExpensesByCategory(int year, Integer month) {
+        int targetMonth = (month != null) ? month : 0;
+        List<Object[]> rawData = transactionRepository.findExpensesByCategoryForYearAndOptionalMonth(year, targetMonth);
+        List<CategoryExpenseDTO> result = new ArrayList<>();
+
+        double totalExpenses = rawData.stream()
+                .mapToDouble(row -> ((Number) row[1]).doubleValue())
+                .sum();
+
+        for (Object[] row : rawData) {
+            String category = (String) row[0];
+            Double total = ((Number) row[1]).doubleValue();
+
+            double percentage = totalExpenses > 0
+                    ? Math.round((total / totalExpenses) * 100.0 * 10.0) / 10.0
+                    : 0.0;
+
+            result.add(CategoryExpenseDTO.builder()
+                    .category(category)
+                    .total(total)
+                    .percentage(percentage)
+                    .build());
+        }
+
+        return result;
+    }
 
     /**
      * Ajouter une transaction

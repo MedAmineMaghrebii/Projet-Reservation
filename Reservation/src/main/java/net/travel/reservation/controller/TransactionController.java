@@ -1,10 +1,13 @@
 package net.travel.reservation.controller;
 
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.CategoryExpenseDTO;
+import net.travel.reservation.dto.MonthlySummaryDTO;
 import net.travel.reservation.entites.StatutTransaction;
 import net.travel.reservation.entites.Transaction;
 import net.travel.reservation.entites.TypeTransaction;
 import net.travel.reservation.services.TransactionService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,23 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
+
+
+    // Exemple 1 (Année seule) : /api/finance/stats/summary?year=2026
+    // Exemple 2 (Année + Mois) : /api/finance/stats/summary?year=2026&month=8
+    @GetMapping("/summary")
+    public ResponseEntity<MonthlySummaryDTO> getSummary(
+            @RequestParam("year") int year,
+            @RequestParam(value = "month", required = false) Integer month) {
+        return ResponseEntity.ok(transactionService.getSummary(year, month));
+    }
+
+    @GetMapping("/expenses-by-category")
+    public ResponseEntity<List<CategoryExpenseDTO>> getExpensesByCategory(
+            @RequestParam("year") int year,
+            @RequestParam(value = "month", required = false) Integer month) {
+        return ResponseEntity.ok(transactionService.getExpensesByCategory(year, month));
+    }
 
     /**
      * Ajouter une transaction
