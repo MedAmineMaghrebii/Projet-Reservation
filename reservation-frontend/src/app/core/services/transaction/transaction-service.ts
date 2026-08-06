@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, Service } from '@angular/core';
 import { environment } from '../../../../environments/environment.development';
 import { Observable } from 'rxjs';
@@ -13,6 +13,41 @@ export class TransactionService {
   private readonly apiUrl = `${environment.apiUrl}/transactions`;
 
   constructor(private http: HttpClient) {}
+
+  /* Récupère le résumé financier (Revenus, Dépenses, Bénéfices, En attente)
+
+
+   */
+
+   getBarChartData(year: number): Observable<any> {
+    let params = new HttpParams().set('year', year.toString());
+    return this.http.get<any>(
+      `${this.apiUrl}/yearly-chart`, { params }
+    );
+
+  }
+  getFinanceSummary(year: number, month?: number): Observable<any> {
+    let params = new HttpParams().set('year', year.toString());
+    
+    if (month && month > 0) {
+      params = params.set('month', month.toString());
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/summary`, { params });
+  }
+
+  /**
+   * Récupère la répartition des dépenses par catégorie pour le Donut Chart
+   */
+  getExpensesByCategory(year: number, month?: number): Observable<any[]> {
+    let params = new HttpParams().set('year', year.toString());
+
+    if (month && month > 0) {
+      params = params.set('month', month.toString());
+    }
+
+    return this.http.get<any[]>(`${this.apiUrl}/expenses-by-category`, { params });
+  }
 
   //transactions summary
   getAllTransactionsSummary(): Observable<any[]> {

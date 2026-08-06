@@ -15,8 +15,8 @@ export class ClientService {
   constructor(private http: HttpClient) {}
 
   //Clients summary
-  getAllClientsSummary(): Observable<Client[]> {
-    return this.http.get<Client[]>(`${this.apiUrl}/summary`);
+  getAllClientsSummary(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/summary`);
   }
 
   /**

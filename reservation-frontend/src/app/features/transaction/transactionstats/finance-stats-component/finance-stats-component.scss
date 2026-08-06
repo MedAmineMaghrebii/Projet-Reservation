@@ -118,6 +118,7 @@
   }
 
   .chart-card {
+    min-width: 0;
     background: #ffffff;
     border-radius: 16px;
     padding: 1.5rem;
@@ -178,6 +179,14 @@
   justify-content: center;
   align-items: center;
   position: relative;
+  
+
+   width: 100%;
+  max-width: 250px;
+  height: 180px !important;
+  margin: 10px auto 0;
+
+  
 
   .donut-center-text {
     position: absolute;

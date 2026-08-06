@@ -13,6 +13,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import net.travel.reservation.dto.MonthlyChartDTO;
+
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
@@ -20,34 +27,43 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
 
 
+    public List<MonthlyChartDTO> getYearlyChart(Integer year) {
 
+        List<MonthlyChartDTO> result =
+                transactionRepository.getYearlyRevenueExpenseChart(year);
+
+        Map<Integer, MonthlyChartDTO> dataByMonth =
+                result.stream()
+                        .collect(Collectors.toMap(
+                                MonthlyChartDTO::getMonth,
+                                item -> item
+                        ));
+
+        List<MonthlyChartDTO> chart = new ArrayList<>();
+
+        for (int month = 1; month <= 12; month++) {
+
+            chart.add(
+                    dataByMonth.getOrDefault(
+                            month,
+                            MonthlyChartDTO.builder()
+                                    .month(month)
+                                    .revenus(0.0)
+                                    .depenses(0.0)
+                                    .build()
+                    )
+            );
+        }
+
+        return chart;
+    }
 
 
 
     public MonthlySummaryDTO getSummary(int year, Integer month) {
-        int targetMonth = (month != null) ? month : 0; // 0 signifie "Toute l'année"
+        int targetMonth = (month != null) ? month : 0; // 0 = whole year
 
-        Double totalRevenus = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
-                TypeTransaction.REVENU, null, year, targetMonth);
-
-        Double totalDepenses = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
-                TypeTransaction.DEPENSE, null, year, targetMonth);
-
-        Double revenusEnAttente = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
-                TypeTransaction.REVENU, StatutTransaction.EN_ATTENTE, year, targetMonth);
-
-        Double depensesEnAttente = transactionRepository.sumByTypeAndStatusAndYearAndOptionalMonth(
-                TypeTransaction.DEPENSE, StatutTransaction.EN_ATTENTE, year, targetMonth);
-
-        return MonthlySummaryDTO.builder()
-                .year(year)
-                .month(targetMonth)
-                .totalRevenus(totalRevenus)
-                .totalDepenses(totalDepenses)
-                .totalRevenusEnAttente(revenusEnAttente)
-                .totalDepensesEnAttente(depensesEnAttente)
-                .beneficeNet(totalRevenus - totalDepenses)
-                .build();
+        return transactionRepository.getMonthlySummary(year, targetMonth);
     }
 
 

@@ -2,6 +2,7 @@ package net.travel.reservation.controller;
 
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.dto.CategoryExpenseDTO;
+import net.travel.reservation.dto.MonthlyChartDTO;
 import net.travel.reservation.dto.MonthlySummaryDTO;
 import net.travel.reservation.entites.StatutTransaction;
 import net.travel.reservation.entites.Transaction;
@@ -20,6 +21,14 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    @GetMapping("/yearly-chart")
+    public ResponseEntity<List<MonthlyChartDTO>> getYearlyChart(
+            @RequestParam Integer year
+    ) {
+        return ResponseEntity.ok(
+                transactionService.getYearlyChart(year)
+        );
+    }
 
     // Exemple 1 (Année seule) : /api/finance/stats/summary?year=2026
     // Exemple 2 (Année + Mois) : /api/finance/stats/summary?year=2026&month=8

@@ -1,84 +1,110 @@
 <div class="stats-dashboard">
   <!-- Filtre Période -->
   <div class="period-filter-wrapper">
-    <select [(ngModel)]="selectedPeriod" class="period-select">
-      <option value="Juin 2024">Juin 2024</option>
-      <option value="Mai 2024">Mai 2024</option>
-      <option value="Avril 2024">Avril 2024</option>
+    <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event); onFilterChange()" class="period-select">
+      <option [ngValue]="2026">2026</option>
+      <option [ngValue]="2025">2025</option>
+      <option [ngValue]="2024">2024</option>
+    </select>
+
+    <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set($event); onFilterChange()" class="period-select">
+      <option [ngValue]="0">Toute l'année</option>
+      <option [ngValue]="1">Janvier</option>
+      <option [ngValue]="2">Février</option>
+      <option [ngValue]="3">Mars</option>
+      <option [ngValue]="4">Avril</option>
+      <option [ngValue]="5">Mai</option>
+      <option [ngValue]="6">Juin</option>
+      <option [ngValue]="7">Juillet</option>
+      <option [ngValue]="8">Août</option>
+      <option [ngValue]="9">Septembre</option>
+      <option [ngValue]="10">Octobre</option>
+      <option [ngValue]="11">Novembre</option>
+      <option [ngValue]="12">Décembre</option>
     </select>
   </div>
 
-  <!-- Cards KPI -->
+  <!-- Cards KPI Dynamiques -->
   <div class="kpi-grid">
-    <!-- Revenus -->
+    <!-- 1. Revenus -->
     <div class="kpi-card">
       <div class="kpi-header">
         <div class="icon-circle success">
           <i class="fa-solid fa-arrow-trend-up"></i>
         </div>
-        <span class="badge-trend positive">
-          <i class="fa-solid fa-arrow-up"></i> +8,2%
+        <span 
+          class="badge-trend" 
+          [ngClass]="stats().revenusTrend >= 0 ? 'positive' : 'negative'">
+          <i class="fa-solid" [ngClass]="stats().revenusTrend >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i> 
+          {{ stats().revenusTrend >= 0 ? '+' : '' }}{{ stats().revenusTrend | number:'1.1-1' }}%
         </span>
       </div>
       <span class="kpi-title">Revenus</span>
-      <h2 class="kpi-value">{{ stats.revenus | number }} DT</h2>
-      <span class="kpi-subtext">vs. mois dernier</span>
+      <h2 class="kpi-value">{{ stats().revenus | number:'1.0-2' }} DT</h2>
+      <span class="kpi-subtext">vs. période précédente</span>
     </div>
 
-    <!-- Dépenses -->
+    <!-- 2. Dépenses -->
     <div class="kpi-card">
       <div class="kpi-header">
         <div class="icon-circle danger">
           <i class="fa-solid fa-arrow-trend-down"></i>
         </div>
-        <span class="badge-trend negative">
-          <i class="fa-solid fa-arrow-down"></i> -3,1%
+        <!-- Pour les dépenses, la hausse est en rouge et la baisse en vert -->
+        <span 
+          class="badge-trend" 
+          [ngClass]="stats().depensesTrend <= 0 ? 'positive' : 'negative'">
+          <i class="fa-solid" [ngClass]="stats().depensesTrend >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i> 
+          {{ stats().depensesTrend >= 0 ? '+' : '' }}{{ stats().depensesTrend | number:'1.1-1' }}%
         </span>
       </div>
       <span class="kpi-title">Dépenses</span>
-      <h2 class="kpi-value">{{ stats.depenses | number }} DT</h2>
-      <span class="kpi-subtext">vs. mois dernier</span>
+      <h2 class="kpi-value">{{ stats().depenses | number:'1.0-2' }} DT</h2>
+      <span class="kpi-subtext">vs. période précédente</span>
     </div>
 
-    <!-- Bénéfice net -->
+    <!-- 3. Bénéfice net -->
     <div class="kpi-card">
       <div class="kpi-header">
         <div class="icon-circle primary">
           <i class="fa-solid fa-wallet"></i>
         </div>
-        <span class="badge-trend positive">
-          <i class="fa-solid fa-arrow-up"></i> +11,8%
+        <span 
+          class="badge-trend" 
+          [ngClass]="stats().beneficeTrend >= 0 ? 'positive' : 'negative'">
+          <i class="fa-solid" [ngClass]="stats().beneficeTrend >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"></i> 
+          {{ stats().beneficeTrend >= 0 ? '+' : '' }}{{ stats().beneficeTrend | number:'1.1-1' }}%
         </span>
       </div>
       <span class="kpi-title">Bénéfice net</span>
-      <h2 class="kpi-value">{{ stats.beneficeNet | number }} DT</h2>
-      <span class="kpi-subtext">marge de 73,6%</span>
+      <h2 class="kpi-value">{{ stats().beneficeNet | number:'1.0-2' }} DT</h2>
+      <span class="kpi-subtext">vs. période précédente</span>
     </div>
 
-    <!-- En attente -->
+    <!-- 4. En attente -->
     <div class="kpi-card">
       <div class="kpi-header">
         <div class="icon-circle warning">
           <i class="fa-regular fa-clock"></i>
         </div>
         <span class="badge-trend neutral">
-          <i class="fa-solid fa-file-invoice"></i> 8 factures
+          <i class="fa-solid fa-file-invoice"></i>{{stats().nombreEnAttente | number:'1.0-2'}} À encaisser
         </span>
       </div>
       <span class="kpi-title">En attente</span>
-      <h2 class="kpi-value">{{ stats.enAttente | number }} DT</h2>
-      <span class="kpi-subtext">à encaisser</span>
+      <h2 class="kpi-value">{{ stats().enAttente | number:'1.0-2' }} DT</h2>
+      <span class="kpi-subtext">Paiements non validés</span>
     </div>
   </div>
 
-  <!-- Section Graphiques (Inchangée) -->
+  <!-- Graphiques -->
   <div class="charts-grid">
-    <!-- Chart 1: Revenus vs Dépenses -->
+    <!-- Chart 1: Evolution -->
     <div class="chart-card evolution-chart">
       <div class="chart-header">
         <div>
           <h3>Revenus vs dépenses</h3>
-          <p>Évolution sur les 6 derniers mois</p>
+          <p>Aperçu sur la période sélectionnée</p>
         </div>
         <div class="legend">
           <span><i class="dot purple"></i> Revenus</span>
@@ -95,7 +121,7 @@
       </div>
     </div>
 
-    <!-- Chart 2: Dépenses par catégorie -->
+    <!-- Chart 2: Donut & Légende -->
     <div class="chart-card category-chart">
       <h3>Dépenses par catégorie</h3>
       
@@ -106,16 +132,19 @@
           [type]="doughnutChartType">
         </canvas>
         <div class="donut-center-text">
-          <strong>{{ stats.depenses | number }}</strong>
+          <strong>{{ stats().depenses | number:'1.0-0' }}</strong>
           <span>DT total</span>
         </div>
       </div>
 
       <ul class="category-legend">
-        <li><span><i class="dot purple"></i> Fournisseurs</span> <strong>40%</strong></li>
-        <li><span><i class="dot orange"></i> Personnel</span> <strong>25%</strong></li>
-        <li><span><i class="dot teal"></i> Maintenance</span> <strong>18%</strong></li>
-        <li><span><i class="dot lavender"></i> Autres</span> <strong>17%</strong></li>
+        <li *ngFor="let item of categoriesList()">
+          <span>
+            <i class="dot" [style.background-color]="item.color"></i> 
+            {{ item.category }}
+          </span> 
+          <strong>{{ item.percentage }}%</strong>
+        </li>
       </ul>
     </div>
   </div>
