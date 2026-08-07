@@ -547,47 +547,80 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
   }
 
   .history-card {
-    background-color: #f8fafc;
-    border-radius: 16px;
-    padding: 0.75rem 1rem;
+  background-color: #f8fafc;
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .history-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #f3e8ff;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    font-size: 0.85rem;
+  }
 
-    .history-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-color: #f3e8ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-    }
+  .history-details {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 
-    .history-details {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-
-      .title {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #1e293b;
-      }
-
-      .meta {
-        font-size: 0.72rem;
-        color: #94a3b8;
-      }
-    }
-
-    .history-price {
+    .title {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #0f172a;
+      color: #1e293b;
+    }
+
+    .meta {
+      font-size: 0.72rem;
+      color: #94a3b8;
     }
   }
+
+  .history-price {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .history-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 8px;
+
+  .btn-action {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+
+    &.edit:hover {
+      color: #2563eb;
+    }
+
+    &.delete:hover {
+      color: #dc2626;
+    }
+  }
+}
+}
 }
 
 /* Primary Purple Action Button */

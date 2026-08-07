@@ -2,6 +2,7 @@ package net.travel.reservation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.ApiResponse;
 import net.travel.reservation.entites.TarificationSalle;
 import net.travel.reservation.services.TarificationSalleService;
 import org.springframework.http.HttpStatus;
@@ -38,23 +39,53 @@ public class TarificationController {
 
     // --- Créer une tarification ---
     @PostMapping
-    public ResponseEntity<TarificationSalle> createTarification(@Valid @RequestBody TarificationSalle tarification) {
-        TarificationSalle nouvelleTarification = tarificationSalleService.createTarification(tarification);
-        return new ResponseEntity<>(nouvelleTarification, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<TarificationSalle>> createTarification(
+            @Valid @RequestBody TarificationSalle tarification) {
+
+        TarificationSalle nouvelleTarification =
+                tarificationSalleService.createTarification(tarification);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(
+                        HttpStatus.CREATED.value(),
+                        "Tarification créée avec succès",
+                        nouvelleTarification
+                ));
     }
+
 
     // --- Modifier une tarification ---
     @PutMapping("/{id}")
-    public ResponseEntity<TarificationSalle> updateTarification(
+    public ResponseEntity<ApiResponse<TarificationSalle>> updateTarification(
             @PathVariable Long id,
             @Valid @RequestBody TarificationSalle tarification) {
-        return ResponseEntity.ok(tarificationSalleService.updateTarification(id, tarification));
+
+        TarificationSalle tarificationModifiee =
+                tarificationSalleService.updateTarification(id, tarification);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Tarification modifiée avec succès",
+                        tarificationModifiee
+                )
+        );
     }
+
 
     // --- Supprimer une tarification ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTarification(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteTarification(
+            @PathVariable Long id) {
+
         tarificationSalleService.deleteTarification(id);
-        return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Tarification supprimée avec succès",
+                        null
+                )
+        );
     }
 }

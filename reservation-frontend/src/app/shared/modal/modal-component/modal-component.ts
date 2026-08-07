@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 
-export type ModalMode = 'delete' |'add' | 'edit' | 'view' | 'create' | null;
+export type ModalMode = 'delete' |'add' | 'edit' | 'view' | 'create' | 'editTarif' | null;
 
 @Component({
   selector: 'app-modal',

@@ -14,6 +14,9 @@ import { Salle } from '../../../core/models/salle/salle';
 import * as XLSX from 'xlsx';
 import { saveAs }  from 'file-saver';
 import { Toast } from '../../../shared/toast/toast';
+import { TypePeriode } from '../../../core/models/salle/TypePeriode.enum';
+import { TarificationSalleService } from '../../../core/services/tarification-salle.service';
+import { TarificationSalle } from '../../../core/models/salle/tarification-salle';
 
 @Component({
   selector: 'app-salle-componenet',
@@ -30,7 +33,7 @@ export class SalleComponenet {
   toastType= signal<'success' | 'error'>('success');
   private toastTimer?: ReturnType<typeof setTimeout>;
   //
-reservations = signal<Reservation[]>([]);
+tarifications = signal<TarificationSalle[]>([]);
   salles= signal<any[]>([]);
   filteredSalles= signal<any[]>([]);
   sallesDisponibles = signal<Salle[]>([]);
@@ -48,12 +51,14 @@ activeMenuId = signal<number | string | null>(null);
   selectedSalle = signal<any>(null);
   myForm: FormGroup
   addForm : FormGroup
+  tarifForm : FormGroup
 
   constructor(private fb : FormBuilder,private userService: UserService, 
     private reservationService : ReservationService,
     private router: Router ,
       private cdr: ChangeDetectorRef ,
-      private salleService : SalleService
+      private salleService : SalleService,
+      private tarifService : TarificationSalleService
   ) {
     
 
@@ -69,6 +74,17 @@ this.addForm = this.fb.group({
   email: ['', [ Validators.email]],
   espace: [null] // or Validators.required if every salle must belong to an espace
 });
+
+//tarif form
+this.tarifForm = this.fb.group({
+  id: [],
+  typePeriode: ["",[Validators.required]],
+  prix: [null, [Validators.required, Validators.min(1)]],
+  
+  salle: [null], // or Validators.required if every salle must belong to an espace
+  salleId: [null]
+});
+
 
   // Initialize your Reactive Form with Validators
   this.myForm = this.fb.group({
@@ -142,6 +158,19 @@ private showToast(message: string, type: 'success' | 'error' = 'success'): void 
   }
 
 
+
+  loadTarifs(id : any): void {
+    this.tarifService.findBySalleId(id).subscribe({
+      next: (data) => {
+        this.tarifications.set(data);
+        
+        
+      },
+      error: (err) => console.error('Erreur lors du chargement des salles :', err)
+    });
+  }
+  
+
 // Espaces
 loadEspaces(): void {
     this.salleService.getAllSalles().subscribe({
@@ -168,11 +197,24 @@ loadEspaces(): void {
 
   // --- Modal Open Actions ---
   openViewModal(salle: Salle) {
+    this.loadTarifs(salle.salleId)
     this.selectedSalle.set(salle);
     console.log(this.selectedSalle())
      
     
     this.activeModal.set('view');
+    this.activeMenuId.set(null);
+  }
+
+  openTarifModal(salle : any){
+    this.selectedSalle.set(salle);
+    this.tarifForm.reset();
+
+  this.tarifForm.patchValue({
+    salle: this.selectedSalle(),
+    salleId: this.selectedSalle()?.salleId
+  });
+    this.activeModal.set('create');
     this.activeMenuId.set(null);
   }
   
@@ -208,11 +250,107 @@ openAddModal(){
   closeModal() {
     this.activeModal.set(null);
     this.selectedSalle.set(null);
+    this.tarifications.set([])
     this.myForm.reset();
     this.addForm.reset()
   }
 
+  openEditTarif(item: TarificationSalle) {
 
+  this.tarifForm.patchValue({
+    id: item.id,
+    typePeriode: item.typePeriode,
+    prix: item.prix,
+    salle: item.salle,
+    salleId: item.salleId
+  });
+
+  this.activeModal.set('editTarif');
+}
+
+
+updateTarif() {
+
+  const tarif: TarificationSalle = {
+    id: this.tarifForm.value.id,
+    typePeriode: this.tarifForm.value.typePeriode,
+    prix: this.tarifForm.value.prix,
+    salle: this.selectedSalle(),
+    salleId: this.tarifForm.value.salleId
+  };
+
+
+  this.tarifService.updateTarification(
+    tarif.id!,
+    tarif
+  ).subscribe({
+    next: (response) => {
+      
+     
+      this.showToast(response.message,'success')
+      this.closeModal();
+      this.openViewModal(tarif.salle!)
+      this.loadTarifs(tarif.salleId);
+      
+
+      // recharge les tarifications
+      
+
+    }
+  });
+
+}
+
+deleteTarif(id?: number) {
+  if (!id) return;
+
+  this.tarifService.deleteTarification(id).subscribe({
+    next: (response) => {
+      this.showToast(response.message,'success')
+      this.tarifications.update(list =>
+        list.filter(t => t.id !== id)
+      );
+    }
+  });
+}
+
+
+  //create tarif
+
+  //create Salle
+  createTarif() {
+  if (this.tarifForm.invalid) {
+    this.tarifForm.markAllAsTouched();
+    return;
+  }
+
+  const tarif = {
+  typePeriode: this.tarifForm.value.typePeriode,
+    prix: this.tarifForm.value.prix,
+    salle: this.selectedSalle(),
+    salleId: this.selectedSalle()?.salleId
+  
+};
+console.log(tarif)
+
+  this.tarifService.createTarification(tarif).subscribe({
+    next: (response) => {
+      this.showToast(response.message,'success')
+
+      this.closeModal();
+
+      this.addForm.reset();
+
+      // reload your users list if needed
+      this.loadSalles();
+    },
+
+    error: (error) => {
+      console.error("Erreur création tarif :", error);
+      this.showToast(error.error.message,'error')
+    }
+  });
+}
 
   //create Salle
   createSalle() {

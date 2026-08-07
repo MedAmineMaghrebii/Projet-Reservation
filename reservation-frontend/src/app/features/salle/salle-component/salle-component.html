@@ -78,7 +78,7 @@
         <!-- salle -->
         <td>
           <div class="salle-cell">
-            <div class="avatar" [ngClass]="getAvatarClass(res.SalleId)">
+            <div class="avatar" [ngClass]="getAvatarClass(res.salleId)">
               {{ getInitials(res.nom ,"") }}
             </div>
 
@@ -142,6 +142,9 @@
       <!-- Dropdown Menu -->
       @if (activeMenuId() === res.salleId) {
         <div class="action-dropdown">
+            <button type="button" (click)="openTarifModal(res)">
+            👁️ Ajouter tarif
+          </button>
           <button type="button" (click)="openViewModal(res)">
             👁️ Voir
           </button>
@@ -237,29 +240,141 @@
     
   </div>
 
-  <!-- Reservation History 
+  <!-- list tarification -->
   <div class="history-section">
-    <h3>Historique des réservations</h3>
-    
-    <div class="history-list">
-      @for (item of reservations(); track item.reservationId) {
-        <div class="history-card">
-          <div class="history-icon">📅</div>
-          <div class="history-details">
-            <span class="title">{{ item.numeroReservation }}</span>
-            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.salle.nom }}</span>
-          </div>
-          <span class="history-price">{{ item.montantTotal | number:'1.0-0' }} DT</span>
+  Liste des tarifications
+
+  <div class="history-list">
+    @for (item of tarifications(); track item.id) {
+      <div class="history-card">
+
+        <div class="history-icon">📅</div>
+
+        <div class="history-details">
+          <span class="title">{{ item.typePeriode }}</span>
         </div>
-      }
-    </div>
-  </div>-->
+
+        <span class="history-price">
+          {{ item.prix | number:'1.0-0' }} DT
+        </span>
+
+        <div class="history-actions">
+
+          <button
+            class="btn-action edit"
+            title="Modifier"
+            (click)="openEditTarif(item)">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+
+          <button
+            class="btn-action delete"
+            title="Supprimer"
+            (click)="deleteTarif(item.id)">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+
+        </div>
+
+      </div>
+    }
+  </div>
+</div>
 
   <!-- Full Width Action Button -->
   <button type="button" class="action-btn">
     ✉️ Contacter la Salle
   </button>
 </app-modal>
+
+<app-modal
+  [isOpen]="activeModal() === 'editTarif'"
+  [title]="'Modifier une tarification'"
+  [subtitle]="'Modifier le prix ou la période'"
+  [mode]="'edit'"
+  (closed)="closeModal()"
+  (saved)="updateTarif()">
+
+
+  <form [formGroup]="tarifForm" class="edit-form">
+
+
+    <!-- ID -->
+    <input type="hidden" formControlName="id">
+
+
+    <!-- SALLE -->
+    <input type="hidden" formControlName="salle">
+
+
+    <!-- TYPE PERIODE -->
+    <div class="form-group">
+
+      <label>Type de période *</label>
+
+      <select formControlName="typePeriode">
+
+        <option value="MATIN">
+          Matin
+        </option>
+
+        <option value="APRES_MIDI">
+          Après-midi
+        </option>
+
+        <option value="JOURNEE">
+          Journée
+        </option>
+
+        <option value="NUIT">
+          Nuit
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- PRIX -->
+    <div class="form-group">
+
+      <label>Prix *</label>
+
+      <input
+        type="number"
+        formControlName="prix"
+        placeholder="Prix...">
+
+      <small
+        class="text-danger"
+        *ngIf="
+          tarifForm.get('prix')?.invalid &&
+          (tarifForm.get('prix')?.dirty ||
+          tarifForm.get('prix')?.touched)
+        ">
+
+        <span *ngIf="tarifForm.get('prix')?.errors?.['required']">
+          Le prix est obligatoire.
+        </span>
+
+        <span *ngIf="tarifForm.get('prix')?.errors?.['min']">
+          Le prix doit être supérieur à 0.
+        </span>
+
+      </small>
+
+    </div>
+
+
+  </form>
+
+
+</app-modal>
+
+
+
+
+
 
 <!-- 2. UPDATE / EDIT MODAL -->
 <app-modal
@@ -519,6 +634,121 @@
       </small>
     </div>
     -->
+  </form>
+
+</app-modal>
+
+
+
+<app-modal
+  [isOpen]="activeModal() === 'create'"
+  [title]="'Ajouter une tarification'"
+  [subtitle]="'Créer une nouvelle tarification'"
+  [mode]="'create'"
+  (closed)="closeModal()"
+  (saved)="createTarif()">
+
+  <form [formGroup]="tarifForm" class="edit-form">
+
+    <!-- ID -->
+    <div class="form-group" hidden>
+      <input type="hidden" formControlName="id">
+    </div>
+
+    <!-- SALLE SELECTIONNÉE -->
+    <div class="form-group" hidden>
+      <input
+        type="hidden"
+        formControlName="salle"
+        [value]="selectedSalle()">
+    </div>
+
+
+    <!-- TYPE PERIODE -->
+    <div class="form-group">
+      <label>Type de période *</label>
+
+      <select formControlName="typePeriode">
+
+        <option value="" disabled>
+          Choisir une période...
+        </option>
+
+        <option value="MATIN">
+          Matin
+        </option>
+
+        <option value="APRES_MIDI">
+          Après-midi
+        </option>
+
+        <option value="JOURNEE">
+          Journée
+        </option>
+
+        <option value="NUIT">
+          Nuit
+        </option>
+
+      </select>
+
+      <small
+        class="text-danger"
+        *ngIf="
+          tarifForm.get('typePeriode')?.invalid &&
+          (tarifForm.get('typePeriode')?.dirty ||
+          tarifForm.get('typePeriode')?.touched)
+        ">
+        <span *ngIf="tarifForm.get('typePeriode')?.errors?.['required']">
+          Le type de période est obligatoire.
+        </span>
+      </small>
+
+    </div>
+
+
+    <!-- PRIX -->
+    <div class="form-group">
+      <label>Prix *</label>
+
+      <input
+        type="number"
+        formControlName="prix"
+        placeholder="Prix de la tarification...">
+
+      <small
+        class="text-danger"
+        *ngIf="
+          tarifForm.get('prix')?.invalid &&
+          (tarifForm.get('prix')?.dirty ||
+          tarifForm.get('prix')?.touched)
+        ">
+
+        <span *ngIf="tarifForm.get('prix')?.errors?.['required']">
+          Le prix est obligatoire.
+        </span>
+
+        <span *ngIf="tarifForm.get('prix')?.errors?.['min']">
+          Le prix doit être supérieur à 0.
+        </span>
+
+      </small>
+
+    </div>
+
+
+    <!-- SALLE AFFICHAGE (OPTIONNEL) -->
+    <div class="form-group">
+      <label>Salle sélectionnée</label>
+<input formControlName="salle" value ="selectedSalle()" hidden>
+      <input
+        type="text"
+        [value]="selectedSalle()?.nom"
+        readonly>
+
+    </div>
+
+
   </form>
 
 </app-modal>

@@ -37,21 +37,21 @@ export class TarificationSalleService {
   /**
    * Créer une nouvelle tarification
    */
-  createTarification(tarification: TarificationSalle): Observable<TarificationSalle> {
-    return this.http.post<TarificationSalle>(this.apiUrl, tarification);
+  createTarification(tarification: TarificationSalle): Observable<any> {
+    return this.http.post<any>(this.apiUrl, tarification);
   }
 
   /**
    * Modifier une tarification existante
    */
-  updateTarification(id: number, tarification: TarificationSalle): Observable<TarificationSalle> {
-    return this.http.put<TarificationSalle>(`${this.apiUrl}/${id}`, tarification);
+  updateTarification(id: number, tarification: TarificationSalle): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, tarification);
   }
 
   /**
    * Supprimer une tarification par ID
    */
-  deleteTarification(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deleteTarification(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }
