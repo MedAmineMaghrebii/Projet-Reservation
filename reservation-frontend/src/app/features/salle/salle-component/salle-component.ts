@@ -312,7 +312,8 @@ openAddModal(){
       if (typeof this.filterSalles === 'function') {
         this.filterSalles();
       }
-      this.cdr.detectChanges();
+      this.loadSalles()
+     
 
       // 3. Close modal
       this.closeModal();

@@ -2,6 +2,7 @@ package net.travel.reservation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.ApiResponse;
 import net.travel.reservation.entites.Salle;
 import net.travel.reservation.services.SalleService;
 import org.springframework.http.HttpStatus;
@@ -38,26 +39,51 @@ public class SalleController {
 
     // --- Ajouter une salle ---
     @PostMapping
-    public ResponseEntity<Salle> createSalle(@Valid @RequestBody Salle salle) {
+    public ResponseEntity<ApiResponse<Salle>> createSalle(
+            @Valid @RequestBody Salle salle) {
+
         Salle nouvelleSalle = salleService.createSalle(salle);
-        return new ResponseEntity<>(nouvelleSalle, HttpStatus.CREATED);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(
+                        HttpStatus.CREATED.value(),
+                        "Salle créée avec succès",
+                        nouvelleSalle
+                ));
     }
 
     // --- Modifier une salle ---
     @PutMapping("/{id}")
-    public ResponseEntity<Salle> updateSalle(
+    public ResponseEntity<ApiResponse<Salle>> updateSalle(
             @PathVariable Long id,
             @Valid @RequestBody Salle salle) {
-        return ResponseEntity.ok(salleService.updateSalle(id, salle));
+
+        Salle salleModifiee = salleService.updateSalle(id, salle);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Salle modifiée avec succès",
+                        salleModifiee
+                )
+        );
     }
 
     // --- Supprimer une salle ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSalle(@PathVariable Long id) {
-        salleService.deleteSalle(id);
-        return ResponseEntity.noContent().build();
-    }
+    public ResponseEntity<ApiResponse<Void>> deleteSalle(
+            @PathVariable Long id) {
 
+        salleService.deleteSalle(id);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Salle supprimée avec succès",
+                        null
+                )
+        );
+    }
     // --- Rechercher les salles par ville ---
     @GetMapping("/ville/{ville}")
     public ResponseEntity<List<Salle>> findByVille(@PathVariable String ville) {
