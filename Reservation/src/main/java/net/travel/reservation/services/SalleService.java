@@ -2,10 +2,11 @@ package net.travel.reservation.services;
 
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.entites.Salle;
+import net.travel.reservation.entites.User;
 import net.travel.reservation.repositories.SalleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import net.travel.reservation.security.SecurityUtils; // Import de SecurityUtils
 import java.util.List;
 
 @Service
@@ -14,7 +15,7 @@ import java.util.List;
 public class SalleService {
 
     private final SalleRepository salleRepository;
-
+    private final SecurityUtils securityUtils;
     // Récupérer toutes les salles
     public List<Salle> getAllSalles() {
         return salleRepository.findAll();
@@ -74,9 +75,18 @@ public class SalleService {
     public List<Salle> findByCapacite(Integer capacite) {
         return salleRepository.findByCapaciteMaxGreaterThanEqual(capacite);
     }
-
     // Recherche de salles correspondant aux critères
     public List<Salle> rechercherSalleDisponible(String ville, Integer capacite) {
         return salleRepository.findByVilleAndCapaciteMaxGreaterThanEqual(ville, capacite);
+    }
+    public List<Salle> getSallesByConnectedUser() {
+        User currentUser = securityUtils.getCurrentUser();
+
+        if (currentUser.getEspace() == null) {
+            throw new RuntimeException("Aucun espace n'est associé à cet utilisateur.");
+        }
+
+        Long espaceId = currentUser.getEspace().getEspaceId();
+        return salleRepository.findByEspace_EspaceId(espaceId);
     }
 }

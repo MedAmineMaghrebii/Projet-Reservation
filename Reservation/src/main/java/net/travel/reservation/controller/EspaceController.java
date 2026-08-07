@@ -76,7 +76,7 @@ public class EspaceController {
     // ✅ AJOUT : Récupérer l'espace et ses salles par l'ID de l'utilisateur -> /api/espaces/user/{userId}
     @GetMapping("/user/{userId}")
     public ResponseEntity<Espace> trouverEspaceParUserId(@PathVariable Long userId) {
-        return espaceService.trouverEspaceParUserId(userId)
+        return espaceService.trouverEspaceParId(userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

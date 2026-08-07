@@ -68,43 +68,27 @@ public class ReservationService {
     @Transactional
     public Reservation createReservation(Reservation reservation) {
 
+        User currentUser = securityUtils.getCurrentUser();
+
         if (reservation.getReservationId() != null && reservation.getReservationId() <= 0) {
             reservation.setReservationId(null);
         }
 
-        // 1. Validation des données obligatoires
-        if (reservation.getDate() == null) {
-            throw new RuntimeException("La date de l'événement est obligatoire");
-        }
-        if (reservation.getSalle() == null || reservation.getSalle().getSalleId() == null) {
-            throw new RuntimeException("La salle est obligatoire");
-        }
-        if (reservation.getTarificationsAppliquees() == null || reservation.getTarificationsAppliquees().isEmpty()) {
-            throw new RuntimeException("Au moins un type de période (tarification) est obligatoire");
-        }
+        // ... tes validations
 
-        // On prend par exemple la première tarification de la liste pour vérifier la période
-        TypePeriode nouvellePeriode = reservation.getTarificationsAppliquees().get(0).getPeriode();
-        if (nouvellePeriode == null) {
-            throw new RuntimeException("Le type de période est obligatoire");
-        }
-
-        // 2. Vérification des conflits de date et période
-        verifierDisponibilite(
-                reservation.getSalle().getSalleId(),
-                reservation.getDate(),
-                nouvellePeriode
-        );
-
-        // 3. Génération automatique du numéro de réservation s'il n'est pas renseigné
         if (reservation.getNumeroReservation() == null || reservation.getNumeroReservation().isBlank()) {
-            reservation.setNumeroReservation("RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+            reservation.setNumeroReservation(
+                    "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()
+            );
         }
 
-        // 4. Statut par défaut si non spécifié
         if (reservation.getStatut() == null) {
             reservation.setStatut(StatutReservation.EN_ATTENTE);
         }
+
+        // Utilisateur qui crée la réservation
+        reservation.setCreePar(currentUser);
+
 
         return reservationRepository.save(reservation);
     }

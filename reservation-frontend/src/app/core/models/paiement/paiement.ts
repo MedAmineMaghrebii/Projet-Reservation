@@ -13,7 +13,7 @@ export class Paiement {
   urlRecuPdf?: string;
   notes?: string;
   creePar?: User;
-  dateCreation!: string;
+  dateCreation?: string;
 
   constructor(
     paiementId?: string,

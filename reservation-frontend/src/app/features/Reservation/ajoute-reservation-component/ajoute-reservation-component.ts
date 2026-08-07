@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 
 import { Client } from '../../../core/models/clients/client';
+import { TypeClient } from '../../../core/models/clients/typeClient.enum';
 import { Salle } from '../../../core/models/salle/salle';
 import { Reservation } from '../../../core/models/reservations/reservation';
 import { StatutReservation } from '../../../core/models/reservations/statut-reservation.enum';
@@ -12,14 +13,20 @@ import { TypePeriode } from '../../../core/models/salle/TypePeriode.enum';
 import { TarificationSalle } from '../../../core/models/salle/tarification-salle';
 
 import { ClientService } from '../../../core/services/client';
-import { EspaceService } from '../../../core/services/espace.service';
 import { SalleService } from '../../../core/services/salle.service';
 import { ReservationService } from '../../../core/services/reservation.service';
 import { ServiceService } from '../../../core/services/service.service';
 import { TarificationSalleService } from '../../../core/services/tarification-salle.service';
 import { Toast } from '../../../shared/toast/toast';
 import { AlertComponent } from '../../../shared/alert/alert';
-
+import { PaiementService } from '../../../core/services/paiement.service';
+import { TransactionService } from '../../../core/services/transaction/transaction-service';
+import { TypePaiement } from '../../../core/models/paiement/TypePaiement.enum';
+import { MethodePaiement } from '../../../core/models/paiement/MethodePaiement.enum';
+import { PaiementRequestDTO } from '../../../core/models/PaiementRequestDTO';
+import { Transaction } from '../../../core/models/transaction';
+import { TypeTransaction } from '../../../core/models/TypeTransaction.enum';
+import { StatutTransaction } from '../../../core/models/StatutTransaction.enum';
 @Component({
   selector: 'app-ajouter-reservation',
   standalone: true,
@@ -47,15 +54,24 @@ export class AjouterReservationComponent implements OnInit {
   // Formulaire Réactif pour la Réservation & Tarification
   reservationForm!: FormGroup;
 
-  tauxAcompte: number = 30;
+tauxAcompte: number = 30;
+  pourcentageRemise: number = 0;
   tarificationSelectionnee?: TarificationSalle;
+  availableTarifications: TarificationSalle[] = [];
+  tarificationsSelectionnees: TarificationSalle[] = [];
+  typePeriodeOptions = [
+    { label: 'Matin', value: TypePeriode.MATIN },
+    { label: 'Après-midi', value: TypePeriode.APRES_MIDI },
+    { label: 'Journée', value: TypePeriode.JOURNEE },
+    { label: 'Nuit', value: TypePeriode.NUIT }
+  ];
 
   toastVisible = false;
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
   alertVisible = false;
   alertTitle = '';
-  alertMessage = '';
+  alertMessage = '';  
   alertType: 'danger' | 'warning' | 'info' = 'warning';
   private toastTimer?: ReturnType<typeof setTimeout>;
   private alertAction?: () => void;
@@ -64,19 +80,20 @@ export class AjouterReservationComponent implements OnInit {
     private fb: FormBuilder,
     private reservationService: ReservationService,
     private clientService: ClientService,
-    private espaceService: EspaceService,
     private salleService: SalleService,
     private serviceService: ServiceService,
     private tarificationSalleService: TarificationSalleService,
+    private paiementService: PaiementService,
+    private transactionService: TransactionService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.initForms();
-    this.loadClients();
-    this.loadSallesByUserEspace();
-  }
+   ngOnInit(): void {
+     this.initForms();
+     this.loadClients();
+     this.loadSallesByUserEspace();
+   }
 
   private initForms(): void {
     // Initialisation du formulaire Nouveau Client avec Validators
@@ -93,10 +110,16 @@ export class AjouterReservationComponent implements OnInit {
     this.reservationForm = this.fb.group({
       salleSelectionnee: [null, Validators.required],
       date: ['', Validators.required],
-      typePeriode: [null, Validators.required],
-      montantTotal: [0, [Validators.required, Validators.min(0)]],
+      typePeriodes: [[], Validators.minLength(1)],
+montantTotal: [0, [Validators.required, Validators.min(0)]],
       tauxAcompte: [30],
+      pourcentageRemise: [0, [Validators.min(0), Validators.max(100)]],
       notes: ['']
+    });
+
+    this.reservationForm.get('pourcentageRemise')?.valueChanges.subscribe(val => {
+      this.pourcentageRemise = val || 0;
+      this.cdr.markForCheck();
     });
 
     this.reservationForm.get('tauxAcompte')?.valueChanges.subscribe(val => {
@@ -104,53 +127,58 @@ export class AjouterReservationComponent implements OnInit {
       this.cdr.markForCheck();
     });
 
-    this.reservationForm.get('typePeriode')?.valueChanges.subscribe(() => {
-      this.updateTarificationSelection();
-      this.cdr.markForCheck();
-    });
+     this.reservationForm.get('typePeriodes')?.valueChanges.subscribe(() => {
+       this.updateTarificationSelection();
+       this.cdr.markForCheck();
+     });
+
+     // Initial calculation of montant total
+     this.calculerMontantTotal();
   }
 
-  loadClients(): void {
-    this.clientService.getAllClients().subscribe({
-      next: (data) => {
-        this.clientsExistants = data || [];
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Erreur lors du chargement des clients :', err)
-    });
-  }
+   loadClients(): void {
+     this.clientService.getAllClients().subscribe({
+       next: (data) => {
+         this.clientsExistants = data || [];
+         this.cdr.markForCheck();
+         // Recalculate when clients are loaded
+         this.calculerMontantTotal();
+       },
+       error: (err) => console.error('Erreur lors du chargement des clients :', err)
+     });
+   }
 
-  loadSalles(): void {
-    this.salleService.getAllSalles().subscribe({
-      next: (data) => {
-        this.sallesDisponibles = data || [];
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Erreur lors du chargement des salles :', err)
-    });
-  }
+   loadSalles(): void {
+     this.salleService.getAllSalles().subscribe({
+       next: (data) => {
+         this.sallesDisponibles = data || [];
+         this.cdr.markForCheck();
+         // Recalculate when salles are loaded
+         this.calculerMontantTotal();
+       },
+       error: (err) => console.error('Erreur lors du chargement des salles :', err)
+     });
+   }
 
-  loadSallesByUserEspace(): void {
-    const userId = Number(localStorage.getItem('userId'));
-    if (!userId) {
-      this.loadSalles();
-      return;
-    }
-
-    this.espaceService.trouverEspaceParUserId(userId).subscribe({
-      next: (espace: any) => {
-        this.sallesDisponibles = Array.isArray(espace?.salles) ? espace.salles : [];
-        if (!this.sallesDisponibles.length) {
-          this.loadSalles();
-        }
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des salles par espace utilisateur :', err);
-        this.loadSalles();
-      }
-    });
-  }
+   loadSallesByUserEspace(): void {
+     // On utilise directement le service dédié aux salles de l'utilisateur connecté (/api/salles/my-salles)
+     this.salleService.getSallesByConnectedUser().subscribe({
+       next: (data) => {
+         this.sallesDisponibles = Array.isArray(data) ? data : [];
+         if (!this.sallesDisponibles.length) {
+           // Fallback si aucune salle n'est trouvée pour cet espace
+           this.loadSalles();
+         }
+         this.cdr.markForCheck();
+         // Recalculate when salles are loaded
+         this.calculerMontantTotal();
+       },
+       error: (err) => {
+         console.error('Erreur lors du chargement des salles de l’utilisateur connecté :', err);
+         this.loadSalles();
+       }
+     });
+   }
 
   compareSalles(s1: Salle, s2: Salle): boolean {
     if (!s1 || !s2) return false;
@@ -159,45 +187,48 @@ export class AjouterReservationComponent implements OnInit {
     return id1 === id2;
   }
 
-  selectionnerClient(client: Client): void {
-    this.clientSelectionne = client;
-    this.showToast(`Client sélectionné : ${client.nom} ${client.prenom}`, 'success');
-  }
+   selectionnerClient(client: Client): void {
+     this.clientSelectionne = client;
+     this.showToast(`Client sélectionné : ${client.nom} ${client.prenom}`, 'success');
+     // Recalculate montant total when client changes (for remise calculation)
+     this.calculerMontantTotal();
+   }
 
-  onSalleChange(): void {
-    this.servicesSelectionnes = [];
-    this.servicesDisponibles = [];
-    const salle: Salle = this.reservationForm.get('salleSelectionnee')?.value;
-    const salleId = salle?.salleId ?? (salle as any)?.id;
+   onSalleChange(): void {
+     this.servicesSelectionnes = [];
+     this.servicesDisponibles = [];
+     const salle: Salle = this.reservationForm.get('salleSelectionnee')?.value;
+     const salleId = salle?.salleId ?? (salle as any)?.id;
 
-    if (!salleId) {
-      this.tarificationSelectionnee = undefined;
-      this.calculerMontantTotal();
-      this.cdr.markForCheck();
-      return;
-    }
+     if (!salleId) {
+       this.tarificationSelectionnee = undefined;
+       this.calculerMontantTotal();
+       this.cdr.markForCheck();
+       return;
+     }
 
-    this.serviceService.getServicesBySalleId(salleId).subscribe({
-      next: (data) => {
-        this.servicesDisponibles = Array.isArray(data) ? data : [];
-        this.updateTarificationSelection();
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des services :', err);
-        this.servicesDisponibles = [];
-        this.updateTarificationSelection();
-        this.cdr.markForCheck();
-      }
-    });
-  }
+     this.serviceService.getServicesBySalleId(salleId).subscribe({
+       next: (data) => {
+         this.servicesDisponibles = Array.isArray(data) ? data : [];
+         this.updateTarificationSelection();
+         this.cdr.markForCheck();
+       },
+       error: (err) => {
+         console.error('Erreur lors du chargement des services :', err);
+         this.servicesDisponibles = [];
+         this.updateTarificationSelection();
+         this.cdr.markForCheck();
+       }
+     });
+   }
 
   private updateTarificationSelection(): void {
     const salle: Salle = this.reservationForm.get('salleSelectionnee')?.value;
-    const typePeriode: TypePeriode | null = this.reservationForm.get('typePeriode')?.value;
+    const selectedPeriodes: TypePeriode[] = this.reservationForm.get('typePeriodes')?.value || [];
 
-    if (!salle || !typePeriode) {
+    if (!salle || selectedPeriodes.length === 0) {
       this.tarificationSelectionnee = undefined;
+      this.tarificationsSelectionnees = [];
       this.calculerMontantTotal();
       return;
     }
@@ -205,23 +236,27 @@ export class AjouterReservationComponent implements OnInit {
     const salleId = salle.salleId ?? (salle as any)?.id;
     if (!salleId) {
       this.tarificationSelectionnee = undefined;
+      this.tarificationsSelectionnees = [];
       this.calculerMontantTotal();
       return;
     }
 
-    this.tarificationSalleService.findBySalleId(salleId).subscribe({
-      next: (tarifications) => {
-        this.tarificationSelectionnee = tarifications.find(t => t.typePeriode === typePeriode);
-        this.calculerMontantTotal();
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des tarifications :', err);
-        this.tarificationSelectionnee = undefined;
-        this.calculerMontantTotal();
-        this.cdr.markForCheck();
-      }
-    });
+     this.tarificationSalleService.findBySalleId(salleId).subscribe({
+       next: (tarifications) => {
+         this.availableTarifications = Array.isArray(tarifications) ? tarifications : [];
+         this.tarificationsSelectionnees = this.availableTarifications.filter(t => selectedPeriodes.includes(t.typePeriode));
+         this.tarificationSelectionnee = this.tarificationsSelectionnees.length === 1 ? this.tarificationsSelectionnees[0] : undefined;
+         this.calculerMontantTotal();
+         this.cdr.markForCheck();
+       },
+       error: (err) => {
+         console.error('Erreur lors du chargement des tarifications :', err);
+         this.tarificationSelectionnee = undefined;
+         this.tarificationsSelectionnees = [];
+         this.calculerMontantTotal();
+         this.cdr.markForCheck();
+       }
+     });
   }
 
   private getServiceId(service: Service): number | string | null {
@@ -229,20 +264,73 @@ export class AjouterReservationComponent implements OnInit {
     return service.serviceId ?? (service as any).id ?? null;
   }
 
-  toggleService(service: Service): void {
-    const id = this.getServiceId(service);
-    if (id === null || id === undefined) return;
+   toggleService(service: Service): void {
+     const id = this.getServiceId(service);
+     if (id === null || id === undefined) return;
 
-    const index = this.servicesSelectionnes.findIndex(s => this.getServiceId(s) === id);
+     const index = this.servicesSelectionnes.findIndex(s => this.getServiceId(s) === id);
 
-    if (index > -1) {
-      this.servicesSelectionnes.splice(index, 1);
+     if (index > -1) {
+       this.servicesSelectionnes.splice(index, 1);
+     } else {
+       this.servicesSelectionnes.push(service);
+     }
+
+     this.calculerMontantTotal();
+     this.cdr.markForCheck();
+   }
+
+  isTypePeriodeSelected(typePeriode: TypePeriode): boolean {
+    const selections = this.reservationForm.get('typePeriodes')?.value as TypePeriode[] || [];
+    return selections.includes(typePeriode);
+  }
+
+  isTypePeriodeDisabled(typePeriode: TypePeriode): boolean {
+    const selections = this.reservationForm.get('typePeriodes')?.value as TypePeriode[] || [];
+    if (selections.includes(TypePeriode.JOURNEE)) {
+      return typePeriode !== TypePeriode.JOURNEE;
+    }
+    if (typePeriode === TypePeriode.JOURNEE && selections.length > 0) {
+      return true;
+    }
+    return false;
+  }
+
+  toggleTypePeriode(typePeriode: TypePeriode, checked: boolean): void {
+    const controls = this.reservationForm.get('typePeriodes');
+    if (!controls) return;
+
+    const current: TypePeriode[] = controls.value || [];
+    let next: TypePeriode[] = [...current];
+
+    if (checked) {
+      if (typePeriode === TypePeriode.JOURNEE) {
+        next = [TypePeriode.JOURNEE];
+      } else {
+        next = next.filter(p => p !== TypePeriode.JOURNEE);
+        if (!next.includes(typePeriode)) {
+          next.push(typePeriode);
+        }
+      }
     } else {
-      this.servicesSelectionnes.push(service);
+      next = next.filter(p => p !== typePeriode);
     }
 
-    this.calculerMontantTotal();
-    this.cdr.markForCheck();
+     controls.setValue(next);
+     this.updateTarificationSelection();
+     this.cdr.markForCheck();
+  }
+
+  get totalTarificationSalle(): number {
+    return this.tarificationsSelectionnees.reduce((sum, t) => sum + (t.prix || 0), 0);
+  }
+
+  get selectedPeriodesLabel(): string {
+    const selectedPeriodes: TypePeriode[] = this.reservationForm.get('typePeriodes')?.value || [];
+    if (!selectedPeriodes.length) {
+      return '—';
+    }
+    return selectedPeriodes.join(' + ');
   }
 
   isServiceSelected(service: Service): boolean {
@@ -255,11 +343,11 @@ export class AjouterReservationComponent implements OnInit {
     return this.getServiceId(service) ?? index;
   };
 
-  calculerMontantTotal(): void {
-    const prixSalle = this.tarificationSelectionnee?.prix ?? 0;
-    const totalServices = this.servicesSelectionnes.reduce((sum, s) => sum + (s.prix || 0), 0);
-    this.reservationForm.patchValue({ montantTotal: prixSalle + totalServices }, { emitEvent: false });
-  }
+   calculerMontantTotal(): void {
+     const prixSalle = this.totalTarificationSalle;
+     const totalServices = this.servicesSelectionnes.reduce((sum, s) => sum + (s.prix || 0), 0);
+     this.reservationForm.patchValue({ montantTotal: prixSalle + totalServices }, { emitEvent: false });
+   }
 
   get clientsFiltres(): Client[] {
     if (!this.rechercheClientTerme || !this.rechercheClientTerme.trim()) {
@@ -282,8 +370,25 @@ export class AjouterReservationComponent implements OnInit {
     });
   }
 
+get clientEstConventionne(): boolean {
+    const client = this.modeClient === 'existant' ? this.clientSelectionne : null;
+    return client?.typeClient === TypeClient.CONVENTIONNE;
+  }
+
+   get montantTotalBrut(): number {
+     return this.reservationForm.get('montantTotal')?.value || 0;
+   }
+
+  get montantRemise(): number {
+    return (this.montantTotalBrut * this.pourcentageRemise) / 100;
+  }
+
+  get montantTotalFinal(): number {
+    return this.montantTotalBrut - this.montantRemise;
+  }
+
   get montantAcompte(): number {
-    const total = this.reservationForm.get('montantTotal')?.value || 0;
+    const total = this.montantTotalFinal;
     return (total * this.tauxAcompte) / 100;
   }
 
@@ -330,14 +435,16 @@ export class AjouterReservationComponent implements OnInit {
   private verifierDisponibiliteAvantValidation(callback: () => void): void {
     const salle = this.reservationForm.get('salleSelectionnee')?.value;
     const date = this.reservationForm.get('date')?.value;
-    const typePeriode = this.reservationForm.get('typePeriode')?.value;
+    const selectedPeriodes: TypePeriode[] = this.reservationForm.get('typePeriodes')?.value || [];
 
     const salleId = salle?.salleId ?? salle?.id;
 
-    if (!salleId || !date || !typePeriode) {
+    if (!salleId || !date || selectedPeriodes.length === 0) {
       callback();
       return;
     }
+
+    const hasJourneeSelected = selectedPeriodes.includes(TypePeriode.JOURNEE);
 
     this.reservationService.findByDate(date).subscribe({
       next: (reservations) => {
@@ -348,13 +455,10 @@ export class AjouterReservationComponent implements OnInit {
 
           if (rStatut === StatutReservation.ANNULEE) return false;
           if (rSalleId !== salleId) return false;
+          if (!rPeriode) return false;
 
-          // Règle de chevauchement
-          if (rPeriode === typePeriode) return true; 
-          if (rPeriode === 'JOURNEE') return true;
-          if (typePeriode === 'JOURNEE') return true;
-
-          return false;
+          if (hasJourneeSelected || rPeriode === TypePeriode.JOURNEE) return true;
+          return selectedPeriodes.includes(rPeriode as TypePeriode);
         });
 
         if (conflit) {
@@ -375,114 +479,176 @@ export class AjouterReservationComponent implements OnInit {
     });
   }
 
-  changerEtape(etape: number): void {
-    if (this.etapeCourante === 1 && etape === 2) {
-      if (this.modeClient === 'existant' && !this.clientSelectionne) {
-        this.showAlert('Client requis', 'Veuillez sélectionner un client dans la liste avant de continuer.', 'warning');
+   changerEtape(etape: number): void {
+     if (this.etapeCourante === 1 && etape === 2) {
+       if (this.modeClient === 'existant' && !this.clientSelectionne) {
+         this.showAlert('Client requis', 'Veuillez sélectionner un client dans la liste avant de continuer.', 'warning');
+         return;
+       }
+       if (this.modeClient === 'nouveau') {
+         if (this.clientForm.invalid) {
+           this.clientForm.markAllAsTouched();
+           this.showAlert('Informations client incomplètes', 'Veuillez corriger les erreurs du formulaire client avant de continuer.', 'warning');
+           return;
+         }
+       }
+     }
+
+     if (this.etapeCourante === 2 && etape === 3) {
+       const salle = this.reservationForm.get('salleSelectionnee')?.value;
+       const date = this.reservationForm.get('date')?.value;
+       const selectedPeriodes: TypePeriode[] = this.reservationForm.get('typePeriodes')?.value || [];
+
+       if (!salle) {
+         this.showAlert('Salle requise', 'Veuillez sélectionner une salle avant de continuer.', 'warning');
+         return;
+       }
+       if (!date) {
+         this.showAlert('Date requise', 'Veuillez renseigner la date de réservation.', 'warning');
+         return;
+       }
+       if (!selectedPeriodes.length) {
+         this.showAlert('Période requise', 'Veuillez sélectionner au moins un type de période.', 'warning');
+         return;
+       }
+
+       // Vérification avant de passer à l'étape 3
+       this.verifierDisponibiliteAvantValidation(() => {
+         this.etapeCourante = etape;
+         this.cdr.markForCheck();
+       });
+       return;
+     }
+
+      // Recalculate montant total when moving to confirmation step
+      if (etape === 4) {
+        this.calculerMontantTotal();
+      }
+
+     if (etape >= 1 && etape <= 4) {
+       this.etapeCourante = etape;
+       this.cdr.markForCheck();
+     }
+   }
+
+   soumettreReservation(): void {
+     // Ensure montant total is up to date before submission
+     this.calculerMontantTotal();
+     
+     if (this.modeClient === 'nouveau') {
+       if (this.clientForm.invalid) {
+         this.clientForm.markAllAsTouched();
+         return;
+       }
+       this.clientService.createClient(this.clientForm.value as Client).subscribe({
+         next: (createdClient) => this.enregistrerReservation(createdClient),
+         error: (err) => {
+           console.error('Erreur création client :', err);
+           this.showToast('Erreur lors de la création du client. Vérifiez les données saisies.', 'error');
+         }
+       });
+     } else {
+       if (!this.clientSelectionne) return;
+       this.enregistrerReservation(this.clientSelectionne);
+     }
+   }
+
+    private enregistrerReservation(client: Client): void {
+      const resValue = this.reservationForm.value;
+
+      if (!resValue.salleSelectionnee) {
+        this.showAlert('Salle requise', 'Veuillez sélectionner une salle avant d’enregistrer.', 'warning');
         return;
       }
-      if (this.modeClient === 'nouveau') {
-        if (this.clientForm.invalid) {
-          this.clientForm.markAllAsTouched();
-          this.showAlert('Informations client incomplètes', 'Veuillez corriger les erreurs du formulaire client avant de continuer.', 'warning');
-          return;
-        }
-      }
-    }
 
-    if (this.etapeCourante === 2 && etape === 3) {
-      const salle = this.reservationForm.get('salleSelectionnee')?.value;
-      const date = this.reservationForm.get('date')?.value;
-      const typePeriode = this.reservationForm.get('typePeriode')?.value;
-
-      if (!salle) {
-        this.showAlert('Salle requise', 'Veuillez sélectionner une salle avant de continuer.', 'warning');
-        return;
-      }
-      if (!date) {
-        this.showAlert('Date requise', 'Veuillez renseigner la date de réservation.', 'warning');
-        return;
-      }
-      if (!typePeriode) {
-        this.showAlert('Période requise', 'Veuillez sélectionner un type de période.', 'warning');
+      if (!resValue.date) {
+        this.showAlert('Date requise', 'Veuillez remplir la date de réservation.', 'warning');
         return;
       }
 
-      // Vérification avant de passer à l'étape 3
-      this.verifierDisponibiliteAvantValidation(() => {
-        this.etapeCourante = etape;
-        this.cdr.markForCheck();
-      });
-      return;
-    }
-
-    if (etape >= 1 && etape <= 4) {
-      this.etapeCourante = etape;
-      this.cdr.markForCheck();
-    }
-  }
-
-  soumettreReservation(): void {
-    if (this.modeClient === 'nouveau') {
-      if (this.clientForm.invalid) {
-        this.clientForm.markAllAsTouched();
+      const selectedPeriodes: TypePeriode[] = resValue.typePeriodes || [];
+      if (!selectedPeriodes.length) {
+        this.showAlert('Période requise', 'Veuillez sélectionner au moins un type de période avant d’enregistrer.', 'warning');
         return;
       }
-      this.clientService.createClient(this.clientForm.value as Client).subscribe({
-        next: (createdClient) => this.enregistrerReservation(createdClient),
-        error: (err) => {
-          console.error('Erreur création client :', err);
-          this.showToast('Erreur lors de la création du client. Vérifiez les données saisies.', 'error');
-        }
-      });
-    } else {
-      if (!this.clientSelectionne) return;
-      this.enregistrerReservation(this.clientSelectionne);
-    }
-  }
 
-  private enregistrerReservation(client: Client): void {
-    const resValue = this.reservationForm.value;
+      // Ensure we have the latest montant total
+      this.calculerMontantTotal();
 
-    if (!resValue.salleSelectionnee) {
-      this.showAlert('Salle requise', 'Veuillez sélectionner une salle avant d’enregistrer.', 'warning');
-      return;
-    }
-
-    if (!resValue.date) {
-      this.showAlert('Date requise', 'Veuillez remplir la date de réservation.', 'warning');
-      return;
-    }
-
-    if (!resValue.typePeriode) {
-      this.showAlert('Période requise', 'Veuillez sélectionner un type de période avant d’enregistrer.', 'warning');
-      return;
-    }
-
-    const reservationToSave = new Reservation(
-      undefined,
-      `RES-${Date.now().toString().slice(-5)}`,
-      resValue.date,
-      StatutReservation.EN_ATTENTE,
-      resValue.montantTotal || 0,
-      client,
-      resValue.salleSelectionnee,
-      this.servicesSelectionnes,
-      resValue.notes,
-      undefined,
-      this.tarificationSelectionnee ? [this.tarificationSelectionnee] : [],
-      undefined,
-      [],
-     );
+      const reservationToSave = new Reservation(
+        undefined,
+        `RES-${Date.now().toString().slice(-5)}`,
+        resValue.date,
+        StatutReservation.EN_ATTENTE,
+        this.montantTotalFinal || 0,
+        client,
+        resValue.salleSelectionnee,
+        this.servicesSelectionnes,
+        resValue.notes,
+        undefined,
+        this.tarificationsSelectionnees,
+        undefined,
+        [],
+       );
 
     reservationToSave.notes = resValue.notes;
-    reservationToSave.typePeriode = resValue.typePeriode;
+    reservationToSave.typePeriode = selectedPeriodes.length === 1 ? selectedPeriodes[0] : undefined;
     reservationToSave.tarificationAppliquee = this.tarificationSelectionnee;
+    reservationToSave.tarificationsAppliquees = this.tarificationsSelectionnees;
 
-    this.reservationService.createReservation(reservationToSave).subscribe({
-      next: (createdReservation) => {
-        this.showToast('Réservation enregistrée avec succès !', 'success');
-        setTimeout(() => this.router.navigate(['/finalisation'], { state: { reservation: createdReservation } }), 800);
+     this.reservationService.createReservation(reservationToSave).subscribe({
+       next: (createdReservation) => {
+         console.log('Réservation créée:', createdReservation);
+         
+         // Vérifier que nous avons bien un ID de réservation valide
+         const reservationId = createdReservation.reservationId;
+         if (!reservationId && reservationId !== 0) {
+           this.showToast('Erreur : ID de réservation manquant ou invalide', 'error');
+           return;
+         }
+         
+         // Créer le paiement pour l'acompte en utilisant le DTO attendu par le backend
+         const paiementData: PaiementRequestDTO = {
+           montant: this.montantAcompte,
+           datePaiement: new Date().toISOString().split('T')[0],
+           typePaiement: TypePaiement.ACOMPTE,
+           methodePaiement: MethodePaiement.ESPECES,
+           reservationId:reservationId,
+           notes: `Acompte réservation ${createdReservation.numeroReservation}`
+         };
+
+        this.paiementService.createPaiement(paiementData).subscribe({
+          next: (createdPaiement) => {
+            // Créer la transaction associée
+const transactionData = new Transaction({
+  libelle: `Acompte réservation ${createdReservation.numeroReservation}`,
+  description: `Paiement d'acompte pour la réservation du ${createdReservation.date}`,
+  type: TypeTransaction.REVENU,                 // -> 'REVENU'
+  montant: this.montantAcompte,
+  statut: StatutTransaction.VALIDE,               // ✅ FIX : 'VALIDE' (sans accent !)
+  modePaiement: MethodePaiement.ESPECES,
+  dateTransaction: new Date().toISOString(),      // Format ISO standard pour LocalDateTime
+  reservation: { reservationId: reservationId }
+});
+
+            this.transactionService.createTransaction(transactionData).subscribe({
+              next: (createdTransaction) => {
+                this.showToast('Réservation, paiement et transaction enregistrés avec succès !', 'success');
+                setTimeout(() => this.router.navigate(['/finalisation'], { state: { reservation: createdReservation } }), 800);
+              },
+              error: (err) => {
+                console.error('Erreur lors de la création de la transaction :', err);
+                this.showToast('Réservation et paiement enregistrés mais erreur lors de la création de la transaction.', 'error');
+                setTimeout(() => this.router.navigate(['/finalisation'], { state: { reservation: createdReservation } }), 800);
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Erreur lors de la création du paiement :', err);
+            this.showToast('Réservation enregistrée mais erreur lors de la création du paiement.', 'error');
+            setTimeout(() => this.router.navigate(['/finalisation'], { state: { reservation: createdReservation } }), 800);
+          }
+        });
       },
       error: (err) => {
         console.error('Erreur lors de la réservation :', err);

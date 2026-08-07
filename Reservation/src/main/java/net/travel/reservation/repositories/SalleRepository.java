@@ -20,4 +20,5 @@ public interface SalleRepository extends JpaRepository<Salle, Long> {
     List<Salle> findByVille(String ville);
 
     boolean existsByNom(String nom);
+    List<Salle> findByEspace_EspaceId(Long espaceId);
 }

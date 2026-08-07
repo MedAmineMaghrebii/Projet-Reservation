@@ -1,7 +1,9 @@
 package net.travel.reservation.services;
 
 import net.travel.reservation.entites.Espace;
+import net.travel.reservation.entites.User;
 import net.travel.reservation.repositories.EspaceRepository;
+import net.travel.reservation.security.SecurityUtils; // Import de ton utilitaire de sécurité
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,9 @@ public class EspaceService {
 
     @Autowired
     private EspaceRepository espaceRepository;
+
+    @Autowired
+    private SecurityUtils securityUtils; // Injection de SecurityUtils
 
     public Espace creerEspace(Espace espace) {
         if (espaceRepository.existsByNom(espace.getNom())) {
@@ -61,8 +66,9 @@ public class EspaceService {
         return espaceRepository.searchByNomOrVille(keyword);
     }
 
-    // ✅ AJOUT : Récupérer l'espace et ses salles par l'ID de l'utilisateur
-    public Optional<Espace> trouverEspaceParUserId(Long userId) {
-        return espaceRepository.findByUserId(userId);
+    // ✅ MODIFICATION : Récupérer l'espace et ses salles de l'utilisateur connecté automatiquement
+    public Optional<Espace> trouverEspaceParUtilisateurConnecte() {
+        User currentUser = securityUtils.getCurrentUser();
+        return espaceRepository.findByUserId(currentUser.getUserId());
     }
 }

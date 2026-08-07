@@ -1,9 +1,11 @@
 package net.travel.reservation.services;
 
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.PaiementRequestDTO;
 import net.travel.reservation.entites.Paiement;
 import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.repositories.PaiementRepository;
+import net.travel.reservation.repositories.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class PaiementService {
 
     private final PaiementRepository paiementRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<Paiement> getAllPaiements() {
         return paiementRepository.findAll();
@@ -28,24 +31,34 @@ public class PaiementService {
     }
 
     @Transactional
-    public Paiement createPaiement(Paiement paiement) {
-        if (paiement.getMontant() == null || paiement.getMontant().compareTo(BigDecimal.ZERO) <= 0) {
+    public Paiement createPaiement(PaiementRequestDTO dto) {
+        if (dto.getMontant() == null || dto.getMontant().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Le montant du paiement doit être supérieur à zéro");
         }
 
-        if (paiement.getReservation() == null) {
+        if (dto.getReservationId() == null) {
             throw new RuntimeException("Le paiement doit être associé à une réservation valide");
         }
 
-        // Vérification du montant total de la réservation
-        Reservation reservation = paiement.getReservation();
+        Reservation reservation = reservationRepository.findById(dto.getReservationId())
+                .orElseThrow(() -> new RuntimeException("Le paiement doit être associé à une réservation valide"));
+
         BigDecimal totalDejaPaye = calculerTotalPaye(reservation.getReservationId());
-        BigDecimal nouveauTotal = totalDejaPaye.add(paiement.getMontant());
+        BigDecimal nouveauTotal = totalDejaPaye.add(dto.getMontant());
 
         if (reservation.getMontantAPayer() != null && nouveauTotal.compareTo(reservation.getMontantAPayer()) > 0) {
             throw new RuntimeException("Le montant total payé (" + nouveauTotal +
                     ") dépasse le montant total de la réservation (" + reservation.getMontantAPayer() + ")");
         }
+
+        Paiement paiement = Paiement.builder()
+                .montant(dto.getMontant())
+                .datePaiement(dto.getDatePaiement())
+                .typePaiement(dto.getTypePaiement())
+                .methodePaiement(dto.getMethodePaiement())
+                .reservation(reservation)
+                .notes(dto.getNotes())
+                .build();
 
         return paiementRepository.save(paiement);
     }
@@ -79,7 +92,6 @@ public class PaiementService {
 
     public BigDecimal calculerTotalPaye(Long reservationId) {
         List<Paiement> paiements = getPaiementsByReservation(reservationId);
-
         return paiements.stream()
                 .map(Paiement::getMontant)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

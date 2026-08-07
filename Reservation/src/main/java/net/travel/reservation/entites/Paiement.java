@@ -1,10 +1,12 @@
 package net.travel.reservation.entites;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -48,7 +50,8 @@ public class Paiement {
 
     // Date du paiement
     @Column(nullable = false)
-    private LocalDateTime datePaiement;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate datePaiement;
 
 
     // Exemple : s3://reçus/REC-2024-001.pdf
@@ -80,7 +83,7 @@ public class Paiement {
         }
 
         if(datePaiement == null) {
-            datePaiement = LocalDateTime.now();
+            datePaiement = LocalDate.now();
         }
     }
 

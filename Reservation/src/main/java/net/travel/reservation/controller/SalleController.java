@@ -24,6 +24,12 @@ public class SalleController {
         return ResponseEntity.ok(salleService.getAllSalles());
     }
 
+    // --- ✅ AJOUT : Récupérer les salles de l'espace de l'utilisateur connecté ---
+    @GetMapping("/my-salles")
+    public ResponseEntity<List<Salle>> getSallesByConnectedUser() {
+        return ResponseEntity.ok(salleService.getSallesByConnectedUser());
+    }
+
     // --- Récupérer une salle par ID ---
     @GetMapping("/{id}")
     public ResponseEntity<Salle> getSalleById(@PathVariable Long id) {

@@ -158,19 +158,33 @@
 
         <div class="form-group full-width">
           <label>Type de période *</label>
-          <select formControlName="typePeriode">
-            <option [ngValue]="null" disabled hidden>-- Choisir une période --</option>
-            <option [ngValue]="'MATIN'">Matin</option>
-            <option [ngValue]="'APRES_MIDI'">Après-midi</option>
-            <option [ngValue]="'JOURNEE'">Journée</option>
-            <option [ngValue]="'NUIT'">Nuit</option>
-          </select>
+          <div class="periode-checkboxes">
+            <label class="checkbox-item" *ngFor="let option of typePeriodeOptions">
+              <input
+                type="checkbox"
+                [value]="option.value"
+                (change)="toggleTypePeriode(option.value, $event.target.checked)"
+                [checked]="isTypePeriodeSelected(option.value)"
+                [disabled]="isTypePeriodeDisabled(option.value)"
+              />
+              {{ option.label }}
+            </label>
+          </div>
+          <small class="text-muted">Vous pouvez sélectionner plusieurs périodes. Si la journée est sélectionnée, elle exclut les autres périodes.</small>
         </div>
       </div>
 
-      <div class="price-box" *ngIf="reservationForm.get('salleSelectionnee')?.value && reservationForm.get('typePeriode')?.value" style="margin-top: 1rem;">
+      <div class="price-box" *ngIf="reservationForm.get('salleSelectionnee')?.value && reservationForm.get('typePeriodes')?.value?.length" style="margin-top: 1rem;">
         <strong>Tarification de la salle :</strong>
-        <div>{{ tarificationSelectionnee?.typePeriode || reservationForm.get('typePeriode')?.value }} — {{ tarificationSelectionnee?.prix || 0 }} TND</div>
+        <div *ngIf="tarificationsSelectionnees.length === 1">
+          {{ tarificationsSelectionnees[0]?.typePeriode }} — {{ tarificationsSelectionnees[0]?.prix || 0 }} TND
+        </div>
+        <div *ngIf="tarificationsSelectionnees.length > 1">
+          {{ tarificationsSelectionnees.map(t => t.typePeriode).join(' + ') }} — {{ totalTarificationSalle }} TND
+        </div>
+        <div *ngIf="tarificationsSelectionnees.length === 0">
+          Tarif non disponible pour la période sélectionnée.
+        </div>
       </div>
 
       <!-- Section Services Optionnels -->
@@ -223,11 +237,49 @@
 
         <div class="summary-item" style="margin-top: 0.75rem;">
           <span>Tarification salle :</span>
-          <strong>{{ tarificationSelectionnee?.prix || 0 }} TND</strong>
+          <strong>{{ totalTarificationSalle }} TND</strong>
         </div>
         <div class="summary-item">
           <span>Services :</span>
           <strong>{{ servicesSelectionnes.reduce((sum, s) => sum + (s.prix || 0), 0) }} TND</strong>
+        </div>
+        <div class="summary-item">
+          <span>Type de période :</span>
+          <strong>{{ selectedPeriodesLabel }}</strong>
+        </div>
+
+        <!-- Section Remise pour les clients CONVENTIONNE -->
+        <div class="remise-section" *ngIf="clientEstConventionne">
+          <div class="remise-header">
+            <span class="remise-badge">🎖️ Client conventionné</span>
+            <small>Ce client peut bénéficier d'une remise sur le montant total.</small>
+          </div>
+          <div class="remise-row">
+            <div class="form-group remise-input">
+              <label>Remise (%)</label>
+              <input 
+                type="number" 
+                formControlName="pourcentageRemise" 
+                min="0" 
+                max="100" 
+                placeholder="0"
+              />
+            </div>
+            <div class="remise-result">
+              <div class="summary-item">
+                <span>Montant brut :</span>
+                <strong>{{ montantTotalBrut }} TND</strong>
+              </div>
+              <div class="summary-item remise-amount">
+                <span>Remise ({{ pourcentageRemise }}%) :</span>
+                <strong>- {{ montantRemise }} TND</strong>
+              </div>
+              <div class="summary-item remise-total">
+                <span>Total après remise :</span>
+                <strong>{{ montantTotalFinal }} TND</strong>
+              </div>
+            </div>
+          </div>
         </div>
 
         <hr />
@@ -270,7 +322,7 @@
         </div>
         <div class="summary-item">
           <span>Type de période :</span>
-          <strong>{{ reservationForm.get('typePeriode')?.value }}</strong>
+          <strong>{{ selectedPeriodesLabel }}</strong>
         </div>
         <div class="summary-item" *ngIf="servicesSelectionnes.length > 0">
           <span>Services inclus :</span>
@@ -280,9 +332,13 @@
             </span>
           </div>
         </div>
+        <div class="summary-item" *ngIf="clientEstConventionne && pourcentageRemise > 0">
+          <span>Remise ({{ pourcentageRemise }}%) :</span>
+          <strong>- {{ montantRemise }} TND</strong>
+        </div>
         <div class="summary-item highlight">
           <span>Montant Total :</span>
-          <strong>{{ reservationForm.get('montantTotal')?.value }} TND</strong>
+          <strong>{{ montantTotalFinal }} TND</strong>
         </div>
       </div>
     </div>
@@ -304,7 +360,7 @@
   </div>
 </div>
 
-<app-toast [visible]="toastVisible" [message]="toastMessage" [type]="toastType"></app-toast>
+<app-toast [visible]="toastVisible" [message]="toastMessage" [type]="toastType" />
 
 <app-alert
   [visible]="alertVisible"
@@ -315,4 +371,4 @@
   [cancelText]="'Fermer'"
   (confirmed)="onAlertConfirm()"
   (cancelled)="onAlertCancel()"
-></app-alert>
+/>

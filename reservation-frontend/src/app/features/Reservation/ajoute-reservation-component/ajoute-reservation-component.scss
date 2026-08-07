@@ -364,8 +364,80 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
 }
 
 /* ==========================================================================
-   SERVICES GRID & TARIFICATION
+   TYPE DE PÉRIODE (Sélecteur Matin / Après-midi / Journée / Nuit)
    ========================================================================== */
+.periode-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+
+  .checkbox-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-muted;
+    background: #f8fafc;
+    border: 1.5px solid $border-color;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    user-select: none;
+    transition: $transition;
+
+    /* On masque la case natif pour un rendu "chip" custom */
+    input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    /* Pastille + icône check custom */
+    &::before {
+      content: '';
+      width: 18px;
+      height: 18px;
+      border: 2px solid #cbd5e1;
+      border-radius: 50%;
+      background: #ffffff;
+      transition: $transition;
+      flex-shrink: 0;
+    }
+
+    &:hover:not(:has(input:disabled)) {
+      border-color: rgba($primary-color, 0.5);
+      background: $primary-light;
+      transform: translateY(-1px);
+      box-shadow: $shadow-sm;
+    }
+
+    &:has(input:checked) {
+      border-color: $primary-color;
+      background: $primary-light;
+      color: $primary-color;
+
+      &::before {
+        border-color: $primary-color;
+        background: $primary-color
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M6.5 11.5l-3-3 1-1 2 2 5-5 1 1-6 6z'/%3E%3C/svg%3E")
+          center / 12px no-repeat;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.15);
+      }
+    }
+
+    &:has(input:disabled) {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: #f1f5f9;
+      border-style: dashed;
+    }
+  }
 .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

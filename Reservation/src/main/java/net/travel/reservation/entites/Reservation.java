@@ -1,5 +1,6 @@
 package net.travel.reservation.entites;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,7 +43,7 @@ public class Reservation {
 
     @PrePersist
     public void prePersist() {
-        this.dateCreation = LocalDateTime.now();
+        this.dateCreation = LocalDate.now();
         if (this.tokenReservation == null) {
             this.tokenReservation = UUID.randomUUID().toString();
         }
@@ -50,7 +51,7 @@ public class Reservation {
 
     @PreUpdate
     public void preUpdate() {
-        this.dateModification = LocalDateTime.now();
+        this.dateModification = LocalDate.now();
     }
 
     // --- RELATIONS ---
@@ -103,7 +104,8 @@ public class Reservation {
     private User modifiePar;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime dateCreation;
-
-    private LocalDateTime dateModification;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateCreation;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateModification;
 }

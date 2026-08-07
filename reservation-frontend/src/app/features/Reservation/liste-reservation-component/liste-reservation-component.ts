@@ -109,14 +109,14 @@ export class ListeReservationComponent implements OnInit {
   openEditModal(reservation: any) {
     this.selectedReservation.set(reservation);
 
-    this.myForm.patchValue({
-      reservationId: reservation.reservationId,
-      date: reservation.date,
-      heureDebut: reservation.heureDebut,
-      heureFin: reservation.heureFin,
-      montantTotal: reservation.montantTotal,
-      notes: reservation.notes
-    });
+     this.myForm.patchValue({
+       reservationId: reservation.reservationId,
+       date: reservation.date,
+       heureDebut: reservation.heureDebut,
+       heureFin: reservation.heureFin,
+       montantTotal: reservation.montantAPayer,
+       notes: reservation.notes
+     });
 
     this.activeModal.set('edit');
     this.activeMenuId.set(null);

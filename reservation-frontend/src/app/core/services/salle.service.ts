@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { Salle } from '../models/salle/salle';
 import { environment } from '../../../environments/environment.development';
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -21,6 +20,14 @@ export class SalleService {
    */
   getAllSalles(): Observable<Salle[]> {
     return this.http.get<Salle[]>(this.apiUrl);
+  }
+
+  /**
+   * ✅ GET /api/salles/my-salles
+   * Récupérer les salles associées à l'espace de l'utilisateur connecté
+   */
+  getSallesByConnectedUser(): Observable<Salle[]> {
+    return this.http.get<Salle[]>(`${this.apiUrl}/my-salles`);
   }
 
   /**

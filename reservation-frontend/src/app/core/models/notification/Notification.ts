@@ -6,8 +6,7 @@ import { TypeNotification } from "./TypeNotification.enum";
 
 export class Notification {
 
-  notificationId!: string;
-  user!: User;
+notificationId?: string;  user!: User;
   titre!: string;
   message?: string;
   type!: TypeNotification;

@@ -26,26 +26,6 @@ export class CalendrierComponent implements OnInit, OnChanges {
     }
   }
 
-  private formatDateKey(date: Date): string {
-    const yearStr = date.getFullYear();
-    const monthStr = String(date.getMonth() + 1).padStart(2, '0');
-    const dayStr = String(date.getDate()).padStart(2, '0');
-    return `${yearStr}-${monthStr}-${dayStr}`;
-  }
-
-  private getReservationDateKey(reservation: Reservation): string | null {
-    if (!reservation?.date) {
-      return null;
-    }
-
-    const parsed = new Date(reservation.date);
-    if (isNaN(parsed.getTime())) {
-      return null;
-    }
-
-    return this.formatDateKey(parsed);
-  }
-
   buildCalendar(): void {
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
@@ -60,9 +40,13 @@ export class CalendrierComponent implements OnInit, OnChanges {
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
-      const key = this.formatDateKey(date);
+      
+      const yearStr = date.getFullYear();
+      const monthStr = String(date.getMonth() + 1).padStart(2, '0');
+      const dayStr = String(date.getDate()).padStart(2, '0');
+      const key = `${yearStr}-${monthStr}-${dayStr}`;
 
-      const dailyReservations = this.reservationsList.filter(r => this.getReservationDateKey(r) === key);
+      const dailyReservations = this.reservationsList.filter(r => r.date === key);
       days.push({ date, reservations: dailyReservations });
     }
 

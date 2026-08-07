@@ -21,29 +21,29 @@ export class FinalisationComponent implements OnInit {
 
   constructor(private router: Router) {}
 
-  ngOnInit(): void {
-    const navigation = this.router.getCurrentNavigation();
-    const stateFromRouter = navigation?.extras?.state as any;
-    const stateFromHistory =
-      typeof window !== 'undefined' &&
-      typeof window.history !== 'undefined' &&
-      (window.history.state as any)?.reservation
-        ? window.history.state
-        : null;
-    const state = stateFromRouter ?? stateFromHistory;
+   ngOnInit(): void {
+     const navigation = this.router.getCurrentNavigation();
+     const stateFromRouter = navigation?.extras?.state as any;
+     const stateFromHistory =
+       typeof window !== 'undefined' &&
+       typeof window.history !== 'undefined' &&
+       (window.history.state as any)?.reservation
+         ? window.history.state
+         : null;
+     const state = stateFromRouter ?? stateFromHistory;
 
-    this.reservationData = state?.reservation ?? null;
+     this.reservationData = state?.reservation ?? null;
 
-    if (this.reservationData) {
-      this.clientName = `${this.reservationData.client?.nom ?? ''} ${this.reservationData.client?.prenom ?? ''}`.trim() || '—';
-      this.salleName = this.reservationData.salle?.nom ?? '—';
-      this.reservationDate = this.reservationData.date ?? '—';
-      this.reservationNumber = this.reservationData.numeroReservation ?? '—';
-      this.montantTotal = this.reservationData.montantTotal ?? 0;
-      this.services = (this.reservationData.services ?? []).map((s: any) => s.nom ?? 'Service');
-      this.typePeriode = this.reservationData.typePeriode ?? this.reservationData.tarificationAppliquee?.typePeriode ?? this.reservationData.tarificationsAppliquees?.[0]?.typePeriode ?? '—';
-    }
-  }
+     if (this.reservationData) {
+       this.clientName = `${this.reservationData.client?.nom ?? ''} ${this.reservationData.client?.prenom ?? ''}`.trim() || '—';
+       this.salleName = this.reservationData.salle?.nom ?? '—';
+       this.reservationDate = this.reservationData.date ?? '—';
+       this.reservationNumber = this.reservationData.numeroReservation ?? '—';
+       this.montantTotal = this.reservationData.montantAPayer ?? 0;
+       this.services = (this.reservationData.services ?? []).map((s: any) => s.nom ?? 'Service');
+       this.typePeriode = this.reservationData.typePeriode ?? this.reservationData.tarificationAppliquee?.typePeriode ?? this.reservationData.tarificationsAppliquees?.[0]?.typePeriode ?? '—';
+     }
+   }
 
   imprimerFacture(): void {
     window.print();
