@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Reservation } from '../../../../core/models/reservations/reservation';
+import { StatutReservation } from '../../../../core/models/reservations/statut-reservation.enum';
 
 @Component({
   selector: 'app-calendrier-component',
@@ -12,9 +13,17 @@ import { Reservation } from '../../../../core/models/reservations/reservation';
 export class CalendrierComponent implements OnInit, OnChanges {
   @Input() reservationsList: Reservation[] = [];
 
-  currentMonth = new Date();
+  currentMonth = new Date(2026, 7, 1); // Mois d'Août 2026 selon la capture
+  todayDate = new Date(2026, 7, 7);    // Le 7 Août
   weekDays = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
   weeks: Array<Array<{ date: Date | null; reservations: Reservation[] }>> = [];
+
+  // Compteurs des statistiques
+  totalReservations = 0;
+  countPayee = 0;
+  countConfirmee = 0;
+  countEnAttente = 0;
+  countAnnulee = 0;
 
   ngOnInit(): void {
     this.buildCalendar();
@@ -22,11 +31,22 @@ export class CalendrierComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reservationsList']) {
+      this.calculateStats();
       this.buildCalendar();
     }
   }
 
+  calculateStats(): void {
+    this.totalReservations = this.reservationsList.length;
+    this.countPayee = this.reservationsList.filter(r => r.statut === StatutReservation.PAYEE).length;
+    this.countConfirmee = this.reservationsList.filter(r => r.statut === StatutReservation.CONFIRMEE).length;
+    this.countEnAttente = this.reservationsList.filter(r => r.statut === StatutReservation.EN_ATTENTE).length;
+    this.countAnnulee = this.reservationsList.filter(r => r.statut === StatutReservation.ANNULEE).length;
+  }
+
   buildCalendar(): void {
+    this.calculateStats();
+    
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -34,6 +54,7 @@ export class CalendrierComponent implements OnInit, OnChanges {
     const startDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
 
     const days: Array<{ date: Date | null; reservations: Reservation[] }> = [];
+
     for (let i = 0; i < startDayIndex; i++) {
       days.push({ date: null, reservations: [] });
     }
@@ -60,37 +81,42 @@ export class CalendrierComponent implements OnInit, OnChanges {
     }
   }
 
-  previousMonth(): void {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-    this.buildCalendar();
-  }
-
-  nextMonth(): void {
-    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-    this.buildCalendar();
-  }
-
   formatMonth(): string {
     return this.currentMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
 
+  isToday(date: Date | null): boolean {
+    if (!date) return false;
+    return (
+      date.getDate() === this.todayDate.getDate() &&
+      date.getMonth() === this.todayDate.getMonth() &&
+      date.getFullYear() === this.todayDate.getFullYear()
+    );
+  }
+
   getReservationLabel(reservation: Reservation): string {
-    const clientName = `${reservation.client?.prenom || ''} ${reservation.client?.nom || ''}`.trim();
-    return reservation.notes ? `${clientName} · ${reservation.notes}` : clientName || 'Réservation';
+    return `${reservation.client?.prenom || ''} ${reservation.client?.nom || ''}`.trim() || 'Client';
   }
 
   getReservationClass(reservation: Reservation): string {
-    switch (reservation.statut?.toUpperCase()) {
-      case 'CONFIRMEE':
-      case 'CONFIRME':
-        return 'event-confirmed';
-      case 'EN_ATTENTE':
-        return 'event-pending';
-      case 'ANNULEE':
-      case 'ANNULE':
-        return 'event-cancelled';
-      default:
-        return 'event-default';
+    switch (reservation.statut) {
+      case StatutReservation.PAYEE: return 'event-payee';
+      case StatutReservation.CONFIRMEE: return 'event-confirmee';
+      case StatutReservation.EN_ATTENTE: return 'event-en-attente';
+      case StatutReservation.TERMINEE: return 'event-terminee';
+      case StatutReservation.ANNULEE: return 'event-annulee';
+      default: return '';
+    }
+  }
+
+  getStatusBadgeLabel(statut: StatutReservation): string {
+    switch (statut) {
+      case StatutReservation.PAYEE: return 'PAYÉE';
+      case StatutReservation.CONFIRMEE: return 'CONFIRMÉE';
+      case StatutReservation.EN_ATTENTE: return 'EN ATTENTE';
+      case StatutReservation.TERMINEE: return 'TERMINÉE';
+      case StatutReservation.ANNULEE: return 'ANNULÉE';
+      default: return '';
     }
   }
 }

@@ -1,195 +1,298 @@
+// Couleurs pixel-perfect basées sur la capture d'écran
+$payee-bg: #eaf8f0;
+$payee-border: #22c55e;
+$payee-text: #166534;
+
+$confirmee-bg: #edf5ff;
+$confirmee-border: #3b82f6;
+$confirmee-text: #1d4ed8;
+
+$en-attente-bg: #fffbeb;
+$en-attente-border: #f59e0b;
+$en-attente-text: #b45309;
+
+$terminee-bg: #f1f5f9;
+$terminee-border: #94a3b8;
+$terminee-text: #475569;
+
+$annulee-bg: #fef2f2;
+$annulee-border: #ef4444;
+$annulee-text: #b91c1c;
+
 .calendar-page {
-  padding: 2rem;
-  min-height: 100vh;
-  background: #f4f6fb;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
+  padding: 2.5rem;
+  background-color: #fbfbfd;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
 
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-.calendar-cell {
-  min-height: 100px; /* Assure une hauteur visible pour chaque jour */
-  border: 1px solid #eee;
-  padding: 8px;
-}
-.calendar-label {
-  margin: 0 0 0.35rem;
-  color: #5b6b89;
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+  /* Header principal */
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
 
-.calendar-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: #111827;
-}
+    .calendar-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #94a3b8;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
 
-.calendar-actions {
-  display: flex;
-  gap: 0.75rem;
-}
+    .month-title {
+      margin: 0;
+      font-family: 'Georgia', 'Playfair Display', serif; // Police Serif élégante comme l'image
+      font-size: 3rem;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: capitalize;
+    }
 
-.nav-btn {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #fff;
-  color: #0f172a;
-  border-radius: 999px;
-  padding: 0.75rem 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
+    /* Légende */
+    .legend-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      background: #ffffff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      border: 1px solid #f1f5f9;
 
-.nav-btn:hover {
-  transform: translateY(-1px);
-}
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #475569;
 
-.nav-btn-primary {
-  background: #1d4ed8;
-  color: #fff;
-  border-color: transparent;
-}
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
 
-.calendar-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.calendar-row {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.calendar-weekdays {
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.calendar-weekday {
-  padding: 0.8rem 0.6rem;
-  background: #eef2ff;
-  border-radius: 16px;
-  text-align: center;
-}
-
-.calendar-cell {
-  min-height: 180px;
-  padding: 1rem;
-  background: #fff;
-  border-radius: 24px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.calendar-cell.empty {
-  background: rgba(226, 232, 240, 0.55);
-  border-style: dashed;
-  box-shadow: none;
-}
-
-.cell-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.85rem;
-}
-
-.cell-day {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.cell-weekday {
-  font-size: 0.78rem;
-  color: #94a3b8;
-  text-transform: capitalize;
-}
-
-.events-list {
-  display: grid;
-  gap: 0.65rem;
-  flex: 1;
-  overflow: auto;
-}
-
-.event-pill {
-  padding: 0.85rem;
-  border-radius: 16px;
-  color: #0f172a;
-  font-size: 0.82rem;
-  min-height: 52px;
-}
-
-.event-pill strong {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.92rem;
-}
-
-.event-confirmed {
-  background: #dcfce7;
-  border-left: 4px solid #16a34a;
-}
-
-.event-pending {
-  background: #fef9c3;
-  border-left: 4px solid #ca8a04;
-}
-
-.event-cancelled {
-  background: #fee2e2;
-  border-left: 4px solid #dc2626;
-}
-
-.event-default {
-  background: #e2e8f0;
-  border-left: 4px solid #3b82f6;
-}
-
-.empty-note {
-  color: #94a3b8;
-  font-size: 0.85rem;
-  font-style: italic;
-  margin-top: 0.5rem;
-}
-
-@media (max-width: 1200px) {
-  .calendar-row {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 900px) {
-  .calendar-grid {
-    gap: 0.75rem;
+        &.payee .dot { background: $payee-border; }
+        &.confirmee .dot { background: $confirmee-border; }
+        &.en-attente .dot { background: $en-attente-border; }
+        &.terminee .dot { background: $terminee-border; }
+        &.annulee .dot { background: $annulee-border; }
+      }
+    }
   }
 
-  .calendar-cell {
-    min-height: 160px;
-    padding: 0.85rem;
-  }
-}
+  /* Cartes de Stats */
+  .stats-grid {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
 
-@media (max-width: 640px) {
-  .calendar-row {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      border-radius: 16px;
+      padding: 1rem 1.5rem;
+      min-width: 140px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+      }
+
+      .stat-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+      }
+
+      /* Couleurs spécifiques des chiffres de stats */
+      &.payee .stat-value { color: $payee-border; }
+      &.confirmee .stat-value { color: $confirmee-border; }
+      &.en-attente .stat-value { color: $en-attente-border; }
+      &.annulee .stat-value { color: $annulee-border; }
+    }
   }
 
-  .calendar-weekdays,
-  .calendar-cell {
-    display: none;
+  /* Structure du calendrier */
+  .calendar-container {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+
+    /* Entête des jours de la semaine */
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid #e2e8f0;
+
+      .weekday-cell {
+        text-align: center;
+        padding: 1.25rem 0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        letter-spacing: 0.1em;
+      }
+    }
+
+    /* Grille des cases */
+    .calendar-grid {
+      display: flex;
+      flex-direction: column;
+
+      .calendar-row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        border-bottom: 1px solid #e2e8f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+
+    /* Cellule / Carreaux */
+    .calendar-cell {
+      min-height: 140px;
+      padding: 0.75rem;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #ffffff;
+
+      &:last-child {
+        border-right: none;
+      }
+
+      &.empty {
+        background-color: #fafafa;
+      }
+
+      /* Jour sélectionné / actuel avec bordure bleue vive */
+      &.today {
+        background-color: #f4f7ff;
+        box-shadow: inset 0 0 0 2px #4338ca;
+        z-index: 1;
+
+        .day-number {
+          background-color: #4338ca;
+          color: #ffffff;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .cell-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        .day-number {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #334155;
+        }
+
+        /* Petit compteur en haut à droite du carreau */
+        .day-count-badge {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #94a3b8;
+          background: #f1f5f9;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .events-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        flex: 1;
+      }
+
+      /* Cartes/Pills de réservation identiques à l'image */
+      .event-pill {
+        padding: 0.5rem 0.6rem;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+
+        .status-title {
+          font-size: 0.65rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+        }
+
+        .client-name {
+          font-size: 0.75rem;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* Variantes de couleurs précises */
+        &.event-payee {
+          background: $payee-bg;
+          border-left: 3px solid $payee-border;
+          .status-title { color: $payee-text; }
+          .client-name { color: #0f172a; }
+        }
+
+        &.event-confirmee {
+          background: $confirmee-bg;
+          border-left: 3px solid $confirmee-border;
+          .status-title { color: $confirmee-text; }
+          .client-name { color: #0f172a; }
+        }
+
+        &.event-en-attente {
+          background: $en-attente-bg;
+          border-left: 3px solid $en-attente-border;
+          .status-title { color: $en-attente-text; }
+          .client-name { color: #0f172a; }
+        }
+
+        &.event-terminee {
+          background: $terminee-bg;
+          border-left: 3px solid $terminee-border;
+          .status-title { color: $terminee-text; }
+          .client-name { color: #334155; }
+        }
+
+        &.event-annulee {
+          background: $annulee-bg;
+          border-left: 3px solid $annulee-border;
+          .status-title { color: $annulee-text; }
+          .client-name { color: #0f172a; }
+        }
+      }
+    }
   }
 }

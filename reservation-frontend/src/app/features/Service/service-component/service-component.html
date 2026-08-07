@@ -1,0 +1,132 @@
+<div class="services-container">
+  <!-- En-tête -->
+  <header class="header">
+    <div class="header-text">
+      <h1>Services & extras</h1>
+      <p>Construisez des offres qui rendent chaque événement unique.</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <span class="icon">+</span> Ajouter un service
+    </button>
+  </header>
+
+  <!-- Filtres par catégorie -->
+  <nav class="categories-nav">
+    <button 
+      *ngFor="let cat of categories" 
+      class="chip-btn" 
+      [class.active]="selectedCategory === cat"
+      (click)="filterByCategory(cat)">
+      {{ cat }}
+    </button>
+  </nav>
+
+  <!-- Grille de cartes -->
+  <div class="services-grid">
+    <div class="service-card" *ngFor="let service of filteredServices">
+      <div class="card-header">
+        <div class="icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div class="actions">
+          <button class="icon-btn edit-btn" title="Modifier">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </button>
+          <button class="icon-btn delete-btn" (click)="deleteService(service.serviceId)" title="Supprimer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3 class="service-title">{{ service.nom }}</h3>
+        <span class="service-category">{{ service.categorie || 'Autre' }}</span>
+      </div>
+
+      <div class="card-footer">
+        <div class="price">
+          <strong>{{ service.prix }}</strong>
+          <span class="currency">DT / unité</span>
+        </div>
+        <span 
+          class="status-badge" 
+          [ngClass]="{
+            'available': service.statut === 'Disponible',
+            'limited': service.statut === 'Limité'
+          }">
+          {{ service.statut || 'Disponible' }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay et Modale de Création -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <span class="tag">CATALOGUE</span>
+      <h2>Nouveau service</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()" class="modal-body">
+      
+      <!-- Nom du service -->
+      <div class="form-group">
+        <label for="nom">Nom du service</label>
+        <input id="nom" type="text" formControlName="nom" placeholder="ex: Pack mariage" />
+      </div>
+
+      <!-- Catégorie -->
+      <div class="form-group">
+        <label for="categorie">Catégorie</label>
+        <select id="categorie" formControlName="categorie">
+          <option *ngFor="let cat of formCategories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <!-- Prix unitaire -->
+      <div class="form-group">
+        <label for="prix">Prix unitaire</label>
+        <input id="prix" type="number" formControlName="prix" min="0" />
+      </div>
+
+      <!-- Disponibilité -->
+      <div class="form-group">
+        <label for="statut">Disponibilité</label>
+
+        <div class="select-wrapper">
+          <select id="statut" formControlName="statut">
+            <option value="Disponible">Disponible</option>
+            <option value="Limité">Limité</option>
+            <option value="Indisponible">Indisponible</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn-submit" [disabled]="serviceForm.invalid">Enregistrer</button>
+      </div>
+
+    </form>
+  </div>
+</div> 

@@ -8,6 +8,7 @@ import { ListeClientsComponent } from './features/clients/liste-clients-componen
 import { PersonnelComponenet } from './features/personnel/personnel-componenet/personnel-componenet';
 import { TransactionComponenet } from './features/transaction/transaction-componenet/transaction-componenet';
 import { SalleComponenet } from './features/salle/salle-component/salle-component';
+import { ServiceComponent } from './features/Service/service-component/service-component';
 
 export const routes: Routes = [
   // Page de connexion (hors layout, sans la sidebar)
@@ -28,6 +29,10 @@ export const routes: Routes = [
       {
         path: 'ajouter-reservation',
         component: AjouterReservationComponent
+      },
+      {
+        path: 'service',
+        component: ServiceComponent
       },
        {
         path: 'finalisation',

@@ -1,0 +1,321 @@
+$purple-primary: #8b5cf6;
+$purple-dark: #7c3aed;
+$purple-light: #f3e8ff;
+$text-dark: #1e293b;
+$text-muted: #64748b;
+$bg-main: #f8fafc;
+$card-bg: #ffffff;
+$border-color: #e2e8f0;
+
+.services-container {
+  padding: 2rem;
+  background-color: $bg-main;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: $text-dark;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .header-text {
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+      }
+      p {
+        color: $text-muted;
+        margin: 0;
+        font-size: 0.95rem;
+      }
+    }
+
+    .btn-primary {
+      background-color: $purple-primary;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background-color: $purple-dark;
+      }
+    }
+  }
+
+  .categories-nav {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+
+    .chip-btn {
+      background-color: white;
+      border: 1px solid $border-color;
+      padding: 0.5rem 1.25rem;
+      border-radius: 2rem;
+      color: $text-dark;
+      font-weight: 500;
+      cursor: pointer;
+
+      &.active {
+        background-color: $purple-primary;
+        color: white;
+        border-color: $purple-primary;
+      }
+    }
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .service-card {
+    background: $card-bg;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid $border-color;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      .icon-box {
+        width: 40px;
+        height: 40px;
+        background-color: $purple-light;
+        color: $purple-primary;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+
+        .icon-btn {
+          background: none;
+          border: none;
+          color: $text-muted;
+          cursor: pointer;
+          padding: 0.25rem;
+
+          &.delete-btn:hover {
+            color: #ef4444;
+          }
+        }
+      }
+    }
+
+    .card-body {
+      margin: 1.25rem 0;
+
+      .service-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+      }
+
+      .service-category {
+        font-size: 0.85rem;
+        color: $text-muted;
+      }
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .price {
+        strong {
+          font-size: 1.4rem;
+          font-weight: 700;
+        }
+        .currency {
+          font-size: 0.85rem;
+          color: $text-muted;
+          margin-left: 0.25rem;
+        }
+      }
+
+      .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 1rem;
+
+        &.available {
+          background-color: #e6f4ea;
+          color: #1e7e34;
+        }
+
+        &.limited {
+          background-color: #fef3c7;
+          color: #b45309;
+        }
+      }
+    }
+  }
+}
+
+/* Modal Overlay & Card */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+
+  .modal-header {
+    margin-bottom: 1.5rem;
+
+    .tag {
+      color: $purple-primary;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0.25rem 0 0 0;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: $text-dark;
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+
+      &:hover {
+        background-color: #f1f5f9;
+      }
+    }
+  }
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: $text-dark;
+      }
+
+      input, select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #f1f5f9;
+        background-color: #f8fafc;
+        border-radius: 1rem;
+        font-size: 0.95rem;
+        color: $text-dark;
+        outline: none;
+        box-sizing: border-box;
+
+        &:focus {
+          border-color: $purple-primary;
+          background-color: white;
+        }
+      }
+
+      select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3C1e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1rem;
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+
+      .btn-cancel, .btn-submit {
+        flex: 1;
+        padding: 0.85rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-cancel {
+        background: white;
+        border: 1px solid $border-color;
+        color: $text-dark;
+
+        &:hover {
+          background-color: #f8fafc;
+        }
+      }
+
+      .btn-submit {
+        background: $purple-primary;
+        border: none;
+        color: white;
+
+        &:hover {
+          background: $purple-dark;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        } 
+      }
+    }
+  }
+}

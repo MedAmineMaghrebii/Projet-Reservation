@@ -167,7 +167,7 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
 }
 
 /* ==========================================================================
-   SEARCH BAR & CLIENT LIST (Correction de l'image)
+   SEARCH BAR & CLIENT LIST
    ========================================================================== */
 .search-section {
   display: flex;
@@ -312,7 +312,7 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
 }
 
 /* ==========================================================================
-   FORM GRIDS & INPUTS (ÉTAPE CLIENT NOUVEAU & DÉTAILS)
+   FORM GRIDS & INPUTS
    ========================================================================== */
 .form-grid {
   display: grid;
@@ -364,7 +364,7 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
 }
 
 /* ==========================================================================
-   TYPE DE PÉRIODE (Sélecteur Matin / Après-midi / Journée / Nuit)
+   TYPE DE PÉRIODE
    ========================================================================== */
 .periode-checkboxes {
   display: grid;
@@ -389,7 +389,6 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
     user-select: none;
     transition: $transition;
 
-    /* On masque la case natif pour un rendu "chip" custom */
     input[type="checkbox"] {
       position: absolute;
       opacity: 0;
@@ -398,7 +397,6 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
       pointer-events: none;
     }
 
-    /* Pastille + icône check custom */
     &::before {
       content: '';
       width: 18px;
@@ -438,6 +436,11 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
       border-style: dashed;
     }
   }
+}
+
+/* ==========================================================================
+   SERVICES GRID & PRICING
+   ========================================================================== */
 .services-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -552,27 +555,32 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
 .wizard-footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 2.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid $border-color;
 
   .btn {
-    padding: 0.65rem 1.4rem;
+    padding: 0.75rem 1.5rem;
     font-size: 0.9rem;
     font-weight: 600;
     border-radius: $radius-sm;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
     transition: $transition;
+    outline: none;
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     &-secondary {
       background: #f1f5f9;
       color: $text-main;
+      border-color: $border-color;
+
       &:hover:not(:disabled) {
         background: #e2e8f0;
       }
@@ -581,16 +589,20 @@ $shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 
     &-primary {
       background: $primary-color;
       color: #ffffff;
+
       &:hover:not(:disabled) {
         background: $primary-hover;
+        box-shadow: 0 4px 12px rgba($primary-color, 0.25);
       }
     }
 
     &-success {
       background: #10b981;
       color: #ffffff;
+
       &:hover:not(:disabled) {
         background: #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
       }
     }
   }

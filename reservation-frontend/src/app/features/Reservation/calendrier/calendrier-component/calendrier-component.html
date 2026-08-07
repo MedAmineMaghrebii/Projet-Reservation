@@ -1,32 +1,80 @@
 <section class="calendar-page">
-  <div class="calendar-header">
-    <div>
-      <p class="calendar-label">Planning de réservations</p>
-      <h1>{{ formatMonth() }}</h1>
+  <!-- En-tête : Titre & Légende -->
+  <header class="calendar-header">
+    <div class="header-titles">
+      <span class="calendar-label">PLANNING DE RÉSERVATIONS</span>
+      <h1 class="month-title">{{ formatMonth() }}</h1>
     </div>
-    <div class="calendar-actions">
-      <button class="nav-btn" (click)="previousMonth()">Précédent</button>
-      <button class="nav-btn nav-btn-primary" (click)="nextMonth()">Suivant</button>
+
+    <!-- Légende des couleurs -->
+    <div class="legend-bar">
+      <span class="legend-item payee"><i class="dot"></i> Payée</span>
+      <span class="legend-item confirmee"><i class="dot"></i> Confirmée</span>
+      <span class="legend-item en-attente"><i class="dot"></i> En attente</span>
+      <span class="legend-item terminee"><i class="dot"></i> Terminée</span>
+      <span class="legend-item annulee"><i class="dot"></i> Annulée</span>
+    </div>
+  </header>
+
+  <!-- Cartes des Statistiques -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-value">{{ totalReservations }}</span>
+      <span class="stat-label">RÉSERVATIONS</span>
+    </div>
+    <div class="stat-card payee">
+      <span class="stat-value">{{ countPayee }}</span>
+      <span class="stat-label">PAYÉES</span>
+    </div>
+    <div class="stat-card confirmee">
+      <span class="stat-value">{{ countConfirmee }}</span>
+      <span class="stat-label">CONFIRMÉES</span>
+    </div>
+    <div class="stat-card en-attente">
+      <span class="stat-value">{{ countEnAttente }}</span>
+      <span class="stat-label">EN ATTENTE</span>
+    </div>
+    <div class="stat-card annulee">
+      <span class="stat-value">{{ countAnnulee }}</span>
+      <span class="stat-label">ANNULÉES</span>
     </div>
   </div>
 
-  <div class="calendar-grid">
-    <div class="calendar-row calendar-weekdays">
-      <div *ngFor="let day of weekDays" class="calendar-weekday">{{ day }}</div>
+  <!-- Grille du Calendrier -->
+  <div class="calendar-container">
+    <!-- En-tête des jours de la semaine -->
+    <div class="calendar-weekdays">
+      <div *ngFor="let day of weekDays" class="weekday-cell">{{ day  }}</div>
     </div>
 
-    <div *ngFor="let week of weeks" class="calendar-row">
-      <div *ngFor="let day of week" class="calendar-cell" [class.empty]="!day.date">
-        <div class="cell-header" *ngIf="day.date">
-          <span class="cell-day">{{ day.date.getDate() }}</span>
-          <span class="cell-weekday">{{ day.date.toLocaleDateString('fr-FR', { weekday: 'short' }) }}</span>
-        </div>
-
-        <div *ngIf="day.date" class="events-list">
-          <div *ngFor="let reservation of day.reservations" class="event-pill" [ngClass]="getReservationClass(reservation)">
-            <strong>{{ reservation.salle?.nom || 'Salle' }}</strong>
-            <p>{{ getReservationLabel(reservation) }}</p>
+    <!-- Grille des cellules -->
+    <div class="calendar-grid">
+      <div *ngFor="let week of weeks" class="calendar-row">
+        <div 
+          *ngFor="let day of week" 
+          class="calendar-cell" 
+          [class.empty]="!day.date"
+          [class.today]="isToday(day.date)">
+          
+          <!-- Header de la cellule : Numéro du jour & Petit badge compteur -->
+          <div class="cell-header" *ngIf="day.date">
+            <span class="day-number">{{ day.date.getDate() }}</span>
+            <span class="day-count-badge" *ngIf="day.reservations.length > 0">
+              {{ day.reservations.length }}
+            </span>
           </div>
+
+          <!-- Cartes de réservation dans la journée -->
+          <div *ngIf="day.date" class="events-list">
+            <div 
+              *ngFor="let reservation of day.reservations" 
+              class="event-pill" 
+              [ngClass]="getReservationClass(reservation)">
+              <span class="status-title">{{ getStatusBadgeLabel(reservation.statut) }}</span>
+              <span class="client-name">{{ getReservationLabel(reservation) }}</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
