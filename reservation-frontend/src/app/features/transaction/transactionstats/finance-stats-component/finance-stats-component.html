@@ -98,54 +98,100 @@
   </div>
 
   <!-- Graphiques -->
-  <div class="charts-grid">
-    <!-- Chart 1: Evolution -->
-    <div class="chart-card evolution-chart">
-      <div class="chart-header">
-        <div>
-          <h3>Revenus vs dépenses</h3>
-          <p>Aperçu sur la période sélectionnée</p>
-        </div>
-        <div class="legend">
-          <span><i class="dot purple"></i> Revenus</span>
-          <span><i class="dot orange"></i> Dépenses</span>
-        </div>
+<div class="charts-grid">
+
+  <!-- Chart 1: Evolution -->
+  <div class="chart-card evolution-chart">
+
+    <div class="chart-header">
+      <div>
+        <h3>Revenus vs dépenses</h3>
+        <p>Aperçu sur la période sélectionnée</p>
       </div>
-      
-      <div class="chart-container" style="position: relative; height:260px;">
-        <canvas baseChart
-          [data]="barChartData"
-          [options]="barChartOptions"
-          [type]="barChartType">
-        </canvas>
+
+      <div class="legend">
+        <span><i class="dot purple"></i> Revenus</span>
+        <span><i class="dot orange"></i> Dépenses</span>
       </div>
     </div>
 
-    <!-- Chart 2: Donut & Légende -->
-    <div class="chart-card category-chart">
-      <h3>Dépenses par catégorie</h3>
-      
-      <div class="donut-wrapper" style="position: relative; height: 180px; margin-top: 10px;">
-        <canvas baseChart
-          [data]="doughnutChartData"
-          [options]="doughnutChartOptions"
-          [type]="doughnutChartType">
-        </canvas>
-        <div class="donut-center-text">
-          <strong>{{ stats().depenses | number:'1.0-0' }}</strong>
-          <span>DT total</span>
-        </div>
-      </div>
 
-      <ul class="category-legend">
-        <li *ngFor="let item of categoriesList()">
-          <span>
-            <i class="dot" [style.background-color]="item.color"></i> 
-            {{ item.category }}
-          </span> 
-          <strong>{{ item.percentage }}%</strong>
-        </li>
-      </ul>
+    <div class="chart-container" style="position: relative; height:260px;">
+
+      <canvas
+        #barChart
+        baseChart
+        [data]="barChartData"
+        [options]="barChartOptions"
+        [type]="barChartType">
+      </canvas>
+
     </div>
+
   </div>
+
+
+
+  <!-- Chart 2: Donut & Légende -->
+  <div class="chart-card category-chart">
+
+    <h3>Dépenses par catégorie</h3>
+
+
+    <div class="donut-wrapper"
+         style="position: relative; height:180px; margin-top:10px;">
+
+
+      <canvas
+        #doughnutChart
+        baseChart
+        [data]="doughnutChartData"
+        [options]="doughnutChartOptions"
+        [type]="doughnutChartType">
+      </canvas>
+
+
+      <div class="donut-center-text">
+
+        <strong>
+          {{ stats().depenses | number:'1.0-0' }}
+        </strong>
+
+        <span>DT total</span>
+
+      </div>
+
+
+    </div>
+
+
+
+    <ul class="category-legend">
+
+      <li *ngFor="let item of categoriesList()">
+
+        <span>
+
+          <i
+            class="dot"
+            [style.background-color]="item.color">
+          </i>
+
+          {{ item.category }}
+
+        </span>
+
+
+        <strong>
+          {{ item.percentage }}%
+        </strong>
+
+
+      </li>
+
+    </ul>
+
+
+  </div>
+
 </div>

@@ -1,11 +1,7 @@
 package net.travel.reservation.services;
 
 import lombok.RequiredArgsConstructor;
-import net.travel.reservation.entites.Reservation;
-import net.travel.reservation.entites.StatutReservation;
-import net.travel.reservation.entites.TarificationSalle;
-import net.travel.reservation.entites.TypePeriode;
-import net.travel.reservation.entites.User;
+import net.travel.reservation.entites.*;
 import net.travel.reservation.repositories.ReservationRepository;
 import net.travel.reservation.security.SecurityUtils;
 import org.springframework.data.domain.Page;
@@ -32,9 +28,11 @@ public class ReservationService {
      * Récupérer toutes les réservations
      */
     public List<Reservation> getAllReservations() {
-        User u = securityUtils.getCurrentUser();
-        System.out.println(u);
-        return reservationRepository.findAll();
+        User currentUser = securityUtils.getCurrentUser();
+        System.out.println(currentUser);
+        return currentUser.getRole() == Role.SUPER_ADMIN
+                ? reservationRepository.findAll()
+                : reservationRepository.findByEspace(currentUser.getEspace());
     }
 
     /**

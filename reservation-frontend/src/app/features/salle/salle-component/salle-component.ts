@@ -16,12 +16,12 @@ import { saveAs }  from 'file-saver';
 import { Toast } from '../../../shared/toast/toast';
 
 @Component({
-  selector: 'app-personnel-componenet',
+  selector: 'app-salle-componenet',
   imports: [CommonModule, FormsModule,ModalComponent,ReactiveFormsModule,Toast],
-  templateUrl: './personnel-componenet.html',
-  styleUrl: './personnel-componenet.scss',
+  templateUrl: './salle-component.html',
+  styleUrl: './salle-component.scss',
 })
-export class PersonnelComponenet {
+export class SalleComponenet {
 
 
   //Toast vars
@@ -31,8 +31,8 @@ export class PersonnelComponenet {
   private toastTimer?: ReturnType<typeof setTimeout>;
   //
 reservations = signal<Reservation[]>([]);
-  users= signal<any[]>([]);
-  filteredUsers= signal<any[]>([]);
+  salles= signal<any[]>([]);
+  filteredSalles= signal<any[]>([]);
   sallesDisponibles = signal<Salle[]>([]);
   
   searchTerm= signal<string>('');
@@ -45,7 +45,7 @@ reservations = signal<Reservation[]>([]);
 dialogMode: ModalMode = 'view';
 activeMenuId = signal<number | string | null>(null);
   activeModal = signal<ModalMode>(null);
-  selectedUser = signal<any>(null);
+  selectedSalle = signal<any>(null);
   myForm: FormGroup
   addForm : FormGroup
 
@@ -57,37 +57,38 @@ activeMenuId = signal<number | string | null>(null);
   ) {
     
 
-    this.addForm = this.fb.group({
-    userId : [],
-    lastname: ['', [Validators.required, Validators.minLength(3)]],
-    firstname: ['', [Validators.required, Validators.minLength(3)]],
-    post: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    telephone: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
-    statut: ['', [Validators.required]],
-    hashPassword: ['', [Validators.required, Validators.minLength(8)]],
-    salle: [null, Validators.required],
-     role: ['', Validators.required]
-  });
+   // Form for adding a salle
+this.addForm = this.fb.group({
+  salleId: [],
+  nom: ['', [Validators.required,Validators.minLength(3)]],
+  capaciteMax: [null, [Validators.required, Validators.min(1)]],
+  description: ['', [Validators.maxLength(500)]],
+  adresse: [''],
+  ville: [''],
+  telephone: ['', [Validators.pattern('^[0-9]{8}$')]],
+  email: ['', [ Validators.email]],
+  espace: [null] // or Validators.required if every salle must belong to an espace
+});
 
   // Initialize your Reactive Form with Validators
   this.myForm = this.fb.group({
-    userId : [],
-    lastname: ['', [Validators.required, Validators.minLength(3)]],
-    firstname: ['', [Validators.required, Validators.minLength(3)]],
-    post: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    telephone: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
-    statut: ['', [Validators.required]],
-     role: ['', Validators.required]
+     salleId: [],
+    nom: ['', [Validators.required,Validators.minLength(3)]],
+    capaciteMax: [null, [Validators.required, Validators.min(1)]],
+    description: ['', [Validators.maxLength(500)]],
+    adresse: [''],
+    ville: [''],
+    telephone: ['', [Validators.pattern('^[0-9]{8}$')]],
+    email: ['', [ Validators.email]],
+    espace: [null] // or Validators.required if every salle must belong to an espace
     
-  });
+    });
 
   }
 
 
   ngOnInit(): void {
-    this.loadUsers();
+    this.loadSalles();
     
   }
 
@@ -141,11 +142,11 @@ private showToast(message: string, type: 'success' | 'error' = 'success'): void 
   }
 
 
-// Salles
-loadSalles(): void {
+// Espaces
+loadEspaces(): void {
     this.salleService.getAllSalles().subscribe({
       next: (data) => {
-        this.sallesDisponibles.set(data);
+        this.filteredSalles.set(data);
         console.log("data", data);
         console.log("salles", this.sallesDisponibles())
         this.cdr.markForCheck();
@@ -166,9 +167,9 @@ loadSalles(): void {
   }
 
   // --- Modal Open Actions ---
-  openViewModal(user: User) {
-    this.selectedUser.set(user);
-    console.log(this.selectedUser())
+  openViewModal(salle: Salle) {
+    this.selectedSalle.set(salle);
+    console.log(this.selectedSalle())
      
     
     this.activeModal.set('view');
@@ -179,61 +180,63 @@ openAddModal(){
   this.loadSalles();
   this.activeModal.set('add');
 }
-  openEditModal(user: any) {
-    this.selectedUser.set(user);
+  openEditModal(salle: any) {
+    this.selectedSalle.set(salle);
 
     this.myForm.patchValue({
-      userId : user.userId ?? '',
-      lastname: user.lastname ?? '',
-      firstname: user.firstname ?? '',
-      role: user.role ?? '',
-      post: user.post ?? '',
-      email: user.email ?? '',
-      telephone: user.telephone ?? '',
-      statut: user.statut ?? '',
+      salleId: salle.salleId ?? '',
+      nom: salle.nom ?? '',
+      capaciteMax: salle.capaciteMax ?? null,
+      description: salle.description ?? '',
+      adresse: salle.adresse ?? '',
+      ville: salle.ville ?? '',
+      telephone: salle.telephone ?? '',
+      email: salle.email ?? '',
+      espace: salle.espace ?? null,
     });
 
     this.activeModal.set('edit');
     this.activeMenuId.set(null);
   }
 
-  openDeleteModal(User: any) {
-    this.selectedUser.set(User);
+  openDeleteModal(Salle: any) {
+    this.selectedSalle.set(Salle);
     this.activeModal.set('delete');
     this.activeMenuId.set(null);
   }
 
   closeModal() {
     this.activeModal.set(null);
-    this.selectedUser.set(null);
+    this.selectedSalle.set(null);
     this.myForm.reset();
     this.addForm.reset()
   }
 
 
 
-  //create USer
-  createUser() {
+  //create Salle
+  createSalle() {
   if (this.addForm.invalid) {
     this.addForm.markAllAsTouched();
     return;
   }
 
-  const user = {
-    firstname: this.addForm.value.firstname,
-    lastname: this.addForm.value.lastname,
-    email: this.addForm.value.email,
-    telephone: this.addForm.value.telephone,
-    post: this.addForm.value.post,
-    role: this.addForm.value.role,
-    statut: this.addForm.value.statut,
-    hashPassword: this.addForm.value.hashPassword,
+  const salle = {
+  nom: this.addForm.value.nom,
+  capaciteMax: this.addForm.value.capaciteMax,
+  description: this.addForm.value.description,
+  adresse: this.addForm.value.adresse,
+  ville: this.addForm.value.ville,
+  telephone: this.addForm.value.telephone,
+  email: this.addForm.value.email,
 
-    // if backend expects the whole object
-    salle: this.addForm.value.salle
-  };
+  // if backend expects the whole Espace object
+  espace: this.addForm.value.espace,
+  tarifications: [],
+  services: []
+};
 
-  this.userService.createUser(user).subscribe({
+  this.salleService.createSalle(salle).subscribe({
     next: (response) => {
       this.showToast(response.message,'success')
 
@@ -242,18 +245,18 @@ openAddModal(){
       this.addForm.reset();
 
       // reload your users list if needed
-      this.loadUsers();
+      this.loadSalles();
     },
 
     error: (error) => {
-      console.error("Erreur création utilisateur :", error);
+      console.error("Erreur création salle :", error);
       this.showToast(error.error.message,'error')
     }
   });
 }
 
   // --- Modal Submit Handlers ---
-  saveUserChanges() {
+  saveSalleChanges() {
     if (this.myForm.invalid) {
       this.myForm.markAllAsTouched(); // Trigger error visual cues for invalid fields
       return;
@@ -265,11 +268,11 @@ openAddModal(){
     };
     //console.log(updatedData)
 
-    this.userService.updateUser(updatedData.userId,updatedData).subscribe({
+    this.salleService.updateSalle(updatedData.salleId,updatedData).subscribe({
       next: (response) => {
         console.log(response)
         this.showToast(response.message,'success')
-        this.loadUsers();
+        this.loadSalles();
          
          this.closeModal();
       },
@@ -286,28 +289,28 @@ openAddModal(){
   }
 
  confirmDelete() {
-  const currentUser = this.selectedUser();
-  const UserId = currentUser?.id || currentUser?.UserId;
+  const currentSalle = this.selectedSalle();
+  const salleId = currentSalle?.id || currentSalle?.salleId;
 
-  if (!UserId) {
-    console.error('No User selected for deletion');
+  if (!salleId) {
+    console.error('No Salle selected for deletion');
     return;
   }
 
-  this.userService.deleteUser(UserId).subscribe({
+  this.salleService.deleteSalle(salleId).subscribe({
     next: (res) => {
       console.log('User deleted successfully');
       this.showToast(res.message,'success')
 
-      // 1. Remove the User from the main data array
-      this.filteredUsers.set(this.filteredUsers().filter(
-        c => (c.id || c.UserId) !== UserId
+      // 1. Remove the salle from the main data array
+      this.filteredSalles.set(this.filteredSalles().filter(
+        c => (c.id || c.salleId) !== salleId
       )
     );
 
       // 2. Refresh local filter or trigger change detection if needed
-      if (typeof this.filterUsers === 'function') {
-        this.filterUsers();
+      if (typeof this.filterSalles === 'function') {
+        this.filterSalles();
       }
       this.cdr.detectChanges();
 
@@ -315,7 +318,7 @@ openAddModal(){
       this.closeModal();
     },
     error: (err) => {
-      console.error('Error deleting User:', err);
+      console.error('Error deleting Salle:', err);
       this.showToast(err.error.message,'error')
     }
   });
@@ -333,11 +336,11 @@ openAddModal(){
 
 
 
-  loadUsers(): void {
-    this.userService.getAllUsers().subscribe({
+  loadSalles(): void {
+    this.salleService.getAllSalles().subscribe({
       next: (data) => {
-        this.users.set(data);
-        this.filterUsers();
+        this.salles.set(data);
+        this.filterSalles();
          this.cdr.detectChanges();
       },
       error: (err) => {
@@ -345,12 +348,10 @@ openAddModal(){
       }
     });
   }
-  goToAddUser(): void {
-    this.router.navigate(['/ajouter-User']); 
-  }
+ 
 
-  filterUsers(): void {
-    this.filteredUsers.set (this.users().filter(res => {
+  filterSalles(): void {
+    this.filteredSalles.set (this.salles().filter(res => {
       const UserName = `${res.firstname || ''} ${res.lastname || ''}`.toLowerCase();
       
       const matchesSearch = UserName.includes(this.searchTerm().toLowerCase())  
@@ -362,12 +363,12 @@ openAddModal(){
     }));
   }
 
-  deleteUser(id: number) {
+  deleteSalle(id: number) {
     if (confirm('Voulez-vous vraiment supprimer ce Personnel ?')) {
-      this.userService.deleteUser(id).subscribe({
+      this.salleService.deleteSalle(id).subscribe({
       next: (response) => {
         this.showToast(response.message,'success')
-        this.filterUsers();
+        this.filterSalles();
          
       },
       error: (err) => {

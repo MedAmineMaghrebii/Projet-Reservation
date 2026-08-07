@@ -1,3 +1,7 @@
+
+<app-toast [visible]="toastVisible()" [message]="toastMessage()" [type]="toastType()"></app-toast>
+
+
 <div class="table-wrapper">
   
   <!-- Header -->
@@ -68,7 +72,7 @@
     </thead>
 
     <tbody>
-      <tr *ngFor="let res of filteredUsers">
+      <tr *ngFor="let res of filteredUsers()">
   
 
         <!-- User -->
@@ -153,7 +157,7 @@
       </tr>
 
 
-      <tr *ngIf="filteredUsers.length === 0">
+      <tr *ngIf="filteredUsers().length === 0">
         <td colspan="6" class="empty-message">
           Aucun Personnel trouvé.
         </td>

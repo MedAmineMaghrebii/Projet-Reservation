@@ -1,0 +1,524 @@
+
+<app-toast [visible]="toastVisible()" [message]="toastMessage()" [type]="toastType()"></app-toast>
+
+
+<div class="table-wrapper">
+  
+  <!-- Header -->
+<!-- Header -->
+<header class="header">
+  <div class="header-title">
+    <span class="subtitle">Salles De votre espace</span>
+    <h1>Salles</h1>
+    <p class="count-label"> Les bonnes personnes, au bon endroit, au bon moment.</p>
+  </div>
+  
+  <!-- Ajout de l'événement (click) ici -->
+  <button class="btn-primary" (click)="openAddModal()">
+    <i class="icon-plus">+</i>
+    Nouvelle Salle
+  </button>
+</header>
+
+  <!-- Control Bar -->
+  <div class="controls-card">
+    <div class="search-and-filter">
+      <!-- Barre de recherche -->
+      <div class="search-input">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Rechercher..." 
+          [(ngModel)]="searchTerm" 
+          (input)="filterSalles()" 
+        />
+      </div>
+</div>
+
+<!-- Action Button Wrapper -->
+  <div class="action-wrapper">
+    <button 
+      type="button" 
+      class="btn-export" 
+      title="Export vers Excel" 
+      (click)="exportTable()">
+      <i class="feather icon-download"></i>
+      <span>Exporter</span>
+    </button>
+  </div>
+  
+</div>
+
+  
+      
+
+    
+
+  <!-- Tableau des réservations -->
+  <div class="table-card">
+  <table class="reservations-table" id="exportTable">
+    <thead>
+      <tr>
+        <th>Salle</th>
+        <th>Description</th>
+        <th>Contact</th>
+        <th>Capité Max</th>
+        <th>Adresse</th>
+        <th class="noExport"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let res of filteredSalles()">
+  
+
+        <!-- salle -->
+        <td>
+          <div class="salle-cell">
+            <div class="avatar" [ngClass]="getAvatarClass(res.SalleId)">
+              {{ getInitials(res.nom ,"") }}
+            </div>
+
+            <div class="salle-info">
+              <span class="salle-name">
+                {{ res.nom }}
+              </span>
+              
+            </div>
+          </div>
+        </td>
+
+
+              <!-- Description -->
+        <td>
+          <span class="description-main">
+            {{ res.description }}
+          </span>
+        </td>
+
+        <!-- Contact -->
+        <td>
+          <div class="contact-cell">
+            <span class="contact-phone">+216 {{ res.telephone }}</span>
+            <span class="contact-email">{{ res.email }}</span>
+          </div>
+        </td>
+
+
+      
+
+
+        <!-- capacité -->
+        <td class="text-center">
+          <span class="capacite-counts">
+            {{ res.capaciteMax }}
+          </span>
+        </td>
+
+
+        <!-- Adresse -->
+        
+        <td>
+          <div class="contact-cell">
+            <span class="contact-phone">{{ res.adress }}</span>
+            <span class="contact-email">{{ res.ville }}</span>
+          </div>
+        </td>
+
+
+        <!-- Actions -->
+        <td class="actions-cell">
+    <div class="action-menu-container">
+      <button 
+        type="button" 
+        class="btn-more" 
+        (click)="toggleMenu(res.salleId, $event)">
+        •••
+      </button>
+
+      <!-- Dropdown Menu -->
+      @if (activeMenuId() === res.salleId) {
+        <div class="action-dropdown">
+          <button type="button" (click)="openViewModal(res)">
+            👁️ Voir
+          </button>
+          <button type="button" (click)="openEditModal(res)">
+            ✏️ Modifier
+          </button>
+          <button type="button" class="delete-action" (click)="openDeleteModal(res)">
+            🗑️ Supprimer
+          </button>
+        </div>
+      }
+    </div>
+  </td>
+
+      </tr>
+
+
+      <tr *ngIf="filteredSalles().length === 0">
+        <td colspan="6" class="empty-message">
+          Aucune Salle trouvé.
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+</div>
+
+
+
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. VIEW MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'view'"
+  [showFooter]="false"
+  (closed)="closeModal()">
+  
+  <!-- Centered Header Section -->
+  <div class="salle-header">
+    <div class="avatar">
+      {{ selectedSalle()?.nom?.[0] }}
+    </div>
+    
+    <h2 class="salle-name">
+      {{ selectedSalle()?.nom }}
+    </h2>
+    
+    <span class="salle-type">{{ selectedSalle()?.description }}</span>
+    
+   
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ selectedSalle()?.capaciteMax ?? 0 }}</span>
+      <span class="stat-label">Capacité Max</span>
+    </div>
+
+    
+  </div>
+
+  <!-- Detailed Contact Information -->
+  <div class="info-list">
+    <div class="info-item">
+      <span class="icon">📞</span>
+      <div class="info-content">
+        <label>Téléphone</label>
+        <p>{{ selectedSalle()?.telephone }}</p>
+      </div>
+    </div>
+
+    <div class="info-item">
+      <span class="icon">✉️</span>
+      <div class="info-content">
+        <label>Email</label>
+        <p>{{ selectedSalle()?.email }}</p>
+      </div>
+    </div>
+
+     <div class="info-item">
+      <span class="icon">✉️</span>
+      <div class="info-content">
+        <label>Adresse</label>
+        <p>{{ selectedSalle()?.adresse }}</p>
+      </div>
+    </div>
+
+    
+  </div>
+
+  <!-- Reservation History 
+  <div class="history-section">
+    <h3>Historique des réservations</h3>
+    
+    <div class="history-list">
+      @for (item of reservations(); track item.reservationId) {
+        <div class="history-card">
+          <div class="history-icon">📅</div>
+          <div class="history-details">
+            <span class="title">{{ item.numeroReservation }}</span>
+            <span class="meta">{{ item.date | date:'yyyy-MM-dd' }} · {{ item.salle.nom }}</span>
+          </div>
+          <span class="history-price">{{ item.montantTotal | number:'1.0-0' }} DT</span>
+        </div>
+      }
+    </div>
+  </div>-->
+
+  <!-- Full Width Action Button -->
+  <button type="button" class="action-btn">
+    ✉️ Contacter la Salle
+  </button>
+</app-modal>
+
+<!-- 2. UPDATE / EDIT MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'edit'"
+  [title]="'Modifier la salle'"
+  [subtitle]="'Mettre à jour les informations de la salle'"
+  [mode]="'edit'"
+  (closed)="closeModal()"
+  (saved)="saveSalleChanges()">
+
+  <form [formGroup]="myForm" class="edit-form">
+
+    <!-- ID -->
+    <div class="form-group" hidden>
+      <input type="text" formControlName="salleId" hidden />
+    </div>
+
+    <!-- NOM -->
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" formControlName="nom" placeholder="Nom de la salle..." />
+      <small
+        class="text-danger"
+        *ngIf="myForm.get('nom')?.invalid && (myForm.get('nom')?.dirty || myForm.get('nom')?.touched)">
+        <span *ngIf="myForm.get('nom')?.errors?.['required']">
+          Le nom est obligatoire.
+        </span>
+        <span *ngIf="myForm.get('nom')?.errors?.['minlength']">
+          Au moins 3 caractères requis.
+        </span>
+      </small>
+    </div>
+
+    <!-- CAPACITÉ -->
+    <div class="form-group">
+      <label>Capacité maximale *</label>
+      <input type="number" formControlName="capaciteMax" placeholder="Capacité..." />
+      <small
+        class="text-danger"
+        *ngIf="myForm.get('capaciteMax')?.invalid && (myForm.get('capaciteMax')?.dirty || myForm.get('capaciteMax')?.touched)">
+        <span *ngIf="myForm.get('capaciteMax')?.errors?.['required']">
+          La capacité est obligatoire.
+        </span>
+        <span *ngIf="myForm.get('capaciteMax')?.errors?.['min']">
+          La capacité doit être supérieure à 0.
+        </span>
+      </small>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="form-group full-width">
+      <label>Description</label>
+      <textarea
+        formControlName="description"
+        rows="3"
+        placeholder="Description de la salle...">
+      </textarea>
+      <small
+        class="text-danger"
+        *ngIf="myForm.get('description')?.errors?.['maxlength']">
+        La description ne doit pas dépasser 500 caractères.
+      </small>
+    </div>
+
+    <!-- ADRESSE -->
+    <div class="form-group">
+      <label>Adresse</label>
+      <input type="text" formControlName="adresse" placeholder="Adresse..." />
+    </div>
+
+    <!-- VILLE -->
+    <div class="form-group">
+      <label>Ville</label>
+      <input type="text" formControlName="ville" placeholder="Ville..." />
+    </div>
+
+    <!-- EMAIL -->
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" formControlName="email" placeholder="email@exemple.com" />
+      <small
+        class="text-danger"
+        *ngIf="myForm.get('email')?.invalid && (myForm.get('email')?.dirty || myForm.get('email')?.touched)">
+        <span *ngIf="myForm.get('email')?.errors?.['email']">
+          Format d'email invalide.
+        </span>
+      </small>
+    </div>
+
+    <!-- TÉLÉPHONE -->
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input type="text" formControlName="telephone" placeholder="Téléphone..." />
+      <small
+        class="text-danger"
+        *ngIf="myForm.get('telephone')?.invalid && (myForm.get('telephone')?.dirty || myForm.get('telephone')?.touched)">
+        <span *ngIf="myForm.get('telephone')?.errors?.['pattern']">
+          Doit contenir exactement 8 chiffres.
+        </span>
+      </small>
+    </div>
+
+    <!-- ESPACE 
+    <div class="form-group full-width">
+      <label>Espace</label>
+      <select formControlName="espace">
+        <option [ngValue]="null">Sélectionner un espace</option>
+        <option *ngFor="let e of espaces" [ngValue]="e">
+          {{ e.nom }}
+        </option>
+      </select>
+
+      <small
+        class="text-danger"
+        *ngIf="myForm.get('espace')?.invalid && (myForm.get('espace')?.dirty || myForm.get('espace')?.touched)">
+        <span *ngIf="myForm.get('espace')?.errors?.['required']">
+          L'espace est obligatoire.
+        </span>
+      </small>
+    </div>
+    -->
+
+  </form>
+
+</app-modal>
+
+<!-- 3. DELETE CONFIRMATION MODAL -->
+<app-modal
+  [isOpen]="activeModal() === 'delete'"
+  [title]="'Confirmer la suppression'"
+  [saveText]="'Supprimer'"
+  [cancelText]="'Annuler'"
+  (closed)="closeModal()"
+  (saved)="confirmDelete()">
+
+  <div class="delete-confirmation">
+    <p>Êtes-vous sûr de vouloir supprimer <strong>{{ selectedSalle()?.nom }} </strong> ?</p>
+    <p class="warning-text">Cette action est irréversible.</p>
+  </div>
+</app-modal>
+
+
+
+
+
+
+<app-modal
+  [isOpen]="activeModal() === 'add'"
+  [title]="'Ajouter une salle'"
+  [subtitle]="'Créer une nouvelle salle'"
+  [mode]="'create'"
+  (closed)="closeModal()"
+  (saved)="createSalle()">
+
+  <form [formGroup]="addForm" class="edit-form">
+
+    <!-- NOM -->
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" formControlName="nom" placeholder="Nom de la salle..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('nom')?.invalid && (addForm.get('nom')?.dirty || addForm.get('nom')?.touched)">
+        <span *ngIf="addForm.get('nom')?.errors?.['required']">
+          Le nom est obligatoire.
+        </span>
+        <span *ngIf="addForm.get('nom')?.errors?.['minlength']">
+          Au moins 3 caractères requis.
+        </span>
+      </small>
+    </div>
+
+    <!-- CAPACITÉ -->
+    <div class="form-group">
+      <label>Capacité maximale *</label>
+      <input type="number" formControlName="capaciteMax" placeholder="Capacité..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('capaciteMax')?.invalid && (addForm.get('capaciteMax')?.dirty || addForm.get('capaciteMax')?.touched)">
+        <span *ngIf="addForm.get('capaciteMax')?.errors?.['required']">
+          La capacité est obligatoire.
+        </span>
+        <span *ngIf="addForm.get('capaciteMax')?.errors?.['min']">
+          La capacité doit être supérieure à 0.
+        </span>
+      </small>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="form-group full-width">
+      <label>Description</label>
+      <textarea
+        formControlName="description"
+        rows="3"
+        placeholder="Description de la salle...">
+      </textarea>
+
+      <small class="text-danger"
+        *ngIf="addForm.get('description')?.errors?.['maxlength']">
+        La description ne doit pas dépasser 500 caractères.
+      </small>
+    </div>
+
+    <!-- ADRESSE -->
+    <div class="form-group">
+      <label>Adresse</label>
+      <input type="text" formControlName="adresse" placeholder="Adresse..." />
+    </div>
+
+    <!-- VILLE -->
+    <div class="form-group">
+      <label>Ville</label>
+      <input type="text" formControlName="ville" placeholder="Ville..." />
+    </div>
+
+    <!-- EMAIL -->
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" formControlName="email" placeholder="email@exemple.com" />
+      <small class="text-danger"
+        *ngIf="addForm.get('email')?.invalid && (addForm.get('email')?.dirty || addForm.get('email')?.touched)">
+        <span *ngIf="addForm.get('email')?.errors?.['email']">
+          Format d'email invalide.
+        </span>
+      </small>
+    </div>
+
+    <!-- TÉLÉPHONE -->
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input type="text" formControlName="telephone" placeholder="Téléphone..." />
+      <small class="text-danger"
+        *ngIf="addForm.get('telephone')?.invalid &&
+               (addForm.get('telephone')?.dirty || addForm.get('telephone')?.touched)">
+        <span *ngIf="addForm.get('telephone')?.errors?.['pattern']">
+          Doit contenir exactement 8 chiffres.
+        </span>
+      </small>
+    </div>
+
+    <!-- ESPACE 
+    <div class="form-group">
+      <label>Espace *</label>
+
+      <select formControlName="espace">
+        <option [ngValue]="null" disabled>Choisir un espace...</option>
+
+        <option *ngFor="let espace of espaces" [ngValue]="espace">
+          {{ espace.nom }}
+        </option>
+      </select>
+
+      <small class="text-danger"
+        *ngIf="addForm.get('espace')?.invalid &&
+               (addForm.get('espace')?.dirty || addForm.get('espace')?.touched)">
+        <span *ngIf="addForm.get('espace')?.errors?.['required']">
+          L'espace est obligatoire.
+        </span>
+      </small>
+    </div>
+    -->
+  </form>
+
+</app-modal>

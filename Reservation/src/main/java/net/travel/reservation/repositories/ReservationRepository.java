@@ -1,5 +1,6 @@
 package net.travel.reservation.repositories;
 
+import net.travel.reservation.entites.Espace;
 import net.travel.reservation.entites.Reservation;
 import net.travel.reservation.entites.StatutReservation;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     // 🔍 Récupère les réservations actives pour une salle à une date donnée
     List<Reservation> findBySalleSalleIdAndDateAndStatutNot(Long salleId, LocalDate date, StatutReservation statut);
-
+    List <Reservation> findByEspace(Espace espace);
 
     Page<Reservation> findByClientClientId(
             Long clientId,

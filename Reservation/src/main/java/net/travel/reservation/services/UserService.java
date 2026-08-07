@@ -1,10 +1,12 @@
 package net.travel.reservation.services;
 
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.entites.Role;
 import net.travel.reservation.entites.User;
 import net.travel.reservation.exceptions.BadRequestException;
 import net.travel.reservation.exceptions.ResourceNotFoundException;
 import net.travel.reservation.repositories.UserRepository;
+import net.travel.reservation.security.SecurityUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +21,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityUtils securityUtils;
 
     // --- Récupérer tous les utilisateurs ---
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+
+        User currentUser = securityUtils.getCurrentUser();
+        System.out.println(currentUser);
+        return currentUser.getRole() == Role.SUPER_ADMIN
+                ? userRepository.findAll()
+                : userRepository.findByEspace(currentUser.getEspace());
     }
 
     // --- Récupérer par ID ---

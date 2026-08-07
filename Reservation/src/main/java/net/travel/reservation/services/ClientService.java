@@ -3,7 +3,10 @@ package net.travel.reservation.services;
 import lombok.RequiredArgsConstructor;
 import net.travel.reservation.dto.ClientSummary;
 import net.travel.reservation.entites.Client;
+import net.travel.reservation.entites.Role;
+import net.travel.reservation.entites.User;
 import net.travel.reservation.repositories.ClientRepository;
+import net.travel.reservation.security.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +19,25 @@ import java.util.List;
 public class ClientService {
 
     private final ClientRepository clientRepository;
+    private final SecurityUtils securityUtils;
 
     public List<ClientSummary> getClientsSummary() {
-        List<ClientSummary> clients = clientRepository.getClientsSummary();
+        User currentUser = securityUtils.getCurrentUser();
+
+        List<ClientSummary> clients;
+
+        if (currentUser.getRole() == Role.SUPER_ADMIN) {
+            clients = clientRepository.getClientsSummary();
+        } else {
+            clients = clientRepository.getClientsSummaryByEspace(currentUser.getEspace());
+        }
+
         clients.forEach(client -> {
             if (client.getTotalPaye() == null) {
                 client.setTotalPaye(BigDecimal.ZERO);
             }
         });
+
         return clients;
     }
 

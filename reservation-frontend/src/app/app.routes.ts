@@ -7,6 +7,7 @@ import { FinalisationComponent } from './features/finalisation-component/finalis
 import { ListeClientsComponent } from './features/clients/liste-clients-component/liste-clients-component';
 import { PersonnelComponenet } from './features/personnel/personnel-componenet/personnel-componenet';
 import { TransactionComponenet } from './features/transaction/transaction-componenet/transaction-componenet';
+import { SalleComponenet } from './features/salle/salle-component/salle-component';
 
 export const routes: Routes = [
   // Page de connexion (hors layout, sans la sidebar)
@@ -43,6 +44,10 @@ export const routes: Routes = [
         {
         path: 'finances',
         component: TransactionComponenet
+      },
+       {
+        path: 'salle',
+        component: SalleComponenet
       },
       {
         path: '',

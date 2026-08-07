@@ -2,6 +2,7 @@ package net.travel.reservation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.ApiResponse;
 import net.travel.reservation.entites.User;
 import net.travel.reservation.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -38,25 +39,48 @@ public class UserController {
 
     // --- Ajouter un utilisateur ---
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = userService.createUser(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<User>>  createUser(@Valid @RequestBody User user) {
+        User createdUser = userService.createUser(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(
+                        HttpStatus.CREATED.value(),
+                        "Utilisateur créé avec succès",
+                        createdUser
+                ));
     }
 
     // --- Modifier un utilisateur ---
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(
+    public ResponseEntity<ApiResponse<User>> updateUser(
             @PathVariable Long id,
             @RequestBody User user) {
-        System.out.println(user);
-        return ResponseEntity.ok(userService.updateUser(id, user));
+
+        User updatedUser = userService.updateUser(id, user);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Utilisateur modifié avec succès",
+                        updatedUser
+                )
+        );
     }
 
     // --- Supprimer un utilisateur ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable Long id) {
+
         userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Utilisateur supprimé avec succès",
+                        null
+                )
+        );
     }
 
     // --- Vérifier si un email existe ---

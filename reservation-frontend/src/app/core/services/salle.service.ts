@@ -42,24 +42,24 @@ export class SalleService {
    * POST /api/salles
    * Ajouter une nouvelle salle
    */
-  createSalle(salle: Salle): Observable<Salle> {
-    return this.http.post<Salle>(this.apiUrl, salle);
+  createSalle(salle: Salle): Observable<any> {
+    return this.http.post<any>(this.apiUrl, salle);
   }
 
   /**
    * PUT /api/salles/{id}
    * Modifier une salle existante
    */
-  updateSalle(id: number, salle: Salle): Observable<Salle> {
-    return this.http.put<Salle>(`${this.apiUrl}/${id}`, salle);
+  updateSalle(id: number, salle: Salle): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, salle);
   }
 
   /**
    * DELETE /api/salles/{id}
    * Supprimer une salle
    */
-  deleteSalle(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deleteSalle(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   /**
