@@ -25,6 +25,13 @@ public class Service {
     private String nom; // Ex: "DJ", "Décoration", "Traiteur", "Photographe"
     @Column(length = 500)
     private String description;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private CategorieService categorie;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private StatutService statut;
     private BigDecimal prix; // Prix du service en EUR/TND...
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salle_id", nullable = false)

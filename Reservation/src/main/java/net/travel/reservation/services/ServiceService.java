@@ -52,6 +52,8 @@ public class ServiceService {
         service.setNom(serviceRequest.getNom());
         service.setDescription(serviceRequest.getDescription());
         service.setPrix(serviceRequest.getPrix());
+        service.setCategorie(serviceRequest.getCategorie());
+        service.setStatut(serviceRequest.getStatut());
 
         if (serviceRequest.getSalle() != null) {
             service.setSalle(serviceRequest.getSalle());

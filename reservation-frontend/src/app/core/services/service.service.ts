@@ -16,8 +16,8 @@ export class ServiceService {
   /**
    * Créer un nouveau service
    */
-  createService(service: Service): Observable<Service> {
-    return this.http.post<Service>(this.API_URL, service);
+  createService(service: Service): Observable<any> {
+    return this.http.post<any>(this.API_URL, service);
   }
 
   /**
@@ -44,14 +44,14 @@ export class ServiceService {
   /**
    * Mettre à jour un service existant
    */
-  updateService(id: number, service: Service): Observable<Service> {
-    return this.http.put<Service>(`${this.API_URL}/${id}`, service);
+  updateService(id: number, service: Service): Observable<any> {
+    return this.http.put<any>(`${this.API_URL}/${id}`, service);
   }
 
   /**
    * Supprimer un service par son ID
    */
-  deleteService(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`);
+  deleteService(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.API_URL}/${id}`);
   }
 }

@@ -7,6 +7,8 @@ $bg-main: #f8fafc;
 $card-bg: #ffffff;
 $border-color: #e2e8f0;
 
+$primary-color: #7c4dff;
+
 .services-container {
   padding: 2rem;
   background-color: $bg-main;
@@ -172,6 +174,10 @@ $border-color: #e2e8f0;
           background-color: #fef3c7;
           color: #b45309;
         }
+        &.unavailable {
+           background-color: #fee2e2;
+          color: #dc2626;
+        }
       }
     }
   }
@@ -274,7 +280,38 @@ $border-color: #e2e8f0;
         background-repeat: no-repeat;
         background-position: right 1rem center;
         background-size: 1rem;
+     
+
+    &:focus {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+
+    /* Input error highlight state when touched/dirty and invalid */
+    &.ng-invalid.ng-touched {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
       }
+    }
+  }
+
+  /* Form validation text-danger fix */
+  .text-danger {
+    color: #ef4444 !important;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    span {
+      color: #ef4444 !important;
+    }
+  }
     }
 
     .modal-footer {

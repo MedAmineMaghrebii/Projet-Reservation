@@ -2,6 +2,7 @@ package net.travel.reservation.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.travel.reservation.dto.ApiResponse;
 import net.travel.reservation.entites.Service;
 import net.travel.reservation.services.ServiceService;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,17 @@ public class ServiceController {
 
     // --- CREATE ---
     @PostMapping
-    public ResponseEntity<Service> createService(@Valid @RequestBody Service service) {
+    public ResponseEntity<ApiResponse<Service>> createService(
+            @Valid @RequestBody Service service) {
+
         Service createdService = serviceService.createService(service);
-        return new ResponseEntity<>(createdService, HttpStatus.CREATED);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(
+                        HttpStatus.CREATED.value(),
+                        "Service créé avec succès",
+                        createdService
+                ));
     }
 
     // --- READ ALL ---
@@ -45,16 +54,35 @@ public class ServiceController {
 
     // --- UPDATE ---
     @PutMapping("/{id}")
-    public ResponseEntity<Service> updateService(
+    public ResponseEntity<ApiResponse<Service>> updateService(
             @PathVariable Long id,
             @Valid @RequestBody Service service) {
-        return ResponseEntity.ok(serviceService.updateService(id, service));
+
+        Service updatedService = serviceService.updateService(id, service);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Service modifié avec succès",
+                        updatedService
+                )
+        );
     }
+
 
     // --- DELETE ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteService(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteService(
+            @PathVariable Long id) {
+
         serviceService.deleteService(id);
-        return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        "Service supprimé avec succès",
+                        null
+                )
+        );
     }
 }

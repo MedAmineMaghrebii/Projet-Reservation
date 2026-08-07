@@ -4,8 +4,8 @@ import { Espace } from '../espace/espace'; // Ajuste le chemin selon ton arbores
 
 export class Salle {
   salleId?: number;
-  nom!: string;
-  capaciteMax!: number;
+  nom?: string;
+  capaciteMax?: number;
   description?: string;
   adresse?: string;
   ville?: string;
@@ -14,8 +14,8 @@ export class Salle {
 
   // Relations
   espace?: Espace;
-    tarifications: TarificationSalle[] = [];
-  services: Service[] = [];
+    tarifications?: TarificationSalle[] = [];
+  services?: Service[] = [];
 
   constructor(
     salleId?: number,

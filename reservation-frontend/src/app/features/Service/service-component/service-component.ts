@@ -1,63 +1,108 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Service } from '../../../core/models/service/service';
 import { ServiceService } from '../../../core/services/service.service';
 import { Salle } from '../../../core/models/salle/salle';
+import { SalleService } from '../../../core/services/salle.service';
+import { Toast } from '../../../shared/toast/toast';
+import { EnumLabelPipe } from '../../../shared/enumLabel/enum-label-pipe';
 
-export type CategoryFilter = 'Toutes' | 'Formules' | 'Décoration' | 'Technique' | 'Restauration';
+export type CategoryFilter = 'Toutes' | 'FORMULES' | 'DECORATION' | 'TECHNIQUE' | 'RESTAURATION'
+|'ANIMATION' |  'PHOTOGRAPHIE' |'AUTRE';
 
-export interface ServiceUI extends Service {
-  categorie?: CategoryFilter;
-  statut?: 'Disponible' | 'Limité' | 'Indisponible';
-}
+
 
 @Component({
   selector: 'app-service',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,Toast,EnumLabelPipe],
   templateUrl: './service-component.html',
   styleUrls: ['./service-component.scss']
 })
 export class ServiceComponent implements OnInit {
-  services: ServiceUI[] = [];
-  filteredServices: ServiceUI[] = [];
+  services= signal<Service[]>([]);
+  selectedService= signal<any>(null);
+  salles= signal<Salle[]>([]);
+  filteredServices= signal<Service[]>([]);
   
-  categories: CategoryFilter[] = ['Toutes', 'Formules', 'Décoration', 'Technique', 'Restauration'];
-  formCategories: CategoryFilter[] = ['Formules', 'Décoration', 'Technique', 'Restauration'];
+  categories: CategoryFilter[] = ['Toutes', 'FORMULES', 'DECORATION', 'TECHNIQUE', 'RESTAURATION'];
+  formCategories: CategoryFilter[] = ['FORMULES','TECHNIQUE','DECORATION', 'RESTAURATION',
+    'ANIMATION', 'PHOTOGRAPHIE','AUTRE'];
   selectedCategory: CategoryFilter = 'Toutes';
 
   // État de la modale et Formulaire
   isModalOpen = false;
+  showEditModal= false;
   serviceForm!: FormGroup;
+  editForm!: FormGroup;
+
+
+  
+  //Toast vars
+  toastVisible = signal(false);
+  toastMessage = signal('');
+  toastType= signal<'success' | 'error'>('success');
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private serviceService: ServiceService,
-    private fb: FormBuilder
-  ) {}
+    private fb: FormBuilder,
+    private salleService : SalleService
+  ) {
+
+
+    this.editForm = this.fb.group({
+      serviceId : [],
+      nom: ['', [Validators.required]],
+      description: [''],
+      prix: ['', [Validators.required, Validators.min(0)]],
+      categorie: ['', [Validators.required]],
+      statut: ['', [Validators.required]],
+      salleId: [null,[Validators.required]]
+    });
+    this.initForm();
+  }
 
   ngOnInit(): void {
     this.initForm();
     this.loadServices();
   }
 
+
+
+  private showToast(message: string, type: 'success' | 'error' = 'success'): void {
+    this.toastMessage.set(message);
+    this.toastType.set(type);
+    this.toastVisible .set(true);
+    
+
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+
+    this.toastTimer = setTimeout(() => {
+      this.toastVisible.set(false);
+      
+    }, 2500);
+  }
   // Initialisation du Reactive Form avec les champs de la modale
   initForm(): void {
     this.serviceForm = this.fb.group({
       nom: ['', [Validators.required]],
       description: [''],
-      prix: [0, [Validators.required, Validators.min(0)]],
-      categorie: ['Formules', [Validators.required]],
-      statut: ['Disponible', [Validators.required]],
-      salleId: [null]
+      prix: ['', [Validators.required, Validators.min(0)]],
+      categorie: ['', [Validators.required]],
+      statut: ['', [Validators.required]],
+      salleId: [null,[Validators.required]]
     });
   }
 
   loadServices(): void {
     this.serviceService.getAllServices().subscribe({
       next: (data) => {
-        this.services = data.map((s) => this.enrichServiceData(s));
+        this.services.set(data)
         this.filterByCategory(this.selectedCategory);
       },
       error: (err) => console.error('Erreur lors du chargement des services:', err)
@@ -67,14 +112,15 @@ export class ServiceComponent implements OnInit {
   filterByCategory(category: CategoryFilter): void {
     this.selectedCategory = category;
     if (category === 'Toutes') {
-      this.filteredServices = [...this.services];
+      this.filteredServices.set([...this.services()]);
     } else {
-      this.filteredServices = this.services.filter(s => s.categorie === category);
+      this.filteredServices.set(this.services().filter(s => s.categorie === category));
     }
   }
 
   // Actions de la Modale
   openModal(): void {
+    this.loadSalles()
     this.serviceForm.reset({
       nom: '',
       description: '',
@@ -86,9 +132,78 @@ export class ServiceComponent implements OnInit {
     this.isModalOpen = true;
   }
 
+  openEditModal(service: Service): void {
+    this.loadSalles()
+    console.log('Edit clicked', service);
+  this.selectedService.set(service);
+
+  this.editForm.patchValue({
+    serviceId : service.serviceId,
+    nom: service.nom,
+    description: service.description,
+    prix: service.prix,
+    categorie: service.categorie,
+    statut: service.statut,
+    salleId: service.salle?.salleId
+  });
+
+  this.showEditModal = true;
+}
+
   closeModal(): void {
     this.isModalOpen = false;
+    this.showEditModal = false;
+    this.salles.set([]);
+    this.selectedService.set(null)
   }
+
+
+   loadSalles(): void {
+    this.salleService.getAllSalles().subscribe({
+      next: (data) => {
+        this.salles.set(data);
+        
+         
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des users', err);
+      }
+    });
+  }
+
+
+
+  updateService(): void {
+  if (this.editForm.invalid || !this.selectedService) {
+    this.editForm.markAllAsTouched();
+    return;
+  }
+
+  const service: Service = {
+    serviceId : this.selectedService().serviceId,
+    nom: this.editForm.value.nom,
+    description: this.editForm.value.description,
+    prix: this.editForm.value.prix,
+    categorie: this.editForm.value.categorie,
+    statut: this.editForm.value.statut,
+    salle :{salleId: this.editForm.value.salleId} as Salle
+  };
+  console.log(service)
+
+  this.serviceService
+    .updateService(this.selectedService().serviceId!, service)
+    .subscribe({
+      next: (response) => {
+        this.showToast(response.message,'success');
+        this.loadServices();
+        this.closeModal();
+      },
+      error: (err) => {
+        this.showToast(err.error.message,'error');
+        
+      }
+    });
+}
 
   // Soumission du formulaire d'ajout
   onSubmit(): void {
@@ -100,27 +215,25 @@ export class ServiceComponent implements OnInit {
     const formVal = this.serviceForm.value;
 
     // Instanciation de la classe Service avec tes attributs
-    const newService = new Service(
-      undefined,
-      formVal.nom,
-      formVal.prix,
-      formVal.description || '',
-      formVal.salleId ? ({ salleId: formVal.salleId } as Salle) : undefined
-    );
+    const newService: Service = {
+    nom: formVal.nom,
+    description: formVal.description || '',
+    prix: formVal.prix,
+    categorie: formVal.categorie,
+    statut: formVal.statut,
+    salle: { salleId: formVal.salleId} as Salle
+  };
+    console.log(newService)
 
     this.serviceService.createService(newService).subscribe({
-      next: (createdService) => {
-        const uiService: ServiceUI = {
-          ...createdService,
-          categorie: formVal.categorie,
-          statut: formVal.statut
-        };
-
-        this.services.push(uiService);
+      next: (response) => {
+        
+        this.showToast(response.message,'success')
+        this.services().push(response.data);
         this.filterByCategory(this.selectedCategory);
         this.closeModal();
       },
-      error: (err) => console.error('Erreur lors de la création du service:', err)
+      error: (err) => this.showToast(err.error.message,'error')
     });
   }
 
@@ -129,15 +242,15 @@ export class ServiceComponent implements OnInit {
     if (confirm('Voulez-vous vraiment supprimer ce service ?')) {
       this.serviceService.deleteService(id).subscribe({
         next: () => {
-          this.services = this.services.filter(s => s.serviceId !== id);
+          this.services.set(this.services().filter(s => s.serviceId !== id));
           this.filterByCategory(this.selectedCategory);
         },
         error: (err) => console.error('Erreur lors de la suppression:', err)
       });
     }
   }
-
-  private enrichServiceData(s: Service): ServiceUI {
+/*
+  private enrichServiceData(s: Service): Service {
     let cat: CategoryFilter = 'Formules';
     let status: 'Disponible' | 'Limité' | 'Indisponible' = 'Disponible';
 
@@ -149,5 +262,5 @@ export class ServiceComponent implements OnInit {
     if (nomLower.includes('régie')) status = 'Limité';
 
     return { ...s, categorie: cat, statut: status };
-  }
+  }*/
 }
